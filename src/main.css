@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+i {
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  display: inline-block; /* optional, depends on layout */
+}
