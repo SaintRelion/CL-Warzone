@@ -61,20 +61,6 @@ registerGroupAppRoutes({
       iconClassName: "fa-solid fa-ticket text-lg",
       allowedRoles: ["admin"],
     },
-    // {
-    //   path: "/admin/equipment",
-    //   element: <EquipmentsPage />,
-    //   label: "Equipment",
-    //   iconClassName: "fa-solid fa-hard-drive text-lg",
-    //   allowedRoles: ["admin"],
-    // },
-    {
-      path: "/admin/outages",
-      element: <OutagesPage />,
-      label: "Outages",
-      iconClassName: "fa-solid fa-triangle-exclamation text-lg",
-      allowedRoles: ["admin"],
-    },
 
     // CLIENT
     {
