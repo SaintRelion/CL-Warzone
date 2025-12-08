@@ -4,6 +4,6 @@ import {
   setGlobalMode,
 } from "@saintrelion/data-access-layer";
 
-setAuthLibClientAppName("teacherprofile");
-setDataAccessLayerClientAppName("teacherprofile");
+setAuthLibClientAppName("warzone");
+setDataAccessLayerClientAppName("warzone");
 setGlobalMode("firebase");

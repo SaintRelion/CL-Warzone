@@ -11,17 +11,15 @@ import { router } from "./navigations";
 import "@/lib/firebase-client";
 
 import "@/data-access-config";
-import "@/repositories/attendance";
-import "@/repositories/classes";
 import "@/repositories/user";
 
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(
   <NotificationProvider>
-    <AuthProvider initialUser={{ id: "1", role: "client" }}>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <RouterProvider router={router} />
-      </QueryClientProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   </NotificationProvider>,
 );

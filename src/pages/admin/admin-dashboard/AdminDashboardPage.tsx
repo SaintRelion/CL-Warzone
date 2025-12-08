@@ -8,14 +8,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-import {
-  Activity,
-  AlertCircle,
-  DollarSign,
-  Signal,
-  Users,
-  WifiOff,
-} from "lucide-react";
+import { AlertCircle, DollarSign, Signal, Users, WifiOff } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
 
 export const AdminDashboardPage = () => {
@@ -31,7 +24,7 @@ export const AdminDashboardPage = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <StatCard
           icon={Users}
           title="Active Subscribers"
@@ -49,12 +42,6 @@ export const AdminDashboardPage = () => {
           title="Open Tickets"
           value="47"
           color="yellow"
-        />
-        <StatCard
-          icon={Activity}
-          title="Network Load"
-          value="68%"
-          color="purple"
         />
       </div>
 
@@ -102,11 +89,11 @@ export const AdminDashboardPage = () => {
                 <div className="text-xs text-gray-500">2 minutes ago</div>
               </div>
             </div>
-            <div className="flex gap-3 rounded border-l-4 border-yellow-500 bg-yellow-50 p-3">
-              <Signal className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-500" />
+            <div className="flex gap-3 rounded border-l-4 border-green-500 bg-green-50 p-3">
+              <Signal className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
               <div>
                 <div className="text-sm font-semibold text-gray-900">
-                  High Latency Detected
+                  John Dela Cruz paid
                 </div>
                 <div className="text-xs text-gray-500">15 minutes ago</div>
               </div>

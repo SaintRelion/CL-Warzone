@@ -1,31 +1,7 @@
-import { useState } from "react";
-
-interface RegisterData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  streetAddress: string;
-  city: string;
-  zipCode: string;
-  serviceArea: string;
-  preferredDate: string;
-  preferredTime: string;
-}
+import { useAuth } from "@saintrelion/auth-lib";
 
 const AccountPage = () => {
-  const [registerData, setRegisterData] = useState<RegisterData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    streetAddress: "",
-    city: "",
-    zipCode: "",
-    serviceArea: "Metro Manila",
-    preferredDate: "",
-    preferredTime: "",
-  });
+  const { user } = useAuth();
 
   return (
     <div>
@@ -40,54 +16,52 @@ const AccountPage = () => {
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               First Name
             </h3>
-            <p className="text-lg text-gray-900">{registerData.firstName}</p>
+            <p className="text-lg text-gray-900">{user.firstName}</p>
           </div>
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Last Name
             </h3>
-            <p className="text-lg text-gray-900">{registerData.lastName}</p>
+            <p className="text-lg text-gray-900">{user.lastName}</p>
           </div>
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Email Address
             </h3>
-            <p className="text-lg text-gray-900">{registerData.email}</p>
+            <p className="text-lg text-gray-900">{user.emailAddress}</p>
           </div>
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Phone Number
             </h3>
-            <p className="text-lg text-gray-900">{registerData.phone}</p>
+            <p className="text-lg text-gray-900">{user.phoneNumber}</p>
           </div>
           <div className="md:col-span-2">
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Street Address
             </h3>
-            <p className="text-lg text-gray-900">
-              {registerData.streetAddress}
-            </p>
+            <p className="text-lg text-gray-900">{user.streetAddress}</p>
           </div>
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">City</h3>
-            <p className="text-lg text-gray-900">{registerData.city}</p>
+            <p className="text-lg text-gray-900">{user.city}</p>
           </div>
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">ZIP Code</h3>
-            <p className="text-lg text-gray-900">{registerData.zipCode}</p>
+            <p className="text-lg text-gray-900">{user.zipCode}</p>
           </div>
           <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Service Area
             </h3>
-            <p className="text-lg text-gray-900">{registerData.serviceArea}</p>
+            <p className="text-lg text-gray-900">{user.serviceArea}</p>
           </div>
-          <div>
+          {/* <div>
             <h3 className="mb-2 text-sm font-medium text-gray-700">
               Preferred Installation Date
             </h3>
             <p className="text-lg text-gray-900">
-              {registerData.preferredDate || "Not set"}
+              {user.preferredDate || "Not set"}
             </p>
           </div>
           <div>
@@ -95,9 +69,9 @@ const AccountPage = () => {
               Preferred Time Slot
             </h3>
             <p className="text-lg text-gray-900">
-              {registerData.preferredTime || "Not set"}
+              {user.preferredTime || "Not set"}
             </p>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

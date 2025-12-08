@@ -1,59 +1,41 @@
+import type { PaymentHistory } from "@/models/payment-history";
+import type { PaymentMethod } from "@/models/payment-method";
+import type { Subscription } from "@/models/subscription";
 import { useState } from "react";
-
-interface Subscription {
-  plan: string;
-  price: number;
-  status: string;
-  nextBillingDate: string;
-}
-
-interface PaymentHistory {
-  id: number;
-  date: string;
-  amount: number;
-  status: string;
-  invoice: string;
-  description: string;
-}
-
-interface PaymentMethod {
-  id: number;
-  type: string;
-  last4: string;
-  expiry: string;
-  isDefault: boolean;
-}
 
 const BillingAndPaymentsPage = () => {
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([
     {
-      id: 1,
-      date: "2024-11-01",
-      amount: 1999,
+      id: "1",
+      userId: "2",
+      createdAt: "2024-11-01",
+      amount: "1999",
       status: "paid",
       invoice: "INV-2024-11",
       description: "Fiber 500 Mbps - Monthly",
     },
     {
-      id: 2,
-      date: "2024-10-01",
-      amount: 1999,
+      id: "2",
+      userId: "2",
+      createdAt: "2024-10-01",
+      amount: "1999",
       status: "paid",
       invoice: "INV-2024-10",
       description: "Fiber 500 Mbps - Monthly",
     },
   ]);
 
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    { id: 1, type: "Visa", last4: "4242", expiry: "12/25", isDefault: true },
-  ]);
+  const paymentMethods: PaymentMethod[] = [
+    {
+      id: 1,
+      type: "GCASH",
+      number: "092834242",
+      expiry: "N/A",
+      isDefault: true,
+    },
+  ];
 
-  const [currentSubscription, setCurrentSubscription] = useState<Subscription>({
-    plan: "Fiber 500 Mbps",
-    price: 1999,
-    status: "Active",
-    nextBillingDate: "2024-12-30",
-  });
+  const currentSubscription: Subscription = null;
 
   return (
     <div className="space-y-8">
@@ -65,40 +47,53 @@ const BillingAndPaymentsPage = () => {
           Manage your subscription and payment methods
         </p>
       </div>
-
+      {/* id: string;
+  userId: string;
+  planId: string;
+  balance: string;
+  address: string;
+  status: string;
+  nextBillingDate: string; */}
       {/* Current Subscription */}
       <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-lg md:p-8">
-        <h3 className="mb-4 text-2xl font-bold">Current Subscription</h3>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <p className="mb-1 text-sm text-indigo-100">Plan</p>
-            <p className="text-2xl font-bold">{currentSubscription.plan}</p>
-          </div>
-          <div>
-            <p className="mb-1 text-sm text-indigo-100">Monthly Fee</p>
-            <p className="text-2xl font-bold">
-              ₱{currentSubscription.price.toLocaleString()}
-            </p>
-          </div>
-          <div>
-            <p className="mb-1 text-sm text-indigo-100">Status</p>
-            <div className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-full bg-green-400"></span>
-              <p className="text-lg font-semibold">
-                {currentSubscription.status}
-              </p>
-            </div>
-          </div>
-          <div>
-            <p className="mb-1 text-sm text-indigo-100">Next Billing Date</p>
-            <p className="text-lg font-semibold">
-              {currentSubscription.nextBillingDate}
-            </p>
-          </div>
-        </div>
+        {currentSubscription ? (
+          <>
+            <h3 className="mb-4 text-2xl font-bold">Current Subscription</h3>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div>
+                <p className="mb-1 text-sm text-indigo-100">Plan</p>
+                <p className="text-2xl font-bold">
+                  {currentSubscription.planId}
+                </p>
+              </div>
+              <div>
+                <p className="mb-1 text-sm text-indigo-100">Monthly Fee</p>
+                <p className="text-2xl font-bold">₱{1000}</p>
+              </div>
+              <div>
+                <p className="mb-1 text-sm text-indigo-100">Status</p>
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-green-400"></span>
+                  <p className="text-lg font-semibold">
+                    {currentSubscription.status}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <p className="mb-1 text-sm text-indigo-100">
+                  Next Billing Date
+                </p>
+                <p className="text-lg font-semibold">
+                  {currentSubscription.nextBillingDate}
+                </p>
+              </div>
+            </div>{" "}
+          </>
+        ) : (
+          <h3 className="text-2xl font-bold">No Active Subscription</h3>
+        )}
       </div>
 
-      {/* Payment Methods */}
       <div className="rounded-xl bg-white p-6 shadow-md md:p-8">
         <h3 className="mb-6 text-2xl font-bold text-gray-900">
           Payment Methods
@@ -115,7 +110,7 @@ const BillingAndPaymentsPage = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">
-                    {method.type} •••• {method.last4}
+                    {method.type} {method.number}
                   </p>
                   <p className="text-sm text-gray-600">
                     Expires {method.expiry}
@@ -131,7 +126,6 @@ const BillingAndPaymentsPage = () => {
           ))}
         </div>
       </div>
-
       {/* Payment History */}
       <div className="rounded-xl bg-white p-6 shadow-md md:p-8">
         <h3 className="mb-6 text-2xl font-bold text-gray-900">
@@ -164,7 +158,9 @@ const BillingAndPaymentsPage = () => {
                   key={payment.id}
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
-                  <td className="px-4 py-4 text-gray-900">{payment.date}</td>
+                  <td className="px-4 py-4 text-gray-900">
+                    {payment.createdAt}
+                  </td>
                   <td className="px-4 py-4 text-gray-600">
                     {payment.description}
                   </td>

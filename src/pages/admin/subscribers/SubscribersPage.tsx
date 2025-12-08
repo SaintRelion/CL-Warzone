@@ -1,35 +1,18 @@
 import { DataTable } from "@/components/admin/DataTable";
+import type { Subscription } from "@/models/subscription";
+import type { User } from "@/models/user";
+import { useDBOperationsLocked } from "@saintrelion/data-access-layer";
 import type { ColumnDef } from "@tanstack/react-table";
 
 const SubscribersPage = () => {
-  const subscribers = [
-    {
-      id: 1,
-      name: "Juan dela Cruz",
-      plan: "100 Mbps",
-      status: "Active",
-      balance: 0,
-      address: "Brgy. San Jose",
-    },
-    {
-      id: 2,
-      name: "Maria Santos",
-      plan: "50 Mbps",
-      status: "Active",
-      balance: 1200,
-      address: "Brgy. Poblacion",
-    },
-    {
-      id: 3,
-      name: "Pedro Reyes",
-      plan: "200 Mbps",
-      status: "Suspended",
-      balance: 2400,
-      address: "Brgy. Fatima",
-    },
-  ];
+  const { useSelect: usersSelect } = useDBOperationsLocked<User>("User");
+  const { data: users } = usersSelect();
 
-  const subscriberColumns: ColumnDef<(typeof subscribers)[number]>[] = [
+  const { useSelect: subscribersSelect } =
+    useDBOperationsLocked<Subscription>("Subscribers");
+  const { data: subscribers } = subscribersSelect();
+
+  const subscriberColumns: ColumnDef<typeof subscribers>[] = [
     { accessorKey: "name", header: "Name" },
     { accessorKey: "plan", header: "Plan" },
     {
@@ -59,11 +42,12 @@ const SubscribersPage = () => {
   ];
 
   return (
-    <DataTable
-      type="subscribers"
-      data={subscribers}
-      columns={subscriberColumns}
-    />
+    <span>sdf</span>
+    // <DataTable
+    //   type="subscribers"
+    //   data={subscribers}
+    //   columns={subscriberColumns}
+    // />
   );
 };
 export default SubscribersPage;

@@ -1,4 +1,4 @@
-import { useAuth } from "@saintrelion/auth-lib";
+import { useAuth, useLoginWithCredentials } from "@saintrelion/auth-lib";
 import {
   RenderForm,
   RenderFormButton,
@@ -10,13 +10,18 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
-  const handleLogin = (data: Record<string, string>) => {
-    setUser({
-      id: "1",
-      role: data.sampleRole,
-    });
+  const loginWithCredentials = useLoginWithCredentials();
 
-    navigate(data.sampleRole == "admin" ? "/admin/" : "/");
+  const handleLogin = (data: Record<string, string>) => {
+    loginWithCredentials.run(
+      "emailAddress",
+      data.emailAddress,
+      data.password,
+      setUser,
+      (user) => {
+        navigate(user.role == "admin" ? "/admin/" : "/");
+      },
+    );
   };
 
   return (
@@ -27,40 +32,32 @@ const LoginPage = () => {
           <h1 className="ml-2 text-2xl font-bold text-gray-900">InternetPro</h1>
         </div>
 
-        <RenderForm wrapperClass="space-y-4" onSubmit={handleLogin}>
+        <RenderForm wrapperClass="space-y-4">
           <RenderFormField
             field={{
-              label: "Sample Role",
-              type: "text",
-              name: "sampleRole",
-              placeholder: "client or admin",
+              label: "Email Address",
+              type: "email",
+              name: "emailAddress",
+              placeholder: "your@gmail.com",
             }}
             labelClassName="mb-2 block text-sm font-medium text-gray-700"
             inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
           />
-          {/* <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
-            />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
-            />
-          </div> */}
+          <RenderFormField
+            field={{
+              label: "Password",
+              type: "password",
+              name: "password",
+              placeholder: "••••••••",
+            }}
+            labelClassName="mb-2 block text-sm font-medium text-gray-700"
+            inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
+          />
           <RenderFormButton
             buttonLabel="Sign In"
-            buttonClass="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700"
+            isDisabled={loginWithCredentials.isLocked}
+            onSubmit={handleLogin}
+            buttonClassName="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700"
           />
         </RenderForm>
 
