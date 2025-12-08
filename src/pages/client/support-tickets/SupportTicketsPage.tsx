@@ -21,6 +21,31 @@ const SupportTicketsPage = () => {
     },
   ]);
 
+  // Form state
+  const [newTitle, setNewTitle] = useState("");
+  const [newPriority, setNewPriority] = useState("low");
+  const [newDescription, setNewDescription] = useState("");
+
+  const createTicket = () => {
+    if (!newTitle || !newDescription) return alert("Fill all fields!");
+
+    const newTicket: SupportTicket = {
+      id: supportTickets.length + 1,
+      title: newTitle,
+      status: "open",
+      date: new Date().toISOString().split("T")[0],
+      priority: newPriority,
+      description: newDescription,
+    };
+
+    setSupportTickets([...supportTickets, newTicket]);
+
+    // clear form
+    setNewTitle("");
+    setNewPriority("low");
+    setNewDescription("");
+  };
+
   const getTicketStatusColor = (status: string): string => {
     switch (status.toLowerCase()) {
       case "open":
@@ -52,7 +77,7 @@ const SupportTicketsPage = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div>
         <h2 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
           Support Tickets
@@ -60,35 +85,80 @@ const SupportTicketsPage = () => {
         <p className="text-gray-600">Track and manage your support requests</p>
       </div>
 
+      {/* CREATE TICKET FORM */}
+      <div className="rounded-xl bg-white p-6 shadow-md space-y-4">
+        <h3 className="text-xl font-semibold">Create New Ticket</h3>
+
+        <input
+          type="text"
+          placeholder="Enter Title"
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+          className="w-full p-2 border rounded"
+        />
+
+        <select
+          value={newPriority}
+          onChange={(e) => setNewPriority(e.target.value)}
+          className="w-full p-2 border rounded"
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+
+        <textarea
+          placeholder="Describe the issue"
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+          className="w-full p-2 border rounded"
+        ></textarea>
+
+        <button
+          onClick={createTicket}
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        >
+          Submit Ticket
+        </button>
+      </div>
+
+      {/* TICKETS LIST */}
       <div className="space-y-4">
         {supportTickets.map((ticket) => (
           <div
             key={ticket.id}
-            className="rounded-xl bg-white p-6 shadow-md transition-shadow hover:shadow-lg md:p-8"
+            className="rounded-xl bg-white p-6 shadow-md hover:shadow-lg"
           >
-            <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div className="flex-1">
-                <h3 className="mb-3 text-xl font-bold text-gray-900">
-                  {ticket.title}
-                </h3>
-                <p className="mb-4 text-gray-600">{ticket.description}</p>
-                <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col gap-4 md:flex-row md:justify-between">
+              <div>
+                <h3 className="text-xl font-bold">{ticket.title}</h3>
+                <p className="text-gray-600 mb-3">{ticket.description}</p>
+
+                <div className="flex flex-wrap gap-3">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${getTicketStatusColor(ticket.status)}`}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${getTicketStatusColor(
+                      ticket.status
+                    )}`}
                   >
-                    {ticket.status.replace("-", " ").toUpperCase()}
+                    {ticket.status.toUpperCase()}
                   </span>
+
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${getPriorityColor(ticket.priority)}`}
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${getPriorityColor(
+                      ticket.priority
+                    )}`}
                   >
                     {ticket.priority.toUpperCase()} PRIORITY
                   </span>
+
                   <span className="text-sm text-gray-600">
                     Created: {ticket.date}
                   </span>
                 </div>
               </div>
-              <button className="text-sm font-medium whitespace-nowrap text-indigo-600 hover:text-indigo-700">
+
+              <button className="text-indigo-600 font-medium hover:text-indigo-700">
                 View Details
               </button>
             </div>
@@ -97,13 +167,12 @@ const SupportTicketsPage = () => {
       </div>
 
       {supportTickets.length === 0 && (
-        <div className="rounded-xl bg-gray-50 p-8 text-center">
-          <p className="text-gray-600">
-            You don't have any support tickets yet.
-          </p>
+        <div className="rounded-xl bg-gray-50 p-8 text-center text-gray-600">
+          You don't have any support tickets yet.
         </div>
       )}
     </div>
   );
 };
+
 export default SupportTicketsPage;
