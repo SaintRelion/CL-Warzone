@@ -80,13 +80,13 @@ const SupportTicketsPage = () => {
     <div className="space-y-10">
       <div>
         <h2 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
-          Support Tickets
+          Support Tickets ARMAN
         </h2>
         <p className="text-gray-600">Track me and manage your support requests</p>
       </div>
 
       {/* CREATE TICKET FORM */}
-      <div className="rounded-xl bg-white p-6 shadow-md space-y-4">
+      <div className="space-y-4 rounded-xl bg-white p-6 shadow-md">
         <h3 className="text-xl font-semibold">Create New Ticket</h3>
 
         <input
@@ -94,13 +94,13 @@ const SupportTicketsPage = () => {
           placeholder="Enter Title"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full rounded border p-2"
         />
 
         <select
           value={newPriority}
           onChange={(e) => setNewPriority(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full rounded border p-2"
         >
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -112,12 +112,12 @@ const SupportTicketsPage = () => {
           placeholder="Describe the issue"
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full rounded border p-2"
         ></textarea>
 
         <button
           onClick={createTicket}
-          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
         >
           Submit Ticket
         </button>
@@ -133,12 +133,12 @@ const SupportTicketsPage = () => {
             <div className="flex flex-col gap-4 md:flex-row md:justify-between">
               <div>
                 <h3 className="text-xl font-bold">{ticket.title}</h3>
-                <p className="text-gray-600 mb-3">{ticket.description}</p>
+                <p className="mb-3 text-gray-600">{ticket.description}</p>
 
                 <div className="flex flex-wrap gap-3">
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${getTicketStatusColor(
-                      ticket.status
+                      ticket.status,
                     )}`}
                   >
                     {ticket.status.toUpperCase()}
@@ -146,7 +146,7 @@ const SupportTicketsPage = () => {
 
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${getPriorityColor(
-                      ticket.priority
+                      ticket.priority,
                     )}`}
                   >
                     {ticket.priority.toUpperCase()} PRIORITY
@@ -158,7 +158,7 @@ const SupportTicketsPage = () => {
                 </div>
               </div>
 
-              <button className="text-indigo-600 font-medium hover:text-indigo-700">
+              <button className="font-medium text-indigo-600 hover:text-indigo-700">
                 View Details
               </button>
             </div>
