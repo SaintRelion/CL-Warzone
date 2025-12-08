@@ -82,7 +82,7 @@ const SupportTicketsPage = () => {
         <h2 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
           Support Tickets
         </h2>
-        <p className="text-gray-600">Track and manage your support requests</p>
+        <p className="text-gray-600">Track me and manage your support requests</p>
       </div>
 
       {/* CREATE TICKET FORM */}
