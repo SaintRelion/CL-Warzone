@@ -25,7 +25,7 @@ const ClientSideBar = () => {
         <div className="border-b border-gray-200 p-6">
           <div className="flex items-center gap-2">
             <span className="fa-solid fa-wifi text-2xl text-indigo-600" />
-            <h1 className="text-xl font-bold text-gray-900">InternetPro</h1>
+            <h1 className="text-xl font-bold text-gray-900">Warzone</h1>
           </div>
         </div>
 

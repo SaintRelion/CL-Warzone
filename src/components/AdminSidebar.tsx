@@ -14,7 +14,7 @@ const AdminSidebar = () => {
         {sidebarOpen && (
           <div className="flex items-center gap-2">
             <Wifi className="h-6 w-6 text-blue-400" />
-            <span className="text-lg font-bold">ISP Manager</span>
+            <span className="text-lg font-bold">Warzone Net Cafe</span>
           </div>
         )}
         <button

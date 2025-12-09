@@ -55,6 +55,30 @@ const BillingAndPaymentsPage = () => {
   status: string;
   nextBillingDate: string; */}
       {/* Current Subscription */}
+
+
+      {/* Next Due Date Card */}
+{/* Next Due Date Card (Gradient) */}
+<div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 shadow-lg text-white md:p-8">
+  <h3 className="mb-4 text-2xl font-bold">Next Due Date</h3>
+
+  <div className="flex items-center justify-between rounded-lg bg-white/10 backdrop-blur-sm p-4">
+    <div>
+      <p className="text-sm text-indigo-200">Your next bill is due on</p>
+
+      {/* DISPLAY NEXT DUE DATE HERE */}
+      <p className="mt-1 text-2xl font-bold text-white">
+        December 28, 2024
+      </p>
+    </div>
+
+    <div className="rounded-lg bg-white/20 px-4 py-2 text-white font-semibold">
+      ₱1,999
+    </div>
+  </div>
+</div>
+
+
       <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-lg md:p-8">
         {currentSubscription ? (
           <>

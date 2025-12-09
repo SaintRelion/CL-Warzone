@@ -29,7 +29,7 @@ const LoginPage = () => {
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-2xl">
         <div className="mb-8 flex items-center justify-center">
           <span className="fa-solid fa-wifi text-2xl text-indigo-600" />
-          <h1 className="ml-2 text-2xl font-bold text-gray-900">InternetPro</h1>
+          <h1 className="ml-2 text-2xl font-bold text-gray-900">Warzone</h1>
         </div>
 
         <RenderForm wrapperClass="space-y-4">
