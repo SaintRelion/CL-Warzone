@@ -16,31 +16,34 @@ const BrowsePlansPage = () => {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
 
   const plans: Plan[] = [
-    {
-      id: 1,
-      name: "Basic 100 Mbps",
-      speed: "100 Mbps",
-      price: "1299",
-      features: ["Download: 100 Mbps", "Upload: 20 Mbps", "Unlimited data"],
-      description: "Perfect for casual browsing",
-    },
-    {
-      id: 2,
-      name: "Fiber 500 Mbps",
-      speed: "500 Mbps",
-      price: "1999",
-      features: ["Download: 500 Mbps", "Upload: 100 Mbps", "Unlimited data"],
-      description: "Great for streaming and gaming",
-    },
-    {
-      id: 2,
-      name: "Fiber 1000 Mbps",
-      speed: "1000 Mbps",
-      price: "2999",
-      features: ["Download: 1000 Mbps", "Upload: 1000 Mbps", "Unlimited data"],
-      description: "Great for streaming and gaming",
-    },
-  ];
+  {
+    id: 1,
+    name: "Basic 10 Mbps",
+    speed: "10 Mbps",
+    price: "999",
+    features: ["Download: 10 Mbps", "Upload: 10 Mbps", "Unlimited data"],
+    description: "Perfect for casual browsing",
+  },
+  
+   {
+    id: 2,
+    name: "Basic 50 Mbps",
+    speed: "50 Mbps",
+    price: "1499",
+    features: ["Download: 50 Mbps", "Upload: 50 Mbps", "Unlimited data"],
+    description: "Perfect for casual browsing",
+  },
+  {
+    id: 3,
+    name: "Fiber 100 Mbps",
+    speed: "100 Mbps",
+    price: "2499",
+    features: ["Download: 100 Mbps", "Upload: 100 Mbps", "Unlimited data"],
+    description: "Best for heavy users and smart homes",
+  },
+];
+
+
 
   return (
     <div>
@@ -79,47 +82,139 @@ const BrowsePlansPage = () => {
                   </li>
                 ))}
               </ul>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700">
-                    Select
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="bg-white sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Confirm Your Plan</DialogTitle>
-                    <DialogDescription>
-                      You are about to subscribe to{" "}
-                      <strong>{selectedPlan?.name}</strong> for ₱
-                      {selectedPlan?.price}/month. Please confirm your
-                      installation address.
-                    </DialogDescription>
-                  </DialogHeader>
+           
+               <Dialog>
+              <DialogTrigger asChild>
+                    <button
+                      onClick={() => setSelectedPlan(plan)}
+                      className={`w-full rounded-lg py-3 font-medium transition 
+                        ${selectedPlan?.id === plan.id 
+                          ? "bg-green-600 text-white hover:bg-green-700" 
+                          : "bg-indigo-600 text-white hover:bg-indigo-700"
+                        }`}
+                    >
+                      {selectedPlan?.id === plan.id ? "Current Plan" : "Switch Plan"}
+                    </button>
+                  </DialogTrigger>
 
-                  <RenderForm>
-                    <RenderFormField
-                      field={{
-                        label: "Installation Address",
-                        type: "text",
-                        name: "homeAddress",
-                        placeholder: "Enter your complete address",
-                      }}
-                      wrapperClassName="flex flex-col "
-                      labelClassName="text-sm font-medium text-gray-700 mb-1"
-                    />
+<DialogContent className="bg-white sm:max-w-md">
+  <DialogHeader>
+    <DialogTitle>Switch to This Plan</DialogTitle>
+    <DialogDescription>
+      You are switching to <strong>{plan.name}</strong> for ₱{plan.price}/month.
+      Please fill in your payment details to continue.
+    </DialogDescription>
+  </DialogHeader>
 
-                    <DialogFooter className="mt-6">
-                      <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
-                        Confirm Subscription
-                      </Button>
-                    </DialogFooter>
-                  </RenderForm>
+
+                  <DialogContent className="bg-white sm:max-w-md">
+  <DialogHeader>
+    <DialogTitle>Confirm Your Subscription</DialogTitle>
+    <DialogDescription>
+      Review your plan details and provide your installation address.
+    </DialogDescription>
+  </DialogHeader>
+
+  {/* ===================== ORDER SUMMARY CARD ===================== */}
+  <div className="border rounded-xl p-4 bg-gray-50 mb-6 shadow-sm">
+    <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+      <span className="text-indigo-600 fa-solid fa-receipt" />
+      Order Summary
+    </h3>
+
+    {/* Plan info */}
+    <div className="flex items-start gap-3 mb-4">
+      <span className="fa-solid fa-wifi text-indigo-600 text-xl" />
+      <div>
+        <p className="font-semibold text-gray-900">
+          {selectedPlan?.name}
+        </p>
+        <p className="text-sm text-gray-600">
+          {selectedPlan?.speed} • Unlimited Data
+        </p>
+      </div>
+    </div>
+
+    {/* Items */}
+    <div className="space-y-2 text-sm text-gray-700">
+      <div className="flex justify-between">
+        <span>Monthly Plan</span>
+        <span>₱{selectedPlan?.price}</span>
+      </div>
+
+      <div className="flex justify-between">
+        <span>Installation Fee</span>
+        <span>₱1,500</span>
+      </div>
+
+      <div className="flex justify-between text-green-600">
+        <span className="flex items-center gap-1">
+          <span className="fa-solid fa-tag" />
+          New Customer (10% off)
+        </span>
+        <span>-₱150</span>
+      </div>
+
+      <hr className="my-3" />
+
+      <div className="flex justify-between font-semibold">
+        <span>Monthly Total</span>
+        <span>₱{Number(selectedPlan?.price) - 150}</span>
+      </div>
+
+      <div className="flex justify-between font-bold text-indigo-700 text-lg">
+        <span>First Month Total</span>
+        <span>
+          ₱{Number(selectedPlan?.price) + 1500 - 150}
+        </span>
+      </div>
+    </div>
+
+    {/* Savings Box */}
+    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 flex justify-between">
+      <span className="flex items-center gap-2">
+        <span className="fa-solid fa-wallet" />
+        Total Savings
+      </span>
+      <span className="font-semibold">₱150</span>
+    </div>
+
+    {/* Notes */}
+    <div className="mt-3 text-xs text-gray-600 space-y-1">
+      <p><span className="fa-solid fa-circle-dot mr-1" /> Installation: To be scheduled</p>
+      <p><span className="fa-solid fa-circle-dot mr-1" /> Service Area: Metro Manila</p>
+      <p><span className="fa-solid fa-circle-dot mr-1" /> Billing Cycle: Monthly</p>
+    </div>
+  </div>
+
+  {/* ===================== YOUR EXISTING FORM ===================== */}
+           
+
+          <RenderForm>
+            <DialogFooter className="mt-6 flex justify-end gap-3">
+              {/* Cancel Button */}
+              <Button
+                type="button"
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-100"
+              >
+                Cancel
+              </Button>
+
+              {/* Confirm Button */}
+              <Button className="bg-indigo-600 text-white hover:bg-indigo-700">
+                Order Confirm
+              </Button>
+            </DialogFooter>
+          </RenderForm>
+
+          </DialogContent>
+                  
                 </DialogContent>
               </Dialog>
-            </div>
-          </div>
-        ))}
-      </div>
+
+</div> </div> ))} </div>
+
 
       {selectedPlan && (
         <div className="mt-8 rounded-xl border-2 border-green-200 bg-green-50 p-6">

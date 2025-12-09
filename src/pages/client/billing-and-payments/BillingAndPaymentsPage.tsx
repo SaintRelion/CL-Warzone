@@ -35,7 +35,8 @@ const BillingAndPaymentsPage = () => {
     },
   ];
 
-  const currentSubscription: Subscription = null;
+  const [showGcashModal, setShowGcashModal] = useState(false);
+  const currentSubscription: Subscription | null = null;
 
   return (
     <div className="space-y-8">
@@ -47,38 +48,66 @@ const BillingAndPaymentsPage = () => {
           Manage your subscription and payment methods
         </p>
       </div>
-      {/* id: string;
-  userId: string;
-  planId: string;
-  balance: string;
-  address: string;
-  status: string;
-  nextBillingDate: string; */}
-      {/* Current Subscription */}
-
 
       {/* Next Due Date Card */}
-{/* Next Due Date Card (Gradient) */}
-<div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 shadow-lg text-white md:p-8">
-  <h3 className="mb-4 text-2xl font-bold">Next Due Date</h3>
+      <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 shadow-lg text-white md:p-8">
+        <h3 className="mb-4 text-2xl font-bold">Next Due Date</h3>
 
-  <div className="flex items-center justify-between rounded-lg bg-white/10 backdrop-blur-sm p-4">
-    <div>
-      <p className="text-sm text-indigo-200">Your next bill is due on</p>
+        <div className="flex items-center justify-between rounded-lg bg-white/10 backdrop-blur-sm p-4">
+          <div>
+            <p className="text-sm text-indigo-200">Your next bill is due on</p>
+            <p className="mt-1 text-2xl font-bold text-white">December 28, 2024</p>
+          </div>
 
-      {/* DISPLAY NEXT DUE DATE HERE */}
-      <p className="mt-1 text-2xl font-bold text-white">
-        December 28, 2024
-      </p>
-    </div>
+          <div className="rounded-lg bg-white/20 px-4 py-2 text-white font-semibold">
+            ₱1,999
+          </div>
+        </div>
 
-    <div className="rounded-lg bg-white/20 px-4 py-2 text-white font-semibold">
-      ₱1,999
-    </div>
-  </div>
-</div>
+        {/* Pay Now Button */}
+        <button
+          onClick={() => setShowGcashModal(true)}
+          className="mt-6 w-full md:w-auto bg-white text-indigo-700 px-6 py-2 font-semibold rounded-lg shadow hover:bg-indigo-100 transition"
+        >
+          Pay Now via GCash
+        </button>
+      </div>
 
+      {/* GCash Modal */}
+      {showGcashModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 shadow-xl max-w-sm w-full text-center">
+            <h2 className="text-xl font-bold mb-2 text-indigo-700">GCash Payment</h2>
+            <p className="text-gray-600 mb-4">Scan this QR using your GCash app</p>
 
+            <img
+              src="/gcash-qr.png"
+              alt="GCash QR Code"
+              className="w-56 mx-auto rounded-lg shadow mb-4"
+            />
+
+            <div className="text-left text-gray-700 text-sm mb-6">
+              <p className="font-semibold text-indigo-700 mb-1">How to pay:</p>
+              <ol className="list-decimal ml-5 space-y-1">
+                <li>Open the GCash app</li>
+                <li>Tap <strong>Pay QR</strong></li>
+                <li>Select <strong>Upload QR</strong> or scan directly</li>
+                <li>Enter the exact amount: <strong>₱1,999</strong></li>
+                <li>Confirm payment</li>
+              </ol>
+            </div>
+
+            <button
+              onClick={() => setShowGcashModal(false)}
+              className="w-full rounded-lg bg-indigo-600 text-white px-4 py-2 font-semibold hover:bg-indigo-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Current Subscription */}
       <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-lg md:p-8">
         {currentSubscription ? (
           <>
@@ -111,13 +140,14 @@ const BillingAndPaymentsPage = () => {
                   {currentSubscription.nextBillingDate}
                 </p>
               </div>
-            </div>{" "}
+            </div>
           </>
         ) : (
           <h3 className="text-2xl font-bold">No Active Subscription</h3>
         )}
       </div>
 
+      {/* Payment Methods */}
       <div className="rounded-xl bg-white p-6 shadow-md md:p-8">
         <h3 className="mb-6 text-2xl font-bold text-gray-900">
           Payment Methods
@@ -150,6 +180,7 @@ const BillingAndPaymentsPage = () => {
           ))}
         </div>
       </div>
+
       {/* Payment History */}
       <div className="rounded-xl bg-white p-6 shadow-md md:p-8">
         <h3 className="mb-6 text-2xl font-bold text-gray-900">
@@ -189,7 +220,7 @@ const BillingAndPaymentsPage = () => {
                     {payment.description}
                   </td>
                   <td className="px-4 py-4 font-medium text-gray-900">
-                    ₱{payment.amount.toLocaleString()}
+                    ₱{Number(payment.amount).toLocaleString()}
                   </td>
                   <td className="px-4 py-4">
                     <span
@@ -197,8 +228,8 @@ const BillingAndPaymentsPage = () => {
                         payment.status === "paid"
                           ? "bg-green-100 text-green-800"
                           : payment.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
                       }`}
                     >
                       {payment.status}
@@ -218,4 +249,5 @@ const BillingAndPaymentsPage = () => {
     </div>
   );
 };
+
 export default BillingAndPaymentsPage;
