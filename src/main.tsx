@@ -11,7 +11,9 @@ import { router } from "./navigations";
 import "@/lib/firebase-client";
 
 import "@/data-access-config";
+
 import "@/repositories/user";
+import "@/repositories/subscription";
 
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(
