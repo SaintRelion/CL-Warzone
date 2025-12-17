@@ -55,7 +55,7 @@ const BrowsePlansPage = () => {
   });
   let currentPlan: Plan | null = null;
 
-  if (currentSubscriptions != undefined) {
+  if (currentSubscriptions != undefined && currentSubscriptions.length > 0) {
     currentPlan = plans.filter(
       (v) => v.id == currentSubscriptions[0].planId,
     )[0];
