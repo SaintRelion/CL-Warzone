@@ -39,8 +39,8 @@ importers:
         specifier: ^1.1.13
         version: 1.1.13(@types/react-dom@19.1.8(@types/react@19.1.11))(@types/react@19.1.11)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@saintrelion/auth-lib':
-        specifier: ^4.2.7
-        version: 4.2.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        specifier: ^4.2.8
+        version: 4.2.8(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@saintrelion/cache':
         specifier: ^1.0.1
         version: 1.0.1
@@ -2006,8 +2006,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@saintrelion/auth-lib@4.2.7':
-    resolution: {integrity: sha512-rT8uPTQww6NM4uxZzHzcW30uy377S+LScEUmum/Stwf3cUN5BTGey7o2eI/fG6xgqq916FMgvy3+Qo3+PgpjWw==, tarball: https://npm.pkg.github.com/download/@saintrelion/auth-lib/4.2.7/3dcabbfd8eb35d4f6edb84a525f50a1ded3c1e5d}
+  '@saintrelion/auth-lib@4.2.8':
+    resolution: {integrity: sha512-yA0eAx4UkVEz54saMCyJCedLOTTWLud0NzZ5p/ac6j/x/V6p4wSxNLYlGjYNYHGgHBNqkgu1tipBU+Fvo+9yAw==, tarball: https://npm.pkg.github.com/download/@saintrelion/auth-lib/4.2.8/e4c170693b57d00c435957cef541f9a06c144271}
 
   '@saintrelion/cache@1.0.1':
     resolution: {integrity: sha512-4GXJGbvoS+DK4jCNsH/l6EUdmjbyBL76wghtGJS/ryZiwiGG05v60LWto+EYIXWKROhf9NxDn93/wPbcE3IBLQ==, tarball: https://npm.pkg.github.com/download/@saintrelion/cache/1.0.1/1aa40a67a8396a40cff61200155fecb9e7297ce8}
@@ -2481,8 +2481,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  baseline-browser-mapping@2.9.7:
-    resolution: {integrity: sha512-k9xFKplee6KIio3IDbwj+uaCLpqzOwakOgmqzPezM0sFJlFKcg30vk2wOiAJtkTSfx0SSQDSe8q+mWA/fSH5Zg==}
+  baseline-browser-mapping@2.9.8:
+    resolution: {integrity: sha512-Y1fOuNDowLfgKOypdc9SPABfoWXuZHBOyCS4cD52IeZBhr4Md6CLLs6atcxVrzRmQ06E7hSlm5bHHApPKR/byA==}
     hasBin: true
 
   bl@5.1.0:
@@ -4626,8 +4626,8 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
-  update-browserslist-db@1.2.2:
-    resolution: {integrity: sha512-E85pfNzMQ9jpKkA7+TJAi4TJN+tBCuWh5rUcS/sv6cFi+1q9LYDwDI5dpUL0u/73EElyQ8d3TEaeW4sPedBqYA==}
+  update-browserslist-db@1.2.3:
+    resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
@@ -4665,6 +4665,10 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  uuid@13.0.0:
+    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -6860,13 +6864,14 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.48.1':
     optional: true
 
-  '@saintrelion/auth-lib@4.2.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+  '@saintrelion/auth-lib@4.2.8(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
       '@saintrelion/cache': 1.0.1
       '@saintrelion/notifications': 1.0.2
       '@saintrelion/routers': 2.0.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       firebase: 12.2.1
       react-router-dom: 7.8.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      uuid: 13.0.0
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
       - react
@@ -6926,7 +6931,7 @@ snapshots:
 
   '@saintrelion/routers@2.0.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
-      '@saintrelion/auth-lib': 4.2.7(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      '@saintrelion/auth-lib': 4.2.8(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-router-dom: 7.8.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
     transitivePeerDependencies:
       - '@react-native-async-storage/async-storage'
@@ -7395,7 +7400,7 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  baseline-browser-mapping@2.9.7: {}
+  baseline-browser-mapping@2.9.8: {}
 
   bl@5.1.0:
     dependencies:
@@ -7443,11 +7448,11 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.9.7
+      baseline-browser-mapping: 2.9.8
       caniuse-lite: 1.0.30001760
       electron-to-chromium: 1.5.267
       node-releases: 2.0.27
-      update-browserslist-db: 1.2.2(browserslist@4.28.1)
+      update-browserslist-db: 1.2.3(browserslist@4.28.1)
 
   buffer-from@1.1.2: {}
 
@@ -9598,7 +9603,7 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  update-browserslist-db@1.2.2(browserslist@4.28.1):
+  update-browserslist-db@1.2.3(browserslist@4.28.1):
     dependencies:
       browserslist: 4.28.1
       escalade: 3.2.0
@@ -9633,6 +9638,8 @@ snapshots:
       react: 19.1.1
 
   util-deprecate@1.0.2: {}
+
+  uuid@13.0.0: {}
 
   vary@1.1.2: {}
 
