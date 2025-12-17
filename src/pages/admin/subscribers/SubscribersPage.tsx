@@ -1,6 +1,6 @@
 import { DataTable } from "@/components/admin/DataTable";
-import type { Subscription } from "@/models/subscription";
-import type { User } from "@/models/user";
+import type { Subscription } from "@/models/Subscription";
+import type { User } from "@/models/User";
 import { useDBOperationsLocked } from "@saintrelion/data-access-layer";
 import type { ColumnDef } from "@tanstack/react-table";
 

@@ -1,43 +1,92 @@
-import type { PaymentHistory } from "@/models/payment-history";
-import type { Subscription } from "@/models/subscription";
+import { PLANS } from "@/constants";
+import type { PaymentHistory } from "@/models/PaymentHistory";
+import type { Plan } from "@/models/Plan";
+import type { Subscription } from "@/models/Subscription";
 import { useAuth } from "@saintrelion/auth-lib";
 import { useDBOperationsLocked } from "@saintrelion/data-access-layer";
-import { formatReadableDate } from "@saintrelion/time-functions";
+import { toast } from "@saintrelion/notifications";
+import {
+  formatReadableDate,
+  formatReadableDateTime,
+  toDate,
+} from "@saintrelion/time-functions";
 import { useState } from "react";
 
 const BillingAndPaymentsPage = () => {
   const { user } = useAuth();
-  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([
-    {
-      id: "1",
-      userId: "2",
-      createdAt: "2024-11-01",
-      amount: "1999",
-      status: "paid",
-      invoice: "INV-2024-11",
-      description: "Fiber 500 Mbps - Monthly",
-    },
-    {
-      id: "2",
-      userId: "2",
-      createdAt: "2024-10-01",
-      amount: "1999",
-      status: "paid",
-      invoice: "INV-2024-10",
-      description: "Fiber 500 Mbps - Monthly",
-    },
-  ]);
+
+  const { useSelect: paymentHistorySelect, useInsert: paymentHistoryInsert } =
+    useDBOperationsLocked<PaymentHistory>("PaymentHistory", false, false);
+  const { data: paymentHistory } = paymentHistorySelect();
+
+  const sortedPaymentHistory =
+    paymentHistory != undefined && paymentHistory.length > 0
+      ? paymentHistory.sort((a, b) => {
+          const dateA = toDate(a.createdAt)?.getTime() ?? 0;
+          const dateB = toDate(b.createdAt)?.getTime() ?? 0;
+
+          // Sort descending (newest first)
+          return dateB - dateA;
+        })
+      : [];
 
   const [showGcashModal, setShowGcashModal] = useState(false);
 
-  const { useSelect: subscriptionSelect } =
-    useDBOperationsLocked<Subscription>("Subscription");
+  const { useSelect: subscriptionSelect, useUpdate: subscriptionUpdate } =
+    useDBOperationsLocked<Subscription>("Subscription", false, false);
 
   const { data: currentSubscriptions } = subscriptionSelect({
-    firebaseOptions: { filterField: "userId", value: user.id },
+    firebaseOptions: {
+      filterField: ["userId", "status"],
+      value: [user.id, "Active"],
+    },
   });
+
   const currentSubscription =
-    currentSubscriptions != undefined ? currentSubscriptions[0] : null;
+    currentSubscriptions != undefined && currentSubscriptions.length > 0
+      ? currentSubscriptions[0]
+      : null;
+  let currentPlan: Plan | null = null;
+
+  if (currentSubscription) {
+    currentPlan = PLANS.filter((v) => v.id == currentSubscription.planId)[0];
+  }
+
+  async function handlePayment() {
+    if (currentSubscription && currentPlan) {
+      const balance = Number(currentSubscription.balance);
+      if (balance <= 0) {
+        alert("All balance paid");
+        return;
+      }
+
+      const randomBetween = (min: number, max: number) =>
+        Math.floor(Math.random() * (max - min + 1)) + min;
+
+      let randomAmount = randomBetween(100, 800);
+      randomAmount = Math.min(randomAmount, balance);
+
+      const remainingBalance = balance - randomAmount;
+      const status = remainingBalance > 0 ? "pending" : "complete";
+
+      const transaction = {
+        userId: user.id,
+        description: currentPlan.name,
+        amount: randomAmount.toString(),
+        status,
+        invoice: `INV-${Date.now()}`,
+      };
+
+      await paymentHistoryInsert.run(transaction);
+      await subscriptionUpdate.run({
+        field: "id",
+        value: currentSubscription.id,
+        updates: { balance: remainingBalance.toString() },
+      });
+
+      toast.success(`PHP ${randomAmount}: recorded successfully.`);
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -52,15 +101,13 @@ const BillingAndPaymentsPage = () => {
 
       {/* Next Due Date Card */}
       <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-lg md:p-8">
-        {currentSubscription ? (
+        {currentSubscription && currentPlan ? (
           <>
             <h3 className="mb-4 text-2xl font-bold">Current Subscription</h3>
             <div className="mb-4 grid grid-cols-2 items-center rounded-lg bg-white/10 p-4 backdrop-blur-sm">
               <div>
                 <p className="mb-1 text-sm text-indigo-100">Plan</p>
-                <p className="text-2xl font-bold">
-                  {currentSubscription.planId}
-                </p>
+                <p className="text-2xl font-bold">{currentPlan.name}</p>
               </div>
 
               <div>
@@ -89,6 +136,15 @@ const BillingAndPaymentsPage = () => {
               </div>
             </div>
             {/* Pay Now Button */}
+            <button
+              onClick={() => handlePayment()}
+              disabled={
+                subscriptionUpdate.isLocked || paymentHistoryInsert.isLocked
+              }
+              className="mt-6 w-full rounded-lg bg-white px-6 py-2 font-semibold text-indigo-700 shadow transition hover:bg-indigo-100 md:w-auto"
+            >
+              Pay Now via oxygen
+            </button>{" "}
             <button
               onClick={() => setShowGcashModal(true)}
               className="mt-6 w-full rounded-lg bg-white px-6 py-2 font-semibold text-indigo-700 shadow transition hover:bg-indigo-100 md:w-auto"
@@ -145,40 +201,6 @@ const BillingAndPaymentsPage = () => {
         </div>
       )}
 
-      {/* Payment Methods */}
-      {/* <div className="rounded-xl bg-white p-6 shadow-md md:p-8">
-        <h3 className="mb-6 text-2xl font-bold text-gray-900">
-          Payment Methods
-        </h3>
-        <div className="space-y-4">
-          {paymentMethods.map((method) => (
-            <div
-              key={method.id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 p-4"
-            >
-              <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-indigo-100 p-3">
-                  <span className="text-2xl">💳</span>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {method.type} {method.number}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Expires {method.expiry}
-                  </p>
-                </div>
-              </div>
-              {method.isDefault && (
-                <span className="rounded bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
-                  DEFAULT
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div> */}
-
       {/* Payment History */}
       <div className="rounded-xl bg-white p-6 shadow-md md:p-8">
         <h3 className="mb-6 text-2xl font-bold text-gray-900">
@@ -206,40 +228,47 @@ const BillingAndPaymentsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {paymentHistory.map((payment) => (
-                <tr
-                  key={payment.id}
-                  className="border-b border-gray-100 hover:bg-gray-50"
-                >
-                  <td className="px-4 py-4 text-gray-900">
-                    {payment.createdAt}
-                  </td>
-                  <td className="px-4 py-4 text-gray-600">
-                    {payment.description}
-                  </td>
-                  <td className="px-4 py-4 font-medium text-gray-900">
-                    ₱{Number(payment.amount).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-4">
-                    <span
-                      className={`rounded px-2 py-1 text-xs font-semibold capitalize ${
-                        payment.status === "paid"
-                          ? "bg-green-100 text-green-800"
-                          : payment.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {payment.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700 md:text-sm">
-                      Download
-                    </button>
-                  </td>
+              {sortedPaymentHistory == undefined ||
+              sortedPaymentHistory.length == 0 ? (
+                <tr>
+                  <td className="pt-4">No Payment history</td>
                 </tr>
-              ))}
+              ) : (
+                sortedPaymentHistory.map((payment) => (
+                  <tr
+                    key={payment.id}
+                    className="border-b border-gray-100 hover:bg-gray-50"
+                  >
+                    <td className="px-4 py-4 text-gray-900">
+                      {formatReadableDateTime(payment.createdAt)}
+                    </td>
+                    <td className="px-4 py-4 text-gray-600">
+                      {payment.description}
+                    </td>
+                    <td className="px-4 py-4 font-medium text-gray-900">
+                      ₱{payment.amount.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span
+                        className={`rounded px-2 py-1 text-xs font-semibold capitalize ${
+                          payment.status === "complete"
+                            ? "bg-green-100 text-green-800"
+                            : payment.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {payment.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700 md:text-sm">
+                        Download
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

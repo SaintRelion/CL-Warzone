@@ -1,4 +1,4 @@
-import type { Subscription } from "@/models/subscription";
+import type { Subscription } from "@/models/Subscription";
 import {
   firebaseRegister,
   apiRegister,
