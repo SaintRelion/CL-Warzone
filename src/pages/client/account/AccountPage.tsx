@@ -80,7 +80,7 @@ const AccountPage = () => {
             { label: "Email Address", name: "emailAddress" },
             { label: "Phone Number", name: "phoneNumber" },
             { label: "Street Address", name: "streetAddress", full: true },
-            { label: "City", name: "city" },
+            { label: "City/Municipality", name: "city/municipality" },
             { label: "ZIP Code", name: "zipCode" },
             { label: "Service Area", name: "serviceArea" },
           ].map((field) => (

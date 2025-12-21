@@ -5,6 +5,8 @@ import { useDBOperationsLocked } from "@saintrelion/data-access-layer";
 import { formatReadableDate } from "@saintrelion/time-functions";
 import { useState } from "react";
 
+
+
 const BillingAndPaymentsPage = () => {
   const { user } = useAuth();
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([
@@ -112,11 +114,11 @@ const BillingAndPaymentsPage = () => {
               Scan this QR using your GCash app
             </p>
 
-            <img
-              src="/gcash-qr.png"
-              alt="GCash QR Code"
-              className="mx-auto mb-4 w-56 rounded-lg shadow"
-            />
+         <img
+            src="public/images/gcash.png"
+            alt="GCash QR Code"
+            className="mx-auto mb-4 w-56 rounded-lg shadow"
+          />
 
             <div className="mb-6 text-left text-sm text-gray-700">
               <p className="mb-1 font-semibold text-indigo-700">How to pay:</p>
@@ -145,6 +147,93 @@ const BillingAndPaymentsPage = () => {
         </div>
       )}
 
+
+      {/* RCBCModal */}
+      {showGcashModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
+            <h2 className="mb-2 text-xl font-bold text-indigo-700">
+              GCash Payment
+            </h2>
+            <p className="mb-4 text-gray-600">
+              Scan this QR using your GCash app
+            </p>
+
+         <img
+            src="public/images/gcash.png"
+            alt="GCash QR Code"
+            className="mx-auto mb-4 w-56 rounded-lg shadow"
+          />
+
+            <div className="mb-6 text-left text-sm text-gray-700">
+              <p className="mb-1 font-semibold text-indigo-700">How to pay:</p>
+              <ol className="ml-5 list-decimal space-y-1">
+                <li>Open the GCash app</li>
+                <li>
+                  Tap <strong>Pay QR</strong>
+                </li>
+                <li>
+                  Select <strong>Upload QR</strong> or scan directly
+                </li>
+                <li>
+                  Enter the exact amount: <strong>₱1,999</strong>
+                </li>
+                <li>Confirm payment</li>
+              </ol>
+            </div>
+
+            <button
+              onClick={() => setShowGcashModal(false)}
+              className="w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+            {/* Metrobank Modal */}
+      {showGcashModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
+            <h2 className="mb-2 text-xl font-bold text-indigo-700">
+              GCash Payment
+            </h2>
+            <p className="mb-4 text-gray-600">
+              Scan this QR using your GCash app
+            </p>
+
+         <img
+            src="public/images/gcash.png"
+            alt="GCash QR Code"
+            className="mx-auto mb-4 w-56 rounded-lg shadow"
+          />
+
+            <div className="mb-6 text-left text-sm text-gray-700">
+              <p className="mb-1 font-semibold text-indigo-700">How to pay:</p>
+              <ol className="ml-5 list-decimal space-y-1">
+                <li>Open the GCash app</li>
+                <li>
+                  Tap <strong>Pay QR</strong>
+                </li>
+                <li>
+                  Select <strong>Upload QR</strong> or scan directly
+                </li>
+                <li>
+                  Enter the exact amount: <strong>₱1,999</strong>
+                </li>
+                <li>Confirm payment</li>
+              </ol>
+            </div>
+
+            <button
+              onClick={() => setShowGcashModal(false)}
+              className="w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       {/* Payment Methods */}
       {/* <div className="rounded-xl bg-white p-6 shadow-md md:p-8">
         <h3 className="mb-6 text-2xl font-bold text-gray-900">
