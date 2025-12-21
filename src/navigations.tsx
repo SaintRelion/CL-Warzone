@@ -13,8 +13,6 @@ import AccountPage from "./pages/client/account/AccountPage";
 import FAQPage from "./pages/client/faq/FAQPage";
 import RegisterPage from "./pages/authentication/RegisterPage";
 import TicketsPage from "./pages/admin/tickets/TicketsPage";
-import EquipmentsPage from "./pages/admin/equipments/EquipmentsPage";
-import OutagesPage from "./pages/admin/outages/OutagesPage";
 import { ProtectedRoute } from "@saintrelion/auth-lib";
 
 // ✅ Register protected routes (with layout)

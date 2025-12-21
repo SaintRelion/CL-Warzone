@@ -24,7 +24,11 @@ const AccountPage = () => {
   };
 
   async function handleSubmit(data: Record<string, string>) {
-    const success = await updateUser.run({ userId: user.id, info: data });
+    const success = await updateUser.run({
+      userId: user.id,
+      info: data,
+      uniqueFields: ["emailAddress"],
+    });
     setEditMode(false);
 
     if (success) await updateSession(data, setUser);

@@ -12,8 +12,9 @@ import "@/lib/firebase-client";
 
 import "@/data-access-config";
 
-import "@/repositories/user";
-import "@/repositories/subscription";
+import "@/repositories/UserRepo";
+import "@/repositories/SubscriptionRepo";
+import "@/repositories/PaymentHistoryRepo";
 
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(

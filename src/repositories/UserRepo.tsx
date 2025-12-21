@@ -3,7 +3,7 @@ import {
   apiRegister,
   mockRegister,
 } from "@saintrelion/data-access-layer";
-import type { User } from "@/models/user";
+import type { User } from "@/models/User";
 
 // Firebase
 firebaseRegister("User");

@@ -9,65 +9,58 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import type { Plan } from "@/models/plan";
 import { useAuth } from "@saintrelion/auth-lib";
 import { useDBOperationsLocked } from "@saintrelion/data-access-layer";
-import type { Subscription } from "@/models/subscription";
+import type { Subscription } from "@/models/Subscription";
 import { getCurrentDateTimeString, toDate } from "@saintrelion/time-functions";
-
-const plans: Plan[] = [
-  {
-    id: "1",
-    name: "Basic 10 Mbps",
-    speed: "10 Mbps",
-    price: "999",
-    features: ["Download: 10 Mbps", "Upload: 10 Mbps", "Unlimited data"],
-    description: "Perfect for casual browsing",
-  },
-
-  {
-    id: "2",
-    name: "Basic 50 Mbps",
-    speed: "50 Mbps",
-    price: "1499",
-    features: ["Download: 50 Mbps", "Upload: 50 Mbps", "Unlimited data"],
-    description: "Perfect for casual browsing",
-  },
-  {
-    id: "3",
-    name: "Fiber 100 Mbps",
-    speed: "100 Mbps",
-    price: "2499",
-    features: ["Download: 100 Mbps", "Upload: 100 Mbps", "Unlimited data"],
-    description: "Best for heavy users and smart homes",
-  },
-];
+import { PLANS } from "@/constants";
+import type { Plan } from "@/models/Plan";
 
 const BrowsePlansPage = () => {
   const { user } = useAuth();
   const [viewedPlan, setViewedPlan] = useState<Plan | null>(null);
 
-  const { useSelect: subscriptionSelect, useInsert: subscriptionInsert } =
-    useDBOperationsLocked<Subscription>("Subscription");
+  const {
+    useSelect: subscriptionSelect,
+    useInsert: subscriptionInsert,
+    useUpdate: subscriptionUpdate,
+  } = useDBOperationsLocked<Subscription>("Subscription");
 
   const { data: currentSubscriptions } = subscriptionSelect({
-    firebaseOptions: { filterField: "userId", value: user.id },
+    firebaseOptions: {
+      filterField: ["userId", "status"],
+      value: [user.id, "Active"],
+    },
   });
   let currentPlan: Plan | null = null;
 
-  if (currentSubscriptions != undefined) {
-    currentPlan = plans.filter(
+  let pendingBalance = false;
+  if (currentSubscriptions != undefined && currentSubscriptions.length > 0) {
+    currentPlan = PLANS.filter(
       (v) => v.id == currentSubscriptions[0].planId,
     )[0];
+
+    pendingBalance = Number(currentSubscriptions[0].balance) > 0;
   }
 
   async function handleConfirmPlan(confirmedPlan: Plan) {
     const currentDay = toDate(getCurrentDateTimeString());
 
     if (currentDay != null && confirmedPlan != null) {
+      if (
+        currentSubscriptions != undefined &&
+        currentSubscriptions.length > 0
+      ) {
+        const currentSubscription = currentSubscriptions[0];
+        subscriptionUpdate.run({
+          field: "id",
+          value: currentSubscription.id,
+          updates: { status: "Disabled" },
+        });
+      }
+
       currentDay.setDate(currentDay.getDate() + 30);
 
-      alert(currentDay);
       const data = {
         userId: user.id,
         planId: confirmedPlan.id,
@@ -91,7 +84,7 @@ const BrowsePlansPage = () => {
       </p>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {plans.map((plan) => (
+        {PLANS.map((plan) => (
           <div
             key={plan.id}
             className="overflow-hidden rounded-xl bg-white shadow-md transition-all hover:shadow-xl"
@@ -127,7 +120,22 @@ const BrowsePlansPage = () => {
               >
                 <DialogTrigger asChild>
                   <button
-                    onClick={() => setViewedPlan(plan)}
+                    disabled={subscriptionInsert.isLocked}
+                    onClick={() => {
+                      if (
+                        currentSubscriptions != undefined &&
+                        currentSubscriptions.length > 0
+                      ) {
+                        if (pendingBalance) {
+                          alert(
+                            "You have pending balance in current subscription, please complete any remaining balance.",
+                          );
+                          return;
+                        }
+                      }
+
+                      setViewedPlan(plan);
+                    }}
                     className={`w-full rounded-lg py-3 font-medium transition ${
                       currentPlan?.id === plan.id
                         ? "bg-green-600 text-white hover:bg-green-700"
@@ -262,6 +270,7 @@ const BrowsePlansPage = () => {
             You have selected <strong>{currentPlan.name}</strong> at ₱
             {currentPlan.price}/month.
           </p>
+          <p className="text-xs text-red-800"></p>
         </div>
       )}
     </div>

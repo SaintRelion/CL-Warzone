@@ -1,4 +1,4 @@
-import type { Installation } from "@/models/installation";
+import type { Installation } from "@/models/Installation";
 import {
   firebaseRegister,
   apiRegister,
