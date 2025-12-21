@@ -8,6 +8,7 @@ interface SupportTicket {
   priority: string;
   date: string;
   description: string;
+  images?: string[];
 }
 
 const SupportTicketsPage = () => {
@@ -21,6 +22,7 @@ const SupportTicketsPage = () => {
       date: "2024-11-25",
       description:
         "Internet speed drops significantly during peak hours. Unable to stream or attend meetings.",
+      images: [],
     },
   ]);
 
@@ -29,7 +31,25 @@ const SupportTicketsPage = () => {
   const [service, setService] = useState("Home Fiber");
   const [priority, setPriority] = useState("medium");
   const [description, setDescription] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
+  /* ===================== IMAGE HANDLER ===================== */
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const previews = Array.from(files).map((file) =>
+      URL.createObjectURL(file),
+    );
+
+    setImages((prev) => [...prev, ...previews]);
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  /* ===================== CREATE TICKET ===================== */
   const createTicket = () => {
     if (!issueType || !description)
       return alert("Please complete all required fields.");
@@ -44,6 +64,7 @@ const SupportTicketsPage = () => {
         status: "open",
         date: new Date().toISOString().split("T")[0],
         description,
+        images,
       },
     ]);
 
@@ -51,6 +72,7 @@ const SupportTicketsPage = () => {
     setService("Home Fiber");
     setPriority("medium");
     setDescription("");
+    setImages([]);
   };
 
   /* ===================== HELPERS ===================== */
@@ -144,65 +166,93 @@ const SupportTicketsPage = () => {
         </div>
 
         <textarea
-          placeholder="Describe the problem in detail (when it happens, how often, affected devices, etc.)"
+          placeholder="Describe the problem in detail"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="mt-4 w-full rounded border p-3"
           rows={4}
         />
 
+        {/* ===================== IMAGE UPLOAD ===================== */}
+        <div className="mt-5 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+          <p className="mb-2 text-sm font-semibold text-gray-700">
+            Attach Images (Optional)
+          </p>
+
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            className="block w-full text-sm"
+          />
+
+          {images.length > 0 && (
+            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+              {images.map((img, index) => (
+                <div
+                  key={index}
+                  className="relative h-20 overflow-hidden rounded-lg border"
+                >
+                  <img
+                    src={img}
+                    alt="preview"
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    onClick={() => removeImage(index)}
+                    className="absolute right-1 top-1 rounded-full bg-red-600 px-1 text-xs text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <button
           onClick={createTicket}
-          className="mt-4 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+          className="mt-6 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
         >
           Submit Ticket
         </button>
       </div>
 
-      {/* ===================== TICKETS LIST ===================== */}
+      {/* ===================== TICKET LIST ===================== */}
       <div className="space-y-4">
         {tickets.map((t) => (
           <div
             key={t.id}
             className="rounded-xl bg-white p-6 shadow hover:shadow-md"
           >
-            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold">{t.issueType}</h3>
-                <p className="text-sm text-gray-600">{t.description}</p>
+            <h3 className="text-lg font-bold">{t.issueType}</h3>
+            <p className="text-sm text-gray-600">{t.description}</p>
 
-                <div className="flex flex-wrap gap-2">
-                  <span className={statusStyle(t.status)}>
-                    {t.status.toUpperCase()}
-                  </span>
-
-                  <span className={priorityStyle(t.priority)}>
-                    {t.priority.toUpperCase()}
-                  </span>
-
-                  <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
-                    {t.service}
-                  </span>
-
-                  <span className="text-xs text-gray-500">
-                    Created: {t.date}
-                  </span>
-                </div>
-              </div>
-
-              <button className="self-start text-sm font-medium text-indigo-600 hover:underline">
-                View Details
-              </button>
+            <div className="mt-2 flex gap-2">
+              <span className={statusStyle(t.status)}>
+                {t.status.toUpperCase()}
+              </span>
+              <span className={priorityStyle(t.priority)}>
+                {t.priority.toUpperCase()}
+              </span>
             </div>
+
+            {t.images && t.images.length > 0 && (
+              <div className="mt-3 grid grid-cols-4 gap-2">
+                {t.images.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    className="h-16 w-full rounded-lg border object-cover"
+                    alt="attachment"
+                  />
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
-
-      {tickets.length === 0 && (
-        <div className="rounded-xl bg-gray-50 p-8 text-center text-gray-600">
-          No support tickets found.
-        </div>
-      )}
     </div>
   );
 };
