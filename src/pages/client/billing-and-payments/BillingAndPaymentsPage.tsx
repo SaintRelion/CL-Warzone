@@ -207,60 +207,62 @@ const BillingAndPaymentsPage = () => {
         </div>
       )}
 
-      {/* ===================== PAYMENT HISTORY ===================== */}
-      <div className="rounded-xl bg-white p-4 shadow sm:p-6">
-        <h3 className="mb-4 text-lg font-semibold">Payment History</h3>
+        {/* ===================== PAYMENT HISTORY ===================== */}
+        <div className="rounded-xl bg-white p-4 shadow sm:p-6">
+          <h3 className="mb-4 text-lg font-semibold">Payment History</h3>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-[640px] w-full text-sm">
-            <thead className="border-b bg-gray-50">
-              <tr>
-                <th className="px-3 py-2 text-left">Date</th>
-                <th className="px-3 py-2 text-left">Description</th>
-                <th className="px-3 py-2 text-left">Amount</th>
-                <th className="px-3 py-2 text-left">Status</th>
-                <th className="px-3 py-2 text-right">Invoice</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedPaymentHistory.length === 0 ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-[640px] w-full text-sm">
+              <thead className="border-b bg-gray-50">
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-gray-500">
-                    No payment history
-                  </td>
+                  <th className="px-3 py-2 text-left">Date</th>
+                  <th className="px-3 py-2 text-left">Description</th>
+                  <th className="px-3 py-2 text-left">Amount</th>
+                  <th className="px-3 py-2 text-left">Status</th>
+                  <th className="px-3 py-2 text-right">Invoice</th>
                 </tr>
-              ) : (
-                sortedPaymentHistory.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-b last:border-0 hover:bg-gray-50"
-                  >
-                    <td className="px-3 py-2">
-                      {formatReadableDateTime(p.createdAt)}
-                    </td>
-                    <td className="px-3 py-2">{p.description}</td>
-                    <td className="px-3 py-2 font-medium">₱{p.amount}</td>
-                    <td className="px-3 py-2 capitalize">{p.status}</td>
-                    <td className="px-3 py-2 text-right text-indigo-600">
-                      {p.invoice}
+              </thead>
+              <tbody>
+                {sortedPaymentHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-gray-500">
+                      No payment history
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  sortedPaymentHistory.map((p) => (
+                    <tr
+                      key={p.id}
+                      className="border-b last:border-0 hover:bg-gray-50"
+                    >
+                      <td className="px-3 py-2">
+                        {formatReadableDateTime(p.createdAt)}
+                      </td>
+                      <td className="px-3 py-2">{p.description}</td>
+                      <td className="px-3 py-2 font-medium">₱{p.amount}</td>
+                      <td className="px-3 py-2 capitalize">{p.status}</td>
+                      <td className="px-3 py-2 text-right text-indigo-600">
+                        {p.invoice}
+                      </td>
+                    </tr>
+                    ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+    );
+  };
+
+  
+
+  /* ===================== SMALL INFO CARD ===================== */
+  const Info = ({ label, value }: { label: string; value: string }) => (
+    <div className="rounded-lg bg-white/10 p-4">
+      <p className="text-xs text-indigo-200">{label}</p>
+      <p className="font-semibold">{value}</p>
     </div>
   );
-};
-
-/* ===================== SMALL INFO CARD ===================== */
-const Info = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-lg bg-white/10 p-4">
-    <p className="text-xs text-indigo-200">{label}</p>
-    <p className="font-semibold">{value}</p>
-  </div>
-);
 
 export default BillingAndPaymentsPage;
