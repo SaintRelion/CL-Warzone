@@ -8,3 +8,14 @@ i {
   box-shadow: none !important;
   display: inline-block; /* optional, depends on layout */
 }
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .shadow,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+}
