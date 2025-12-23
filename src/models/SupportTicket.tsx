@@ -1,10 +1,9 @@
-export interface PaymentHistory {
+export interface SupportTicket {
   id: string;
   userId: string;
+  title: string;
   description: string;
-  method: string;
-  amount: string;
+  priority: string;
   status: string;
-  invoice: string;
   createdAt: string;
 }

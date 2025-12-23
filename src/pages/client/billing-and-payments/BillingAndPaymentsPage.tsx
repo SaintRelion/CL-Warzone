@@ -17,7 +17,12 @@ const BillingAndPaymentsPage = () => {
 
   const { useSelect: paymentHistorySelect, useInsert: paymentHistoryInsert } =
     useDBOperationsLocked<PaymentHistory>("PaymentHistory", false, false);
-  const { data: paymentHistory } = paymentHistorySelect();
+  const { data: paymentHistory } = paymentHistorySelect({
+    firebaseOptions: {
+      filterField: ["userId"],
+      value: [user.id],
+    },
+  });
 
   const sortedPaymentHistory =
     paymentHistory != undefined && paymentHistory.length > 0
@@ -67,7 +72,7 @@ const BillingAndPaymentsPage = () => {
       randomAmount = Math.min(randomAmount, balance);
 
       const remainingBalance = balance - randomAmount;
-      const status = remainingBalance > 0 ? "pending" : "complete";
+      const status = remainingBalance > 0 ? "partial" : "paid";
 
       const transaction = {
         userId: user.id,
@@ -251,9 +256,9 @@ const BillingAndPaymentsPage = () => {
                     <td className="px-4 py-4">
                       <span
                         className={`rounded px-2 py-1 text-xs font-semibold capitalize ${
-                          payment.status === "complete"
+                          payment.status === "paid"
                             ? "bg-green-100 text-green-800"
-                            : payment.status === "pending"
+                            : payment.status === "partial"
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-red-100 text-red-800"
                         }`}

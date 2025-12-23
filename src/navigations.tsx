@@ -13,9 +13,12 @@ import AccountPage from "./pages/client/account/AccountPage";
 import FAQPage from "./pages/client/faq/FAQPage";
 import RegisterPage from "./pages/authentication/RegisterPage";
 import TicketsPage from "./pages/admin/tickets/TicketsPage";
-import { ProtectedRoute } from "@saintrelion/auth-lib";
+import { defaultRedirects, ProtectedRoute } from "@saintrelion/auth-lib";
 
 // ✅ Register protected routes (with layout)
+defaultRedirects["admin"] = "/admin";
+defaultRedirects["client"] = "/";
+
 registerGroupAppRoutes({
   layout: (
     <ProtectedRoute>
@@ -32,7 +35,7 @@ registerGroupAppRoutes({
     // ADMIN
     {
       index: true,
-      path: "/admin/",
+      path: "/admin",
       element: <AdminDashboardPage />,
       label: "Dashboard",
       iconClassName: "fa-solid fa-house text-lg",
