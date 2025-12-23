@@ -15,6 +15,7 @@ import { useState } from "react";
 const BillingAndPaymentsPage = () => {
   const { user } = useAuth();
 
+  /* ===================== PAYMENT HISTORY ===================== */
   const { useSelect: paymentHistorySelect, useInsert: paymentHistoryInsert } =
     useDBOperationsLocked<PaymentHistory>("PaymentHistory", false, false);
   const { data: paymentHistory } = paymentHistorySelect({
@@ -25,18 +26,15 @@ const BillingAndPaymentsPage = () => {
   });
 
   const sortedPaymentHistory =
-    paymentHistory != undefined && paymentHistory.length > 0
-      ? paymentHistory.sort((a, b) => {
+    paymentHistory && paymentHistory.length > 0
+      ? [...paymentHistory].sort((a, b) => {
           const dateA = toDate(a.createdAt)?.getTime() ?? 0;
           const dateB = toDate(b.createdAt)?.getTime() ?? 0;
-
-          // Sort descending (newest first)
           return dateB - dateA;
         })
       : [];
 
-  const [showGcashModal, setShowGcashModal] = useState(false);
-
+  /* ===================== SUBSCRIPTION ===================== */
   const { useSelect: subscriptionSelect, useUpdate: subscriptionUpdate } =
     useDBOperationsLocked<Subscription>("Subscription", false, false);
 
@@ -48,139 +46,136 @@ const BillingAndPaymentsPage = () => {
   });
 
   const currentSubscription =
-    currentSubscriptions != undefined && currentSubscriptions.length > 0
+    currentSubscriptions && currentSubscriptions.length > 0
       ? currentSubscriptions[0]
       : null;
-  let currentPlan: Plan | null = null;
 
-  if (currentSubscription) {
-    currentPlan = PLANS.filter((v) => v.id == currentSubscription.planId)[0];
-  }
+  const currentPlan: Plan | null = currentSubscription
+    ? (PLANS.find((p) => p.id === currentSubscription.planId) ?? null)
+    : null;
 
+  /* ===================== UI STATE ===================== */
+  const [showGcashModal, setShowGcashModal] = useState(false);
+
+  /* ===================== DOWNLOAD QR ===================== */
+  const downloadQRCode = () => {
+    const link = document.createElement("a");
+    link.href = "/images/gcash.png";
+    link.download = "gcash-qr.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("GCash QR Code downloaded");
+  };
+
+  /* ===================== HANDLE PAYMENT ===================== */
   async function handlePayment() {
-    if (currentSubscription && currentPlan) {
-      const balance = Number(currentSubscription.balance);
-      if (balance <= 0) {
-        alert("All balance paid");
-        return;
-      }
+    if (!currentSubscription || !currentPlan) return;
 
-      const randomBetween = (min: number, max: number) =>
-        Math.floor(Math.random() * (max - min + 1)) + min;
-
-      let randomAmount = randomBetween(100, 800);
-      randomAmount = Math.min(randomAmount, balance);
-
-      const remainingBalance = balance - randomAmount;
-      const status = remainingBalance > 0 ? "partial" : "paid";
-
-      const transaction = {
-        userId: user.id,
-        description: currentPlan.name,
-        amount: randomAmount.toString(),
-        status,
-        invoice: `INV-${Date.now()}`,
-      };
-
-      await paymentHistoryInsert.run(transaction);
-      await subscriptionUpdate.run({
-        field: "id",
-        value: currentSubscription.id,
-        updates: { balance: remainingBalance.toString() },
-      });
-
-      toast.success(`PHP ${randomAmount}: recorded successfully.`);
+    const balance = Number(currentSubscription.balance);
+    if (balance <= 0) {
+      toast.info("All balance paid");
+      return;
     }
+
+    const randomBetween = (min: number, max: number) =>
+      Math.floor(Math.random() * (max - min + 1)) + min;
+
+    let randomAmount = randomBetween(100, 800);
+    randomAmount = Math.min(randomAmount, balance);
+
+    const remainingBalance = balance - randomAmount;
+    const status = remainingBalance > 0 ? "partial" : "paid";
+
+    await paymentHistoryInsert.run({
+      userId: user.id,
+      description: currentPlan.name,
+      amount: randomAmount.toString(),
+      status,
+      invoice: `INV-${Date.now()}`,
+    });
+
+    await subscriptionUpdate.run({
+      field: "id",
+      value: currentSubscription.id,
+      updates: { balance: remainingBalance.toString() },
+    });
+
+    toast.success(`PHP ${randomAmount} recorded`);
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-4 sm:p-6">
+      {/* ===================== HEADER ===================== */}
       <div>
-        <h2 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
+        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
           Billing & Payments
         </h2>
-        <p className="text-gray-600">
-          Manage your subscription and payment methods
+        <p className="text-sm text-gray-500">
+          Manage your subscription and payments
         </p>
       </div>
 
-      {/* Next Due Date Card */}
-      <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-lg md:p-8">
+      {/* ===================== SUBSCRIPTION CARD ===================== */}
+      <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-5 text-white">
         {currentSubscription && currentPlan ? (
-          <>
-            <h3 className="mb-4 text-2xl font-bold">Current Subscription</h3>
-            <div className="mb-4 grid grid-cols-2 items-center rounded-lg bg-white/10 p-4 backdrop-blur-sm">
-              <div>
-                <p className="mb-1 text-sm text-indigo-100">Plan</p>
-                <p className="text-2xl font-bold">{currentPlan.name}</p>
-              </div>
+          <div className="space-y-5">
+            <h3 className="text-lg font-semibold">Current Subscription</h3>
 
-              <div>
-                <p className="mb-1 text-sm text-indigo-100">Status</p>
-                <div className="flex items-center gap-2">
-                  <span className="h-3 w-3 rounded-full bg-green-400"></span>
-                  <p className="text-lg font-semibold">
-                    {currentSubscription.status}
-                  </p>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Info label="Plan" value={currentPlan.name} />
+              <Info label="Status" value={currentSubscription.status} />
+              <Info
+                label="Next Due Date"
+                value={formatReadableDate(currentSubscription.nextBillingDate)}
+              />
+              <Info
+                label="Outstanding Balance"
+                value={`₱${currentSubscription.balance}`}
+              />
             </div>
-            <h3 className="mb-4 text-2xl font-bold">Next Due Date</h3>
-            <div className="flex items-center justify-between rounded-lg bg-white/10 p-4 backdrop-blur-sm">
-              <div>
-                <p className="text-sm text-indigo-200">
-                  Your next bill is due on
-                </p>
-                <p className="mt-1 text-2xl font-bold text-white">
-                  {formatReadableDate(currentSubscription.nextBillingDate)}
-                </p>
-              </div>
 
-              <div className="rounded-lg bg-white/20 px-4 py-2 font-semibold text-white">
-                ₱{currentSubscription.balance}
-              </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={handlePayment}
+                className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 sm:w-auto"
+              >
+                Pay via Oxygen
+              </button>
+
+              <button
+                onClick={() => setShowGcashModal(true)}
+                className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 sm:w-auto"
+              >
+                Pay via GCash
+              </button>
             </div>
-            {/* Pay Now Button */}
-            <button
-              onClick={() => handlePayment()}
-              disabled={
-                subscriptionUpdate.isLocked || paymentHistoryInsert.isLocked
-              }
-              className="mt-6 w-full rounded-lg bg-white px-6 py-2 font-semibold text-indigo-700 shadow transition hover:bg-indigo-100 md:w-auto"
-            >
-              Pay Now via oxygen
-            </button>{" "}
-            <button
-              onClick={() => setShowGcashModal(true)}
-              className="mt-6 w-full rounded-lg bg-white px-6 py-2 font-semibold text-indigo-700 shadow transition hover:bg-indigo-100 md:w-auto"
-            >
-              Pay Now via GCash
-            </button>{" "}
-          </>
+          </div>
         ) : (
-          <h3 className="text-2xl font-bold">No Active Subscription</h3>
+          <p className="text-center font-semibold">No Active Subscription</p>
         )}
       </div>
 
-      {/* GCash Modal */}
+      {/* ===================== GCASH MODAL ===================== */}
       {showGcashModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
-            <h2 className="mb-2 text-xl font-bold text-indigo-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
+            <h2 className="text-center text-lg font-semibold text-indigo-700">
               GCash Payment
             </h2>
-            <p className="mb-4 text-gray-600">
+            <p className="mb-4 text-center text-sm text-gray-500">
               Scan this QR using your GCash app
             </p>
 
             <img
-              src="/gcash-qr.png"
+              src="/images/gcash.png"
               alt="GCash QR Code"
-              className="mx-auto mb-4 w-56 rounded-lg shadow"
+              className="mx-auto mb-4 w-48 rounded-lg shadow sm:w-56"
             />
 
-            <div className="mb-6 text-left text-sm text-gray-700">
-              <p className="mb-1 font-semibold text-indigo-700">How to pay:</p>
+            {/* ===== HOW TO PAY (KEPT) ===== */}
+            <div className="mb-4 rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
+              <p className="mb-2 font-semibold text-indigo-700">How to pay:</p>
               <ol className="ml-5 list-decimal space-y-1">
                 <li>Open the GCash app</li>
                 <li>
@@ -190,15 +185,25 @@ const BillingAndPaymentsPage = () => {
                   Select <strong>Upload QR</strong> or scan directly
                 </li>
                 <li>
-                  Enter the exact amount: <strong>₱1,999</strong>
+                  Enter the exact amount:
+                  <strong className="ml-1">
+                    ₱{currentSubscription?.balance}
+                  </strong>
                 </li>
                 <li>Confirm payment</li>
               </ol>
             </div>
 
             <button
+              onClick={downloadQRCode}
+              className="mb-3 w-full rounded-lg border border-indigo-600 px-4 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
+            >
+              Download QR Code
+            </button>
+
+            <button
               onClick={() => setShowGcashModal(false)}
-              className="w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700"
+              className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
             >
               Close
             </button>
@@ -206,70 +211,42 @@ const BillingAndPaymentsPage = () => {
         </div>
       )}
 
-      {/* Payment History */}
-      <div className="rounded-xl bg-white p-6 shadow-md md:p-8">
-        <h3 className="mb-6 text-2xl font-bold text-gray-900">
-          Payment History
-        </h3>
+      {/* ===================== PAYMENT HISTORY ===================== */}
+      <div className="rounded-xl bg-white p-4 shadow sm:p-6">
+        <h3 className="mb-4 text-lg font-semibold">Payment History</h3>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-sm md:text-base">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                  Date
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                  Description
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                  Amount
-                </th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-right font-semibold text-gray-700">
-                  Invoice
-                </th>
+          <table className="w-full min-w-[640px] text-sm">
+            <thead className="border-b bg-gray-50">
+              <tr>
+                <th className="px-3 py-2 text-left">Date</th>
+                <th className="px-3 py-2 text-left">Description</th>
+                <th className="px-3 py-2 text-left">Amount</th>
+                <th className="px-3 py-2 text-left">Status</th>
+                <th className="px-3 py-2 text-right">Invoice</th>
               </tr>
             </thead>
             <tbody>
-              {sortedPaymentHistory == undefined ||
-              sortedPaymentHistory.length == 0 ? (
+              {sortedPaymentHistory.length === 0 ? (
                 <tr>
-                  <td className="pt-4">No Payment history</td>
+                  <td colSpan={5} className="py-6 text-center text-gray-500">
+                    No payment history
+                  </td>
                 </tr>
               ) : (
-                sortedPaymentHistory.map((payment) => (
+                sortedPaymentHistory.map((p) => (
                   <tr
-                    key={payment.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    key={p.id}
+                    className="border-b last:border-0 hover:bg-gray-50"
                   >
-                    <td className="px-4 py-4 text-gray-900">
-                      {formatReadableDateTime(payment.createdAt)}
+                    <td className="px-3 py-2">
+                      {formatReadableDateTime(p.createdAt)}
                     </td>
-                    <td className="px-4 py-4 text-gray-600">
-                      {payment.description}
-                    </td>
-                    <td className="px-4 py-4 font-medium text-gray-900">
-                      ₱{payment.amount.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-4">
-                      <span
-                        className={`rounded px-2 py-1 text-xs font-semibold capitalize ${
-                          payment.status === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : payment.status === "partial"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {payment.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      <button className="text-xs font-medium text-indigo-600 hover:text-indigo-700 md:text-sm">
-                        Download
-                      </button>
+                    <td className="px-3 py-2">{p.description}</td>
+                    <td className="px-3 py-2 font-medium">₱{p.amount}</td>
+                    <td className="px-3 py-2 capitalize">{p.status}</td>
+                    <td className="px-3 py-2 text-right text-indigo-600">
+                      {p.invoice}
                     </td>
                   </tr>
                 ))
@@ -281,5 +258,13 @@ const BillingAndPaymentsPage = () => {
     </div>
   );
 };
+
+/* ===================== SMALL INFO CARD ===================== */
+const Info = ({ label, value }: { label: string; value: string }) => (
+  <div className="rounded-lg bg-white/10 p-4">
+    <p className="text-xs text-indigo-200">{label}</p>
+    <p className="font-semibold">{value}</p>
+  </div>
+);
 
 export default BillingAndPaymentsPage;

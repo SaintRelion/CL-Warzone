@@ -105,7 +105,7 @@ const RegisterPage = () => {
               inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
             />
             <RenderFormField
-              field={{ label: "City *", type: "text", name: "city", placeholder: "City/Municipality" }}
+              field={{ label: "City/Municapality *", type: "text", name: "city/municipality", placeholder: "City/Municipality" }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
               inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
             />

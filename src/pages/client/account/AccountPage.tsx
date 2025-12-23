@@ -8,10 +8,9 @@ import {
 
 const AccountPage = () => {
   const { user, setUser } = useAuth();
-
   const updateUser = useUpdateUser();
-
   const [editMode, setEditMode] = useState(false);
+
   const information: Record<string, string> = {
     firstName: user.firstName,
     lastName: user.lastName,
@@ -29,84 +28,84 @@ const AccountPage = () => {
       info: data,
       uniqueFields: ["emailAddress"],
     });
-    setEditMode(false);
 
+    setEditMode(false);
     if (success) await updateSession(data, setUser);
   }
 
   return (
-    <RenderForm wrapperClass="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
-            Account Information
-          </h2>
-          <p className="mt-1 text-gray-600">
-            Manage your personal and contact details
-          </p>
+    <RenderForm wrapperClass="space-y-10 max-w-5xl mx-auto">
+      {/* PAGE HEADER */}
+      <div className="flex flex-col gap-2">
+        <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+          Account Information
+        </h2>
+        <p className="text-gray-600">
+          View and update your personal and contact details
+        </p>
+      </div>
+
+      {/* ACCOUNT CARD */}
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+        {/* Card Header */}
+        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Personal Details
+          </h3>
+
+          {!editMode ? (
+            <button
+              onClick={() => setEditMode(true)}
+              className="rounded-lg border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50"
+            >
+              Edit
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <RenderFormButton
+                onSubmit={handleSubmit}
+                isDisabled={updateUser.isLocked}
+                buttonLabel="Save"
+                buttonClassName="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-green-700"
+              />
+              <button
+                disabled={updateUser.isLocked}
+                onClick={() => setEditMode(false)}
+                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Edit / Save Buttons */}
-        {!editMode ? (
-          <button
-            onClick={() => setEditMode(true)}
-            className="rounded-lg bg-indigo-600 px-5 py-2 font-semibold text-white shadow hover:bg-indigo-700"
-          >
-            Edit Information
-          </button>
-        ) : (
-          <div className="flex gap-3">
-            <RenderFormButton
-              onSubmit={handleSubmit}
-              isDisabled={updateUser.isLocked}
-              buttonLabel="Save Changes"
-              buttonClassName="rounded-lg bg-green-600 px-5 py-2 font-semibold text-white shadow hover:bg-green-700"
-            />
-            <button
-              disabled={updateUser.isLocked}
-              onClick={() => {
-                setEditMode(false);
-              }}
-              className="rounded-lg bg-gray-200 px-5 py-2 font-semibold text-gray-800 hover:bg-gray-300"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
-      {/* Info Card */}
-      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {/* Card Content */}
+        <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2">
           {[
             { label: "First Name", name: "firstName" },
             { label: "Last Name", name: "lastName" },
             { label: "Email Address", name: "emailAddress" },
-            { label: "Phone Number", name: "phoneNumber" },
+            { label: "Password", name: "passwordHash" },
             { label: "Street Address", name: "streetAddress", full: true },
-            { label: "City", name: "city" },
+             { label: "Phone Number", name: "phoneNumber" },
+            { label: "City / Municipality", name: "city" },
             { label: "ZIP Code", name: "zipCode" },
             { label: "Service Area", name: "serviceArea" },
           ].map((field) => (
             <div key={field.name} className={field.full ? "sm:col-span-2" : ""}>
-              <label className="mb-1.5 block text-sm font-semibold tracking-wide">
-                <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent drop-shadow-sm">
-                  {field.label}
-                </span>
-              </label>
+              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">
+                {field.label}
+              </p>
 
               {!editMode ? (
-                <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-lg break-words text-gray-900 shadow-sm">
-                  {information[field.name]}
-                </p>
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-base text-gray-900">
+                  {information[field.name] || "—"}
+                </div>
               ) : (
                 <RenderFormField
-                  field={{
-                    name: field.name,
-                    type: "text",
-                  }}
+                  field={{ name: field.name, type: "text" }}
                   defaultValue={information[field.name]}
-                  inputClassName="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-md transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+                  inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
                 />
               )}
             </div>
@@ -114,14 +113,18 @@ const AccountPage = () => {
         </div>
       </div>
 
-      {/* DELETE ACCOUNT */}
-      <div className="border-t pt-6">
-        <button className="rounded-lg bg-red-600 px-5 py-2 font-semibold text-white shadow hover:bg-red-700">
+      {/* DANGER ZONE */}
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6">
+        <h4 className="text-sm font-semibold text-red-700">
+          Danger Zone
+        </h4>
+        <p className="mt-1 text-sm text-red-600">
+          Deleting your account is permanent and cannot be undone.
+        </p>
+
+        <button className="mt-4 rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-red-700">
           Delete Account
         </button>
-        <p className="mt-1 text-sm text-red-500">
-          Warning: This action cannot be undone.
-        </p>
       </div>
     </RenderForm>
   );

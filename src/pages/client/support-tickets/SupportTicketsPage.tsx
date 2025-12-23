@@ -2,175 +2,257 @@ import { useState } from "react";
 
 interface SupportTicket {
   id: number;
-  title: string;
+  issueType: string;
+  service: string;
   status: string;
-  date: string;
   priority: string;
+  date: string;
   description: string;
+  images?: string[];
 }
 
 const SupportTicketsPage = () => {
-  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([
+  const [tickets, setTickets] = useState<SupportTicket[]>([
     {
       id: 1,
-      title: "Slow internet speed",
+      issueType: "Slow Internet Speed",
+      service: "Home Fiber",
       status: "open",
-      date: "2024-11-25",
       priority: "high",
-      description: "Experiencing slower speeds than expected",
+      date: "2024-11-25",
+      description:
+        "Internet speed drops significantly during peak hours. Unable to stream or attend meetings.",
+      images: [],
     },
   ]);
 
-  // Form state
-  const [newTitle, setNewTitle] = useState("");
-  const [newPriority, setNewPriority] = useState("low");
-  const [newDescription, setNewDescription] = useState("");
+  /* ===================== FORM STATE ===================== */
+  const [issueType, setIssueType] = useState("");
+  const [service, setService] = useState("Home Fiber");
+  const [priority, setPriority] = useState("medium");
+  const [description, setDescription] = useState("");
+  const [images, setImages] = useState<string[]>([]);
 
-  const createTicket = () => {
-    if (!newTitle || !newDescription) return alert("Fill all fields!");
+  /* ===================== IMAGE HANDLER ===================== */
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
 
-    const newTicket: SupportTicket = {
-      id: supportTickets.length + 1,
-      title: newTitle,
-      status: "open",
-      date: new Date().toISOString().split("T")[0],
-      priority: newPriority,
-      description: newDescription,
-    };
+    const previews = Array.from(files).map((file) =>
+      URL.createObjectURL(file),
+    );
 
-    setSupportTickets([...supportTickets, newTicket]);
-
-    // clear form
-    setNewTitle("");
-    setNewPriority("low");
-    setNewDescription("");
+    setImages((prev) => [...prev, ...previews]);
   };
 
-  const getTicketStatusColor = (status: string): string => {
-    switch (status.toLowerCase()) {
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  /* ===================== CREATE TICKET ===================== */
+  const createTicket = () => {
+    if (!issueType || !description)
+      return alert("Please complete all required fields.");
+
+    setTickets([
+      ...tickets,
+      {
+        id: tickets.length + 1,
+        issueType,
+        service,
+        priority,
+        status: "open",
+        date: new Date().toISOString().split("T")[0],
+        description,
+        images,
+      },
+    ]);
+
+    setIssueType("");
+    setService("Home Fiber");
+    setPriority("medium");
+    setDescription("");
+    setImages([]);
+  };
+
+  /* ===================== HELPERS ===================== */
+  const badge = (bg: string, text: string) =>
+    `rounded-full px-3 py-1 text-xs font-semibold ${bg} ${text}`;
+
+  const statusStyle = (status: string) => {
+    switch (status) {
       case "open":
-        return "bg-green-100 text-green-700";
+        return badge("bg-green-100", "text-green-700");
       case "in-progress":
-        return "bg-yellow-100 text-yellow-700";
+        return badge("bg-yellow-100", "text-yellow-700");
       case "resolved":
-        return "bg-blue-100 text-blue-700";
-      case "closed":
-        return "bg-gray-200 text-gray-700";
+        return badge("bg-blue-100", "text-blue-700");
       default:
-        return "bg-gray-100 text-gray-600";
+        return badge("bg-gray-100", "text-gray-700");
     }
   };
 
-  const getPriorityColor = (priority: string): string => {
-    switch (priority.toLowerCase()) {
+  const priorityStyle = (priority: string) => {
+    switch (priority) {
       case "low":
-        return "bg-blue-100 text-blue-700";
+        return badge("bg-blue-100", "text-blue-700");
       case "medium":
-        return "bg-yellow-100 text-yellow-700";
+        return badge("bg-yellow-100", "text-yellow-700");
       case "high":
-        return "bg-red-100 text-red-700";
+        return badge("bg-red-100", "text-red-700");
       case "urgent":
-        return "bg-purple-100 text-purple-700";
+        return badge("bg-purple-100", "text-purple-700");
       default:
-        return "bg-gray-100 text-gray-600";
+        return badge("bg-gray-100", "text-gray-700");
     }
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 p-4 sm:p-6">
+      {/* ===================== HEADER ===================== */}
       <div>
-        <h2 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
-          Support Tickets ARMAN
+        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+          Internet Support Tickets
         </h2>
-        <p className="text-gray-600">Track me and manage your support requests</p>
+        <p className="text-sm text-gray-600">
+          Report internet problems, service issues, and customer inquiries
+        </p>
       </div>
 
-      {/* CREATE TICKET FORM */}
-      <div className="space-y-4 rounded-xl bg-white p-6 shadow-md">
-        <h3 className="text-xl font-semibold">Create New Ticket</h3>
+      {/* ===================== CREATE TICKET ===================== */}
+      <div className="rounded-xl bg-white p-6 shadow">
+        <h3 className="mb-4 text-lg font-semibold">
+          Report an Internet Issue
+        </h3>
 
-        <input
-          type="text"
-          placeholder="Enter Title"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          className="w-full rounded border p-2"
-        />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <select
+            value={issueType}
+            onChange={(e) => setIssueType(e.target.value)}
+            className="rounded border p-2"
+          >
+            <option value="">Select Issue Type</option>
+            <option>Slow Internet Speed</option>
+            <option>No Internet Connection</option>
+            <option>Intermittent Connection</option>
+            <option>Frequent Disconnections</option>
+            <option>High Latency / Ping</option>
+            <option>Billing Inquiry</option>
+            <option>Installation / Activation</option>
+            <option>Router / Modem Issue</option>
+          </select>
 
-        <select
-          value={newPriority}
-          onChange={(e) => setNewPriority(e.target.value)}
-          className="w-full rounded border p-2"
-        >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
-        </select>
+          <select
+            value={service}
+            onChange={(e) => setService(e.target.value)}
+            className="rounded border p-2"
+          >
+            <option>Home Fiber</option>
+            <option>Business Fiber</option>
+            <option>Wireless Broadband</option>
+            <option>Mobile Data</option>
+          </select>
+
+          <select
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+            className="rounded border p-2"
+          >
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+            <option value="urgent">Urgent</option>
+          </select>
+        </div>
 
         <textarea
-          placeholder="Describe the issue"
-          value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
-          className="w-full rounded border p-2"
-        ></textarea>
+          placeholder="Describe the problem in detail"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="mt-4 w-full rounded border p-3"
+          rows={4}
+        />
+
+        {/* ===================== IMAGE UPLOAD ===================== */}
+        <div className="mt-5 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
+          <p className="mb-2 text-sm font-semibold text-gray-700">
+            Attach Images (Optional)
+          </p>
+
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            className="block w-full text-sm"
+          />
+
+          {images.length > 0 && (
+            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
+              {images.map((img, index) => (
+                <div
+                  key={index}
+                  className="relative h-20 overflow-hidden rounded-lg border"
+                >
+                  <img
+                    src={img}
+                    alt="preview"
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    onClick={() => removeImage(index)}
+                    className="absolute right-1 top-1 rounded-full bg-red-600 px-1 text-xs text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={createTicket}
-          className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+          className="mt-6 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
         >
           Submit Ticket
         </button>
       </div>
 
-      {/* TICKETS LIST */}
+      {/* ===================== TICKET LIST ===================== */}
       <div className="space-y-4">
-        {supportTickets.map((ticket) => (
+        {tickets.map((t) => (
           <div
-            key={ticket.id}
-            className="rounded-xl bg-white p-6 shadow-md hover:shadow-lg"
+            key={t.id}
+            className="rounded-xl bg-white p-6 shadow hover:shadow-md"
           >
-            <div className="flex flex-col gap-4 md:flex-row md:justify-between">
-              <div>
-                <h3 className="text-xl font-bold">{ticket.title}</h3>
-                <p className="mb-3 text-gray-600">{ticket.description}</p>
+            <h3 className="text-lg font-bold">{t.issueType}</h3>
+            <p className="text-sm text-gray-600">{t.description}</p>
 
-                <div className="flex flex-wrap gap-3">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${getTicketStatusColor(
-                      ticket.status,
-                    )}`}
-                  >
-                    {ticket.status.toUpperCase()}
-                  </span>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${getPriorityColor(
-                      ticket.priority,
-                    )}`}
-                  >
-                    {ticket.priority.toUpperCase()} PRIORITY
-                  </span>
-
-                  <span className="text-sm text-gray-600">
-                    Created: {ticket.date}
-                  </span>
-                </div>
-              </div>
-
-              <button className="font-medium text-indigo-600 hover:text-indigo-700">
-                View Details
-              </button>
+            <div className="mt-2 flex gap-2">
+              <span className={statusStyle(t.status)}>
+                {t.status.toUpperCase()}
+              </span>
+              <span className={priorityStyle(t.priority)}>
+                {t.priority.toUpperCase()}
+              </span>
             </div>
+
+            {t.images && t.images.length > 0 && (
+              <div className="mt-3 grid grid-cols-4 gap-2">
+                {t.images.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    className="h-16 w-full rounded-lg border object-cover"
+                    alt="attachment"
+                  />
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
-
-      {supportTickets.length === 0 && (
-        <div className="rounded-xl bg-gray-50 p-8 text-center text-gray-600">
-          You don't have any support tickets yet.
-        </div>
-      )}
     </div>
   );
 };
