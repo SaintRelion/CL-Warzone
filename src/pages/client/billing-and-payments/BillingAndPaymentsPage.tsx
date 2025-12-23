@@ -213,7 +213,7 @@ const BillingAndPaymentsPage = () => {
 
       {/* ===================== PAYMENT HISTORY ===================== */}
       <div className="rounded-xl bg-white p-4 shadow sm:p-6">
-        <h3 className="mb-4 text-lg font-semibold">Payment History</h3>
+        <h3 className="mb-4 text-lg font-semibold">Payment Historyiesy</h3>
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] text-sm">
