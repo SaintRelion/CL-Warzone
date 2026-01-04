@@ -51,7 +51,7 @@ registerGroupAppRoutes({
     {
       path: "/admin/billing",
       element: <BillingPage />,
-      label: "Billing & Payments",
+      label: "Bill",
       iconClassName: "fa-solid fa-receipt text-lg",
       allowedRoles: ["admin"],
     },
@@ -74,7 +74,7 @@ registerGroupAppRoutes({
     {
       path: "/billing",
       element: <BillingAndPaymentsPage />,
-      label: "Billing & Payments",
+      label: "Bill",
       allowedRoles: ["client"],
     },
     {
