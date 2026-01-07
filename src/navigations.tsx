@@ -13,6 +13,7 @@ import AccountPage from "./pages/client/account/AccountPage";
 import FAQPage from "./pages/client/faq/FAQPage";
 import RegisterPage from "./pages/authentication/RegisterPage";
 import TicketsPage from "./pages/admin/tickets/TicketsPage";
+import ActivityLogsPage from "./pages/admin/activity-logs/ActivityLogsPage";
 import { defaultRedirects, ProtectedRoute } from "@saintrelion/auth-lib";
 
 // ✅ Register protected routes (with layout)
@@ -62,6 +63,13 @@ registerGroupAppRoutes({
       iconClassName: "fa-solid fa-ticket text-lg",
       allowedRoles: ["admin"],
     },
+    {
+      path: "/admin/activity-logs",
+      element: <ActivityLogsPage />,
+      label: "Activity Logs",
+      iconClassName: "fa-solid fa-clock-rotate-left text-lg",
+      allowedRoles: ["admin"],
+    },
 
     // CLIENT
     {
@@ -95,6 +103,7 @@ registerGroupAppRoutes({
       label: "Support & FAQ",
       allowedRoles: ["client"],
     },
+    
   ],
 });
 
