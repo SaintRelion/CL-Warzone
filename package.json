@@ -22,7 +22,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@saintrelion/auth-lib": "^4.2.8",
     "@saintrelion/cache": "^1.0.1",
-    "@saintrelion/data-access-layer": "^5.0.7",
+    "@saintrelion/data-access-layer": "^5.0.9",
     "@saintrelion/forms": "^1.1.11",
     "@saintrelion/notifications": "^1.0.2",
     "@saintrelion/routers": "^2.0.0",

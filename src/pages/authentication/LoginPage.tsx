@@ -14,8 +14,8 @@ const LoginPage = () => {
 
   const handleLogin = (data: Record<string, string>) => {
     loginWithCredentials.run(
-      "emailAddress",
-      data.emailAddress,
+      "email",
+      data.email,
       data.password,
       setUser,
       (user) => {
@@ -37,7 +37,7 @@ const LoginPage = () => {
             field={{
               label: "Email Address",
               type: "email",
-              name: "emailAddress",
+              name: "email",
               placeholder: "your@gmail.com",
             }}
             labelClassName="mb-2 block text-sm font-medium text-gray-700"
