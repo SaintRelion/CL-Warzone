@@ -1,8 +1,9 @@
-import { logout } from "@saintrelion/auth-lib";
+import { useAuth } from "@saintrelion/auth-lib";
 import { renderNavItems } from "@saintrelion/routers";
 import { useState } from "react";
 
 const ClientSideBar = () => {
+  const auth = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -41,10 +42,8 @@ const ClientSideBar = () => {
 
         <div className="border-t border-gray-200 p-4">
           <button
-            onClick={() => {
-              logout(() => {
-                window.location.href = "/login";
-              });
+            onClick={async () => {
+              await auth.logout();
             }}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-3 font-medium text-white transition hover:bg-red-700"
           >

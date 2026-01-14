@@ -1,16 +1,16 @@
 import { createRoot } from "react-dom/client";
 
-import "./main.css";
-
 import { RouterProvider } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NotificationProvider } from "@saintrelion/notifications";
 import { AuthProvider } from "@saintrelion/auth-lib";
 import { router } from "./navigations";
 
+import "./main.css";
+
 import "@/lib/firebase-client";
 
-import "@/data-access-config";
+import "@/sr-config";
 
 import "@/repositories/UserRepo";
 import "@/repositories/SubscriptionRepo";

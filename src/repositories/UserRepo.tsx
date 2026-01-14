@@ -1,15 +1,10 @@
-import {
-  firebaseRegister,
-  apiRegister,
-  mockRegister,
-} from "@saintrelion/data-access-layer";
-import type { User } from "@/models/User";
+import { registerResource } from "@saintrelion/data-access-layer";
 
-// Firebase
-firebaseRegister("User");
-
-// API
-apiRegister("User", "user");
-
-// Mock
-mockRegister<User>("User", []);
+registerResource({
+  name: "user",
+  endpoint: "user/",
+  store: "User",
+  operations: {
+    list: true,
+  },
+});

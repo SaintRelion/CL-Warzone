@@ -9,29 +9,34 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@saintrelion/auth-lib";
-import { useDBOperationsLocked } from "@saintrelion/data-access-layer";
-import type { Subscription } from "@/models/Subscription";
+import { useCurrentUser } from "@saintrelion/auth-lib";
+import type {
+  ClientSubscription,
+  CreateSubscription,
+  UpdateSubscriptionStatus,
+} from "@/models/Subscription";
 import { getCurrentDateTimeString, toDate } from "@saintrelion/time-functions";
 import { PLANS } from "@/constants";
 import type { Plan } from "@/models/Plan";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
 
 const BrowsePlansPage = () => {
-  const { user } = useAuth();
+  const user = useCurrentUser();
   const [viewedPlan, setViewedPlan] = useState<Plan | null>(null);
 
   const {
-    useSelect: subscriptionSelect,
-    useInsert: subscriptionInsert,
-    useUpdate: subscriptionUpdate,
-  } = useDBOperationsLocked<Subscription>("Subscription");
+    useList: getSubscription,
+    useInsert: insertSubscription,
+    useUpdate: updateSubscription,
+  } = useResourceLocked<
+    ClientSubscription,
+    CreateSubscription,
+    UpdateSubscriptionStatus
+  >("subscription");
 
-  const { data: currentSubscriptions } = subscriptionSelect({
-    firebaseOptions: {
-      filterField: ["userId", "status"],
-      value: [user.id, "Active"],
-    },
-  });
+  const currentSubscriptions = getSubscription({
+    filters: { userId: user.id, status: "Active" },
+  }).data;
   let currentPlan: Plan | null = null;
 
   let pendingBalance = false;
@@ -52,25 +57,23 @@ const BrowsePlansPage = () => {
         currentSubscriptions.length > 0
       ) {
         const currentSubscription = currentSubscriptions[0];
-        subscriptionUpdate.run({
-          field: "id",
-          value: currentSubscription.id,
-          updates: { status: "Disabled" },
+
+        await updateSubscription.run({
+          id: currentSubscription.id,
+          payload: { status: "Disabled" },
         });
       }
 
       currentDay.setDate(currentDay.getDate() + 30);
 
-      const data = {
+      await insertSubscription.run({
         userId: user.id,
         planId: confirmedPlan.id,
         balance: confirmedPlan.price, // Dont forget calculation here
         address: user.streetAddress,
         status: "Active",
         nextBillingDate: currentDay.toISOString(),
-      };
-
-      await subscriptionInsert.run(data);
+      });
     }
   }
 
@@ -120,7 +123,7 @@ const BrowsePlansPage = () => {
               >
                 <DialogTrigger asChild>
                   <button
-                    disabled={subscriptionInsert.isLocked}
+                    disabled={insertSubscription.isLocked}
                     onClick={() => {
                       if (
                         currentSubscriptions != undefined &&

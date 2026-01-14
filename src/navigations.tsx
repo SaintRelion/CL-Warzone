@@ -1,7 +1,5 @@
-import RootLayout from "./layout/RootLayout";
 import NotFound from "./pages/NotFound";
 
-import { registerGroupAppRoutes, createAppRouter } from "@saintrelion/routers";
 import LoginPage from "./pages/authentication/LoginPage";
 import { AdminDashboardPage } from "./pages/admin/admin-dashboard/AdminDashboardPage";
 import SubscribersPage from "./pages/admin/subscribers/SubscribersPage";
@@ -13,84 +11,107 @@ import AccountPage from "./pages/client/account/AccountPage";
 import FAQPage from "./pages/client/faq/FAQPage";
 import RegisterPage from "./pages/authentication/RegisterPage";
 import TicketsPage from "./pages/admin/tickets/TicketsPage";
-import { defaultRedirects, ProtectedRoute } from "@saintrelion/auth-lib";
+import { AdminLayout } from "./layout/AdminLayout";
+import { ClientLayout } from "./layout/ClientLayout";
+import { PublicLayout } from "./layout/PublicLayout";
 
-// ✅ Register protected routes (with layout)
-defaultRedirects["admin"] = "/admin";
-defaultRedirects["client"] = "/";
+import {
+  registerGroupAppRoutes,
+  createAppRouter,
+  createRoleLayout,
+} from "@saintrelion/routers";
+import { roleLayoutMap } from "@saintrelion/auth-lib";
+
+roleLayoutMap[""] = {
+  redirect: "/",
+  layout: PublicLayout,
+};
+roleLayoutMap["admin"] = {
+  redirect: "/admin",
+  layout: AdminLayout,
+};
+roleLayoutMap["client"] = {
+  redirect: "/",
+  layout: ClientLayout,
+};
 
 registerGroupAppRoutes({
-  layout: (
-    <ProtectedRoute>
-      <RootLayout />
-    </ProtectedRoute>
-  ),
   path: "/",
+  layout: createRoleLayout(""),
   errorElement: <NotFound />,
   children: [
-    // PUBLIC
-    { path: "/login", public: true, element: <LoginPage /> },
-    { path: "/register", public: true, element: <RegisterPage /> },
-    // RESTRICTED
-    // ADMIN
+    { path: "login", public: true, element: <LoginPage /> },
+    { path: "register", public: true, element: <RegisterPage /> },
+  ],
+});
+
+registerGroupAppRoutes({
+  path: "/admin",
+  layout: createRoleLayout("admin"),
+  errorElement: <NotFound />,
+  children: [
     {
       index: true,
-      path: "/admin",
       element: <AdminDashboardPage />,
       label: "Dashboard",
       iconClassName: "fa-solid fa-house text-lg",
       allowedRoles: ["admin"],
     },
     {
-      path: "/admin/subscribers",
+      path: "subscribers",
       element: <SubscribersPage />,
       label: "Subscribers",
       iconClassName: "fa-solid fa-users text-lg",
       allowedRoles: ["admin"],
     },
     {
-      path: "/admin/billing",
+      path: "billing",
       element: <BillingPage />,
       label: "Bill",
       iconClassName: "fa-solid fa-receipt text-lg",
       allowedRoles: ["admin"],
     },
     {
-      path: "/admin/tickets",
+      path: "tickets",
       element: <TicketsPage />,
       label: "Support Tickets",
       iconClassName: "fa-solid fa-ticket text-lg",
       allowedRoles: ["admin"],
     },
+  ],
+});
 
-    // CLIENT
+registerGroupAppRoutes({
+  path: "/",
+  layout: createRoleLayout("client"),
+  errorElement: <NotFound />,
+  children: [
     {
       index: true,
-      path: "/",
       element: <BrowsePlansPage />,
       label: "Browse Plans",
       allowedRoles: ["client"],
     },
     {
-      path: "/billing",
+      path: "billing",
       element: <BillingAndPaymentsPage />,
       label: "Bill",
       allowedRoles: ["client"],
     },
     {
-      path: "/support",
+      path: "support",
       element: <SupportTicketsPage />,
       label: "Support Tickets",
       allowedRoles: ["client"],
     },
     {
-      path: "/account",
+      path: "account",
       element: <AccountPage />,
       label: "Account Info",
       allowedRoles: ["client"],
     },
     {
-      path: "/faq",
+      path: "faq",
       element: <FAQPage />,
       label: "Support & FAQ",
       allowedRoles: ["client"],

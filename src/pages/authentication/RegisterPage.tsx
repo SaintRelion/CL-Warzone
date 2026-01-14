@@ -1,52 +1,14 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRegisterUser } from "@saintrelion/auth-lib";
+import { useAuth } from "@saintrelion/auth-lib";
 import {
   RenderForm,
   RenderFormButton,
   RenderFormField,
 } from "@saintrelion/forms";
-import { toDate, getCurrentDateTimeString } from "@saintrelion/time-functions";
-
-const PasswordField = ({ name, label }: { name: string; label: string }) => {
-  const [showPassword, setShowPassword] = useState(false);
-
-  return (
-    <div className="relative">
-      <label className="mb-2 block text-sm font-medium text-gray-700">
-        {label}
-      </label>
-      <input
-        type={showPassword ? "text" : "password"}
-        name={name}
-        className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:ring-2 focus:ring-indigo-600"
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500"
-      >
-        <span
-          className={showPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"}
-        />
-      </button>
-    </div>
-  );
-};
 
 const RegisterPage = () => {
-  const getMinDate = () => {
-    const tomorrow = toDate(getCurrentDateTimeString());
-    if (!tomorrow) return "";
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split("T")[0];
-  };
+  const auth = useAuth();
 
-  const timeSlots = [
-    "8:00 AM - 12:00 PM",
-    "1:00 PM - 5:00 PM",
-    "6:00 PM - 8:00 PM",
-  ];
   const serviceAreas = [
     "Metro Manila",
     "Cebu City",
@@ -55,15 +17,13 @@ const RegisterPage = () => {
     "Iloilo City",
     "Cagayan de Oro",
   ];
-  const registerUser = useRegisterUser();
 
-  const handleRegister = (data: Record<string, string>) => {
-    data.role = "client";
-    registerUser.run({ info: data, password: data.password });
+  const handleRegister = async (data: Record<string, string>) => {
+    await auth.register({ ...data, roles: ["client"] }, data.password);
   };
 
   return (
-    <RenderForm wrapperClass="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center p-4">
+    <RenderForm wrapperClassName="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center p-4">
       <div className="flex h-[80vh] w-full max-w-6xl flex-col overflow-hidden rounded-xl bg-white p-6 shadow-2xl sm:flex-row">
         {/* Left Side - Branding */}
         <div className="hidden rounded-l-xl bg-indigo-600 p-6 text-white sm:flex sm:w-1/3 sm:flex-col sm:items-center sm:justify-center">
@@ -196,6 +156,7 @@ const RegisterPage = () => {
           <div className="mt-6 flex gap-4">
             <RenderFormButton
               onSubmit={handleRegister}
+              isDisabled={auth.isLocked}
               buttonLabel="Create Account"
               buttonClassName="flex-1 rounded-lg bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-700 transition"
             />

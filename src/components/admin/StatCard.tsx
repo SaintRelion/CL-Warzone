@@ -5,7 +5,7 @@ export interface StatCardProps {
   icon: LucideIcon;
   title: string;
   value: string | number;
-  color: "blue" | "green" | "yellow" | "purple";
+  color: "blue" | "green" | "yellow" | "purple" | "red";
 }
 
 export const StatCard: React.FC<StatCardProps> = ({

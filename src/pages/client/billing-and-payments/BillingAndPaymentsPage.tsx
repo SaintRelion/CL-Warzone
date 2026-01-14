@@ -1,9 +1,15 @@
 import { PLANS } from "@/constants";
-import type { PaymentHistory } from "@/models/PaymentHistory";
+import type {
+  CreatePaymentHistory,
+  PaymentHistory,
+} from "@/models/PaymentHistory";
 import type { Plan } from "@/models/Plan";
-import type { Subscription } from "@/models/Subscription";
-import { useAuth } from "@saintrelion/auth-lib";
-import { useDBOperationsLocked } from "@saintrelion/data-access-layer";
+import type {
+  ClientSubscription,
+  UpdateSubscriptionBalance,
+} from "@/models/Subscription";
+import { useCurrentUser } from "@saintrelion/auth-lib";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
 import { toast } from "@saintrelion/notifications";
 import {
   formatReadableDate,
@@ -13,21 +19,23 @@ import {
 import { useState } from "react";
 
 const BillingAndPaymentsPage = () => {
-  const { user } = useAuth();
+  const user = useCurrentUser();
 
   /* ===================== PAYMENT HISTORY ===================== */
-  const { useSelect: paymentHistorySelect, useInsert: paymentHistoryInsert } =
-    useDBOperationsLocked<PaymentHistory>("PaymentHistory", false, false);
-  const { data: paymentHistory } = paymentHistorySelect({
-    firebaseOptions: {
-      filterField: ["userId"],
-      value: [user.id],
+  const { useList: getPaymentHistories, useInsert: insertPaymentHistory } =
+    useResourceLocked<PaymentHistory, CreatePaymentHistory>("paymenthistory", {
+      showToast: false,
+    });
+
+  const paymentHistories = getPaymentHistories({
+    filters: {
+      userId: user.id,
     },
-  });
+  }).data;
 
   const sortedPaymentHistory =
-    paymentHistory && paymentHistory.length > 0
-      ? [...paymentHistory].sort((a, b) => {
+    paymentHistories && paymentHistories.length > 0
+      ? [...paymentHistories].sort((a, b) => {
           const dateA = toDate(a.createdAt)?.getTime() ?? 0;
           const dateB = toDate(b.createdAt)?.getTime() ?? 0;
           return dateB - dateA;
@@ -35,15 +43,15 @@ const BillingAndPaymentsPage = () => {
       : [];
 
   /* ===================== SUBSCRIPTION ===================== */
-  const { useSelect: subscriptionSelect, useUpdate: subscriptionUpdate } =
-    useDBOperationsLocked<Subscription>("Subscription", false, false);
+  const { useList: getSubscriptions, useUpdate: updateSubscription } =
+    useResourceLocked<ClientSubscription, never, UpdateSubscriptionBalance>(
+      "subscription",
+      { showToast: false },
+    );
 
-  const { data: currentSubscriptions } = subscriptionSelect({
-    firebaseOptions: {
-      filterField: ["userId", "status"],
-      value: [user.id, "Active"],
-    },
-  });
+  const currentSubscriptions = getSubscriptions({
+    filters: { userId: user.id },
+  }).data;
 
   const currentSubscription =
     currentSubscriptions && currentSubscriptions.length > 0
@@ -87,7 +95,7 @@ const BillingAndPaymentsPage = () => {
     const remainingBalance = balance - randomAmount;
     const status = remainingBalance > 0 ? "partial" : "paid";
 
-    await paymentHistoryInsert.run({
+    await insertPaymentHistory.run({
       userId: user.id,
       description: currentPlan.name,
       amount: randomAmount.toString(),
@@ -95,10 +103,9 @@ const BillingAndPaymentsPage = () => {
       invoice: `INV-${Date.now()}`,
     });
 
-    await subscriptionUpdate.run({
-      field: "id",
-      value: currentSubscription.id,
-      updates: { balance: remainingBalance.toString() },
+    await updateSubscription.run({
+      id: currentSubscription.id,
+      payload: { balance: remainingBalance.toString() },
     });
 
     toast.success(`PHP ${randomAmount} recorded`);

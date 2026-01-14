@@ -1,15 +1,7 @@
-import type { PaymentHistory } from "@/models/PaymentHistory";
-import {
-  firebaseRegister,
-  apiRegister,
-  mockRegister,
-} from "@saintrelion/data-access-layer";
+import { registerResource } from "@saintrelion/data-access-layer";
 
-// Firebase
-firebaseRegister("PaymentHistory");
-
-// API
-apiRegister("PaymentHistory", "paymenthistory");
-
-// Mock
-mockRegister<PaymentHistory>("PaymentHistory", []);
+registerResource({
+  name: "paymenthistory",
+  endpoint: "paymenthistory/",
+  store: "PaymentHistory",
+});

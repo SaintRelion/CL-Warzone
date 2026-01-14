@@ -38,9 +38,7 @@ const SupportTicketsPage = () => {
     const files = e.target.files;
     if (!files) return;
 
-    const previews = Array.from(files).map((file) =>
-      URL.createObjectURL(file),
-    );
+    const previews = Array.from(files).map((file) => URL.createObjectURL(file));
 
     setImages((prev) => [...prev, ...previews]);
   };
@@ -121,9 +119,7 @@ const SupportTicketsPage = () => {
 
       {/* ===================== CREATE TICKET ===================== */}
       <div className="rounded-xl bg-white p-6 shadow">
-        <h3 className="mb-4 text-lg font-semibold">
-          Report an Internet Issue
-        </h3>
+        <h3 className="mb-4 text-lg font-semibold">Report an Internet Issue</h3>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <select
@@ -201,7 +197,7 @@ const SupportTicketsPage = () => {
                   />
                   <button
                     onClick={() => removeImage(index)}
-                    className="absolute right-1 top-1 rounded-full bg-red-600 px-1 text-xs text-white"
+                    className="absolute top-1 right-1 rounded-full bg-red-600 px-1 text-xs text-white"
                   >
                     ✕
                   </button>

@@ -1,15 +1,7 @@
-import type { Installation } from "@/models/Installation";
-import {
-  firebaseRegister,
-  apiRegister,
-  mockRegister,
-} from "@saintrelion/data-access-layer";
+import { registerResource } from "@saintrelion/data-access-layer";
 
-// Firebase
-firebaseRegister("Installation");
-
-// API
-apiRegister("Installation", "installation");
-
-// Mock
-mockRegister<Installation>("Installation", []);
+registerResource({
+  name: "installation",
+  endpoint: "installation/",
+  store: "Installation",
+});

@@ -36,7 +36,7 @@ export default function AdminPage({ children }: { children: JSX.Element }) {
                 {currentTime.toLocaleString()}
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 animate-pulse rounded-full bg-green-500"></div>
                 <span className="text-sm font-semibold text-gray-700">
@@ -47,7 +47,7 @@ export default function AdminPage({ children }: { children: JSX.Element }) {
                 <div className="text-sm text-gray-500">Uptime</div>
                 <div className="text-lg font-bold text-green-600">99.97%</div>
               </div>
-            </div>
+            </div> */}
           </div>
         </header>
 

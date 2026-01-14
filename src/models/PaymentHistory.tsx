@@ -8,3 +8,11 @@ export interface PaymentHistory {
   invoice: string;
   createdAt: string;
 }
+
+export interface CreatePaymentHistory {
+  userId: string;
+  description: string;
+  amount: string;
+  status: string;
+  invoice: string;
+}
