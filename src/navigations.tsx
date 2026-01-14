@@ -21,6 +21,7 @@ import {
   createRoleLayout,
 } from "@saintrelion/routers";
 import { roleLayoutMap } from "@saintrelion/auth-lib";
+import ActivityLogsPage from "./pages/admin/activity-logs/ActivityLogsPage";
 
 roleLayoutMap[""] = {
   redirect: "/",
@@ -76,6 +77,13 @@ registerGroupAppRoutes({
       element: <TicketsPage />,
       label: "Support Tickets",
       iconClassName: "fa-solid fa-ticket text-lg",
+      allowedRoles: ["admin"],
+    },
+    {
+      path: "activity-logs",
+      element: <ActivityLogsPage />,
+      label: "Activity Logs",
+      iconClassName: "fa-solid fa-clock-rotate-left text-lg",
       allowedRoles: ["admin"],
     },
   ],
