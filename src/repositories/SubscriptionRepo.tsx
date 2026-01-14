@@ -23,7 +23,10 @@ registerDerivedResource({
 
     user: {
       filters: (stores) => {
-        const userIds = stores.subscription.map((sub) => sub.userId);
+        const userIds = [
+          ...new Set(stores.subscription.map((sub) => sub.userId)),
+        ];
+
         return { id: { in: userIds } };
       },
     },

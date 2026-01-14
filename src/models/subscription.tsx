@@ -1,8 +1,9 @@
 export interface ClientSubscription {
   id: string;
   userId: string;
+  name: string;
   planId: string;
-  balance: string;
+  amount: string;
   address: string;
   status: string;
   nextBillingDate: string;
@@ -11,7 +12,7 @@ export interface ClientSubscription {
 export interface CreateSubscription {
   userId: string;
   planId: string;
-  balance: string;
+  amount: string;
   address: string;
   status: string;
   nextBillingDate: string;

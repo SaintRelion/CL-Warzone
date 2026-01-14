@@ -19,9 +19,11 @@ import { getCurrentDateTimeString, toDate } from "@saintrelion/time-functions";
 import { PLANS } from "@/constants";
 import type { Plan } from "@/models/Plan";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
+import type { BillingInfo, CreateBilling } from "@/models/Billing";
+import type { User } from "@/models/user";
 
 const BrowsePlansPage = () => {
-  const user = useCurrentUser();
+  const user = useCurrentUser<User>();
   const [viewedPlan, setViewedPlan] = useState<Plan | null>(null);
 
   const {
@@ -34,19 +36,23 @@ const BrowsePlansPage = () => {
     UpdateSubscriptionStatus
   >("subscription");
 
+  const { useList: getBillings, useInsert: insertBilling } = useResourceLocked<
+    BillingInfo,
+    CreateBilling
+  >("billing");
+
   const currentSubscriptions = getSubscription({
     filters: { userId: user.id, status: "Active" },
   }).data;
-  let currentPlan: Plan | null = null;
+  const currentPlan =
+    currentSubscriptions && currentSubscriptions.length > 0
+      ? PLANS.filter((p) => p.id == currentSubscriptions[0].planId)[0]
+      : null;
 
-  let pendingBalance = false;
-  if (currentSubscriptions != undefined && currentSubscriptions.length > 0) {
-    currentPlan = PLANS.filter(
-      (v) => v.id == currentSubscriptions[0].planId,
-    )[0];
-
-    pendingBalance = Number(currentSubscriptions[0].balance) > 0;
-  }
+  const currentBillings = getBillings({
+    filters: { userId: user.id },
+  }).data?.filter((b) => b.status === "Not Yet Paid");
+  console.log(currentBillings);
 
   async function handleConfirmPlan(confirmedPlan: Plan) {
     const currentDay = toDate(getCurrentDateTimeString());
@@ -64,14 +70,25 @@ const BrowsePlansPage = () => {
         });
       }
 
+      // + 30 days
       currentDay.setDate(currentDay.getDate() + 30);
 
       await insertSubscription.run({
         userId: user.id,
         planId: confirmedPlan.id,
-        balance: confirmedPlan.price, // Dont forget calculation here
+        amount: confirmedPlan.price,
         address: user.streetAddress,
         status: "Active",
+        nextBillingDate: currentDay.toISOString(),
+      });
+
+      await insertBilling.run({
+        userId: user.id,
+        planId: confirmedPlan.id,
+        customer: `${user.firstName} ${user.lastName}`,
+        amount: confirmedPlan.price,
+        method: "Cash",
+        status: "Not Yet Paid",
         nextBillingDate: currentDay.toISOString(),
       });
     }
@@ -129,9 +146,9 @@ const BrowsePlansPage = () => {
                         currentSubscriptions != undefined &&
                         currentSubscriptions.length > 0
                       ) {
-                        if (pendingBalance) {
+                        if (currentBillings && currentBillings.length > 0) {
                           alert(
-                            "You have pending balance in current subscription, please complete any remaining balance.",
+                            "You have pending bills, please complete any remaining balance.",
                           );
                           return;
                         }

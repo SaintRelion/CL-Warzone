@@ -1,8 +1,5 @@
 import { PLANS } from "@/constants";
-import type {
-  CreatePaymentHistory,
-  PaymentHistory,
-} from "@/models/PaymentHistory";
+import type { PaymentHistory } from "@/models/PaymentHistory";
 import type { Plan } from "@/models/Plan";
 import type {
   ClientSubscription,
@@ -22,10 +19,12 @@ const BillingAndPaymentsPage = () => {
   const user = useCurrentUser();
 
   /* ===================== PAYMENT HISTORY ===================== */
-  const { useList: getPaymentHistories, useInsert: insertPaymentHistory } =
-    useResourceLocked<PaymentHistory, CreatePaymentHistory>("paymenthistory", {
+  const { useList: getPaymentHistories } = useResourceLocked<PaymentHistory>(
+    "paymenthistory",
+    {
       showToast: false,
-    });
+    },
+  );
 
   const paymentHistories = getPaymentHistories({
     filters: {
@@ -43,11 +42,11 @@ const BillingAndPaymentsPage = () => {
       : [];
 
   /* ===================== SUBSCRIPTION ===================== */
-  const { useList: getSubscriptions, useUpdate: updateSubscription } =
-    useResourceLocked<ClientSubscription, never, UpdateSubscriptionBalance>(
-      "subscription",
-      { showToast: false },
-    );
+  const { useList: getSubscriptions } = useResourceLocked<
+    ClientSubscription,
+    never,
+    UpdateSubscriptionBalance
+  >("subscription", { showToast: false });
 
   const currentSubscriptions = getSubscriptions({
     filters: { userId: user.id },
@@ -76,41 +75,6 @@ const BillingAndPaymentsPage = () => {
     toast.success("GCash QR Code downloaded");
   };
 
-  /* ===================== HANDLE PAYMENT ===================== */
-  async function handlePayment() {
-    if (!currentSubscription || !currentPlan) return;
-
-    const balance = Number(currentSubscription.balance);
-    if (balance <= 0) {
-      toast.info("All balance paid");
-      return;
-    }
-
-    const randomBetween = (min: number, max: number) =>
-      Math.floor(Math.random() * (max - min + 1)) + min;
-
-    let randomAmount = randomBetween(100, 800);
-    randomAmount = Math.min(randomAmount, balance);
-
-    const remainingBalance = balance - randomAmount;
-    const status = remainingBalance > 0 ? "partial" : "paid";
-
-    await insertPaymentHistory.run({
-      userId: user.id,
-      description: currentPlan.name,
-      amount: randomAmount.toString(),
-      status,
-      invoice: `INV-${Date.now()}`,
-    });
-
-    await updateSubscription.run({
-      id: currentSubscription.id,
-      payload: { balance: remainingBalance.toString() },
-    });
-
-    toast.success(`PHP ${randomAmount} recorded`);
-  }
-
   return (
     <div className="space-y-8 p-4 sm:p-6">
       {/* ===================== HEADER ===================== */}
@@ -138,18 +102,11 @@ const BillingAndPaymentsPage = () => {
               />
               <Info
                 label="Outstanding Balance"
-                value={`₱${currentSubscription.balance}`}
+                value={`₱${currentSubscription.amount}`}
               />
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                onClick={handlePayment}
-                className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 sm:w-auto"
-              >
-                Pay via Oxygen
-              </button>
-
               <button
                 onClick={() => setShowGcashModal(true)}
                 className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 sm:w-auto"
@@ -194,7 +151,7 @@ const BillingAndPaymentsPage = () => {
                 <li>
                   Enter the exact amount:
                   <strong className="ml-1">
-                    ₱{currentSubscription?.balance}
+                    ₱{currentSubscription?.amount}
                   </strong>
                 </li>
                 <li>Confirm payment</li>
@@ -227,10 +184,10 @@ const BillingAndPaymentsPage = () => {
             <thead className="border-b bg-gray-50">
               <tr>
                 <th className="px-3 py-2 text-left">Date</th>
-                <th className="px-3 py-2 text-left">Description</th>
+                {/* <th className="px-3 py-2 text-left">Description</th> */}
                 <th className="px-3 py-2 text-left">Amount</th>
                 <th className="px-3 py-2 text-left">Status</th>
-                <th className="px-3 py-2 text-right">Invoice</th>
+                {/* <th className="px-3 py-2 text-right">Invoice</th> */}
               </tr>
             </thead>
             <tbody>
@@ -249,11 +206,10 @@ const BillingAndPaymentsPage = () => {
                     <td className="px-3 py-2">
                       {formatReadableDateTime(p.createdAt)}
                     </td>
-                    <td className="px-3 py-2">{p.description}</td>
                     <td className="px-3 py-2 font-medium">₱{p.amount}</td>
                     <td className="px-3 py-2 capitalize">{p.status}</td>
                     <td className="px-3 py-2 text-right text-indigo-600">
-                      {p.invoice}
+                      {p.transactionScreenshot}
                     </td>
                   </tr>
                 ))

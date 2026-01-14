@@ -1,30 +1,19 @@
 import { DataTable } from "@/components/admin/DataTable";
+import type { ClientSubscription } from "@/models/Subscription";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
+import { formatReadableDateTime } from "@saintrelion/time-functions";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState, useMemo } from "react";
 
-interface UserSubscription {
-  id: number;
-  userId: string;
-  name: string;
-  planId: string;
-  balance: string;
-  address: string;
-  status: string;
-  nextBillingDate: string;
-}
-
 const SubscribersPage = () => {
   const { useList: getSubscriptions } =
-    useResourceLocked<UserSubscription>("usersubscriptions");
+    useResourceLocked<ClientSubscription>("usersubscriptions");
   const subscriptions = getSubscriptions().data;
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [deleteTarget, setDeleteTarget] = useState<
-    (typeof mockSubscriptions)[0] | null
-  >(null);
+  // const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  // const [deleteTarget, setDeleteTarget] = useState(null);
   const itemsPerPage = 20;
 
   // Calculate stats
@@ -33,7 +22,7 @@ const SubscribersPage = () => {
     ? subscriptions.filter((s) => s.status === "Active").length
     : 0;
   const totalBalance =
-    subscriptions?.reduce((sum, s) => sum + parseFloat(s.balance), 0) ?? 0;
+    subscriptions?.reduce((sum, s) => sum + parseFloat(s.amount), 0) ?? 0;
 
   // Filter by search term
   const filteredSubscriptions = useMemo(() => {
@@ -61,7 +50,7 @@ const SubscribersPage = () => {
     currentPage * itemsPerPage,
   );
 
-  const subscriptionColumns: ColumnDef<UserSubscription>[] = [
+  const subscriptionColumns: ColumnDef<ClientSubscription>[] = [
     {
       accessorKey: "name",
       header: "Subscriber Name",
@@ -104,7 +93,7 @@ const SubscribersPage = () => {
       },
     },
     {
-      accessorKey: "balance",
+      accessorKey: "amount",
       header: () => (
         <div className="group relative inline-flex cursor-help items-center gap-1">
           <span>Outstanding Balance</span>
@@ -145,7 +134,7 @@ const SubscribersPage = () => {
         }
         return (
           <span className="text-sm font-medium text-gray-700">
-            📅 {dateStr}
+            📅 {formatReadableDateTime(dateStr)}
           </span>
         );
       },
@@ -233,9 +222,10 @@ const SubscribersPage = () => {
         {/* Data Table */}
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
           <DataTable
-            type="Subribers"
+            type="Subcribers"
             data={paginatedSubscriptions}
             columns={subscriptionColumns}
+            getRowId={(row) => row.id}
           />
         </div>
 
@@ -285,7 +275,7 @@ const SubscribersPage = () => {
           </div>
         )}
 
-        {/* DELETE CONFIRMATION MODAL */}
+        {/* DELETE CONFIRMATION MODAL
         {showDeleteModal && deleteTarget && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
             <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
@@ -334,7 +324,7 @@ const SubscribersPage = () => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
