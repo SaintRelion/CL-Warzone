@@ -1,15 +1,26 @@
 {
-  "name": "cl-warzone-smtp-server",
-  "version": "0.1.0",
-  "main": "index.js",
+  "name": "cl-warzone-backend",
+  "version": "1.0.0",
+  "description": "Backend API for CL-Warzone ISP Management System",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "seed": "node src/seed.js"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "nodemailer": "^6.9.3"
+    "express-validator": "^7.0.1",
+    "firebase-admin": "^12.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
   }
 }
