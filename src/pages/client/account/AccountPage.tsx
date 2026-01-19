@@ -1,20 +1,27 @@
 import { useState } from "react";
-import { updateSession, useAuth, useUpdateUser } from "@saintrelion/auth-lib";
+import { useAuth, useCurrentUser } from "@saintrelion/auth-lib";
 import {
   RenderForm,
   RenderFormButton,
   RenderFormField,
 } from "@saintrelion/forms";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
+import type { User } from "@/models/user";
 
 const AccountPage = () => {
-  const { user, setUser } = useAuth();
-  const updateUser = useUpdateUser();
+  const { refreshUser } = useAuth();
+  const user = useCurrentUser<User>();
+
+  const { useUpdate: updateUser } = useResourceLocked<never, never, User>(
+    "user",
+  );
+
   const [editMode, setEditMode] = useState(false);
 
   const information: Record<string, string> = {
     firstName: user.firstName,
     lastName: user.lastName,
-    emailAddress: user.emailAddress,
+    email: user.email,
     phoneNumber: user.phoneNumber,
     streetAddress: user.streetAddress,
     city: user.city,
@@ -24,17 +31,16 @@ const AccountPage = () => {
 
   async function handleSubmit(data: Record<string, string>) {
     const success = await updateUser.run({
-      userId: user.id,
-      info: data,
-      uniqueFields: ["emailAddress"],
+      id: user.id,
+      payload: data,
     });
 
     setEditMode(false);
-    if (success) await updateSession(data, setUser);
+    if (success) await refreshUser();
   }
 
   return (
-    <RenderForm wrapperClass="space-y-10 max-w-5xl mx-auto">
+    <RenderForm wrapperClassName="space-y-10 max-w-5xl mx-auto">
       {/* PAGE HEADER */}
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl font-bold tracking-tight text-gray-900">
@@ -84,16 +90,15 @@ const AccountPage = () => {
           {[
             { label: "First Name", name: "firstName" },
             { label: "Last Name", name: "lastName" },
-            { label: "Email Address", name: "emailAddress" },
-            { label: "Password", name: "passwordHash" },
+            { label: "Email Address", name: "email" },
             { label: "Street Address", name: "streetAddress", full: true },
-             { label: "Phone Number", name: "phoneNumber" },
+            { label: "Phone Number", name: "phoneNumber" },
             { label: "City / Municipality", name: "city" },
             { label: "ZIP Code", name: "zipCode" },
             { label: "Service Area", name: "serviceArea" },
           ].map((field) => (
             <div key={field.name} className={field.full ? "sm:col-span-2" : ""}>
-              <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500">
+              <p className="mb-1 text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {field.label}
               </p>
 
@@ -115,9 +120,7 @@ const AccountPage = () => {
 
       {/* DANGER ZONE */}
       <div className="rounded-xl border border-red-200 bg-red-50 p-6">
-        <h4 className="text-sm font-semibold text-red-700">
-          Danger Zone
-        </h4>
+        <h4 className="text-sm font-semibold text-red-700">Danger Zone</h4>
         <p className="mt-1 text-sm text-red-600">
           Deleting your account is permanent and cannot be undone.
         </p>

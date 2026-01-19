@@ -20,8 +20,12 @@ import {
   FileBarChart,
 } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
 
 export const AdminDashboardPage = () => {
+  const { useList: getSubscriptions } = useResourceLocked("subscription");
+  const subcriptions = getSubscriptions({ filters: { status: "Active" } }).data;
+
   const bandwidthData = [
     { time: "00:00", upload: 45, download: 120 },
     { time: "04:00", upload: 30, download: 80 },
@@ -47,16 +51,37 @@ export const AdminDashboardPage = () => {
           Network Operations Dashboard
         </h1>
         <p className="text-sm text-gray-500">
-          Enterprise overview of subscribers, revenue, network health, and incidents
+          Enterprise overview of subscribers, revenue, network health, and
+          incidents
         </p>
       </div>
 
       {/* ===================== KPI ROW ===================== */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={Users} title="Active Subscribers" value="1,175" color="blue" />
-        <StatCard icon={DollarSign} title="Monthly Revenue" value="₱338,000" color="green" />
-        <StatCard icon={AlertTriangle} title="Open Incidents" value="47" color="yellow" />
-        <StatCard icon={WifiOff} title="Network Outages" value="3" color="red" />
+        <StatCard
+          icon={Users}
+          title="Active Subscribers"
+          value={subcriptions.length.toString()}
+          color="blue"
+        />
+        <StatCard
+          icon={DollarSign}
+          title="Monthly Revenue"
+          value="₱338,000"
+          color="green"
+        />
+        <StatCard
+          icon={AlertTriangle}
+          title="Open Incidents"
+          value="47"
+          color="yellow"
+        />
+        <StatCard
+          icon={WifiOff}
+          title="Network Outages"
+          value="3"
+          color="red"
+        />
       </div>
 
       {/* ===================== ANALYTICS ===================== */}
@@ -64,7 +89,7 @@ export const AdminDashboardPage = () => {
         {/* BANDWIDTH */}
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+            <h3 className="text-sm font-semibold tracking-wide text-gray-700 uppercase">
               Bandwidth Utilization (24h)
             </h3>
             <Signal className="h-4 w-4 text-gray-400" />
@@ -98,7 +123,7 @@ export const AdminDashboardPage = () => {
         {/* INCIDENT SEVERITY */}
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+            <h3 className="text-sm font-semibold tracking-wide text-gray-700 uppercase">
               Incident Severity
             </h3>
             <AlertTriangle className="h-4 w-4 text-gray-400" />
@@ -110,11 +135,7 @@ export const AdminDashboardPage = () => {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Bar
-                dataKey="count"
-                fill="#475569"
-                radius={[4, 4, 0, 0]}
-              />
+              <Bar dataKey="count" fill="#475569" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -124,7 +145,7 @@ export const AdminDashboardPage = () => {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* LIVE ALERTS */}
         <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-700">
+          <h3 className="mb-4 text-sm font-semibold tracking-wide text-gray-700 uppercase">
             Live Network Alerts
           </h3>
 
@@ -157,7 +178,7 @@ export const AdminDashboardPage = () => {
 
         {/* EXEC ACTIONS */}
         <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-700">
+          <h3 className="mb-4 text-sm font-semibold tracking-wide text-gray-700 uppercase">
             Administrative Actions
           </h3>
 

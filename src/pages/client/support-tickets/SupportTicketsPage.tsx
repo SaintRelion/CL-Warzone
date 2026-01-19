@@ -1,78 +1,47 @@
+import type { ClientTicket, CreateTicket } from "@/models/Tickets";
+import type { User } from "@/models/user";
+import { useCurrentUser } from "@saintrelion/auth-lib";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
 import { useState } from "react";
 
-interface SupportTicket {
-  id: number;
-  issueType: string;
-  service: string;
-  status: string;
-  priority: string;
-  date: string;
-  description: string;
-  images?: string[];
-}
-
 const SupportTicketsPage = () => {
-  const [tickets, setTickets] = useState<SupportTicket[]>([
-    {
-      id: 1,
-      issueType: "Slow Internet Speed",
-      service: "Home Fiber",
-      status: "open",
-      priority: "high",
-      date: "2024-11-25",
-      description:
-        "Internet speed drops significantly during peak hours. Unable to stream or attend meetings.",
-      images: [],
-    },
-  ]);
+  const user = useCurrentUser<User>();
+
+  const { useList: getMyTickets, useInsert: insertTicket } = useResourceLocked<
+    ClientTicket,
+    CreateTicket,
+    never
+  >("tickets");
+
+  const myTickets = getMyTickets().data;
 
   /* ===================== FORM STATE ===================== */
   const [issueType, setIssueType] = useState("");
   const [service, setService] = useState("Home Fiber");
   const [priority, setPriority] = useState("medium");
   const [description, setDescription] = useState("");
-  const [images, setImages] = useState<string[]>([]);
-
-  /* ===================== IMAGE HANDLER ===================== */
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const previews = Array.from(files).map((file) =>
-      URL.createObjectURL(file),
-    );
-
-    setImages((prev) => [...prev, ...previews]);
-  };
-
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
 
   /* ===================== CREATE TICKET ===================== */
-  const createTicket = () => {
+  const createTicket = async () => {
     if (!issueType || !description)
       return alert("Please complete all required fields.");
 
-    setTickets([
-      ...tickets,
-      {
-        id: tickets.length + 1,
-        issueType,
-        service,
-        priority,
-        status: "open",
-        date: new Date().toISOString().split("T")[0],
-        description,
-        images,
-      },
-    ]);
+    const myTicket = {
+      userId: user.id,
+      customer: `${user.firstName} ${user.firstName}`,
+      issue: issueType,
+      description: description,
+      priority: priority,
+      status: "open",
+      assignedTo: "",
+    };
+
+    await insertTicket.run(myTicket);
 
     setIssueType("");
     setService("Home Fiber");
     setPriority("medium");
     setDescription("");
-    setImages([]);
   };
 
   /* ===================== HELPERS ===================== */
@@ -121,9 +90,7 @@ const SupportTicketsPage = () => {
 
       {/* ===================== CREATE TICKET ===================== */}
       <div className="rounded-xl bg-white p-6 shadow">
-        <h3 className="mb-4 text-lg font-semibold">
-          Report an Internet Issue
-        </h3>
+        <h3 className="mb-4 text-lg font-semibold">Report an Internet Issue</h3>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <select
@@ -173,47 +140,10 @@ const SupportTicketsPage = () => {
           rows={4}
         />
 
-        {/* ===================== IMAGE UPLOAD ===================== */}
-        <div className="mt-5 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4">
-          <p className="mb-2 text-sm font-semibold text-gray-700">
-            Attach Images (Optional)
-          </p>
-
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageUpload}
-            className="block w-full text-sm"
-          />
-
-          {images.length > 0 && (
-            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {images.map((img, index) => (
-                <div
-                  key={index}
-                  className="relative h-20 overflow-hidden rounded-lg border"
-                >
-                  <img
-                    src={img}
-                    alt="preview"
-                    className="h-full w-full object-cover"
-                  />
-                  <button
-                    onClick={() => removeImage(index)}
-                    className="absolute right-1 top-1 rounded-full bg-red-600 px-1 text-xs text-white"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
         <button
           onClick={createTicket}
-          className="mt-6 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+          disabled={insertTicket.isLocked}
+          className={`mt-6 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50`}
         >
           Submit Ticket
         </button>
@@ -221,37 +151,28 @@ const SupportTicketsPage = () => {
 
       {/* ===================== TICKET LIST ===================== */}
       <div className="space-y-4">
-        {tickets.map((t) => (
-          <div
-            key={t.id}
-            className="rounded-xl bg-white p-6 shadow hover:shadow-md"
-          >
-            <h3 className="text-lg font-bold">{t.issueType}</h3>
-            <p className="text-sm text-gray-600">{t.description}</p>
+        {myTickets.length > 0 ? (
+          myTickets.map((t) => (
+            <div
+              key={t.id}
+              className="rounded-xl bg-white p-6 shadow hover:shadow-md"
+            >
+              <h3 className="text-lg font-bold">{t.issue}</h3>
+              <p className="text-sm text-gray-600">{t.description}</p>
 
-            <div className="mt-2 flex gap-2">
-              <span className={statusStyle(t.status)}>
-                {t.status.toUpperCase()}
-              </span>
-              <span className={priorityStyle(t.priority)}>
-                {t.priority.toUpperCase()}
-              </span>
-            </div>
-
-            {t.images && t.images.length > 0 && (
-              <div className="mt-3 grid grid-cols-4 gap-2">
-                {t.images.map((img, i) => (
-                  <img
-                    key={i}
-                    src={img}
-                    className="h-16 w-full rounded-lg border object-cover"
-                    alt="attachment"
-                  />
-                ))}
+              <div className="mt-2 flex gap-2">
+                <span className={statusStyle(t.status)}>
+                  {t.status.toUpperCase()}
+                </span>
+                <span className={priorityStyle(t.priority)}>
+                  {t.priority.toUpperCase()}
+                </span>
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          ))
+        ) : (
+          <div>No Tickets</div>
+        )}
       </div>
     </div>
   );

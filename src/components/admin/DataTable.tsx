@@ -6,27 +6,26 @@ import {
 } from "@tanstack/react-table";
 import { Edit, Trash2 } from "lucide-react";
 
-export interface TableItem {
-  id: number;
-}
-
-export interface DataTableProps<T extends TableItem> {
+export interface DataTableProps<T> {
   type?: string;
   data: T[];
   columns: ColumnDef<T>[];
   showDefaultActions?: boolean;
+  getRowId?: (row: T, index: number) => string;
 }
 
-export function DataTable<T extends TableItem>({
+export function DataTable<T>({
   type = "",
   data,
   columns,
   showDefaultActions = true,
+  getRowId,
 }: DataTableProps<T>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getRowId,
   });
 
   return (
@@ -42,10 +41,21 @@ export function DataTable<T extends TableItem>({
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="rounded-lg border border-gray-300 py-2 pr-4 pl-10 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  className="rounded-lg border border-gray-300 py-2 pr-4 pl-10 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                 />
-                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
             </div>
@@ -81,7 +91,7 @@ export function DataTable<T extends TableItem>({
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.original.id} className="hover:bg-gray-50">
+              <tr key={row.id} className="hover:bg-gray-50">
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}

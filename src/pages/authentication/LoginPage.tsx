@@ -1,27 +1,18 @@
-import { useAuth, useLoginWithCredentials } from "@saintrelion/auth-lib";
+import { useAuth } from "@saintrelion/auth-lib";
 import {
   RenderForm,
   RenderFormButton,
   RenderFormField,
 } from "@saintrelion/forms";
-import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
-  const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const auth = useAuth();
 
-  const loginWithCredentials = useLoginWithCredentials();
-
-  const handleLogin = (data: Record<string, string>) => {
-    loginWithCredentials.run(
-      "email",
-      data.email,
-      data.password,
-      setUser,
-      (user) => {
-        navigate(user.role == "admin" ? "/admin/" : "/");
-      },
-    );
+  const handleLogin = async (data: Record<string, string>) => {
+    await auth.login({
+      username: data.email,
+      password: data.password,
+    });
   };
 
   return (
@@ -32,10 +23,10 @@ const LoginPage = () => {
           <h1 className="ml-2 text-2xl font-bold text-gray-900">Warzone</h1>
         </div>
 
-        <RenderForm wrapperClass="space-y-4">
+        <RenderForm wrapperClassName="space-y-4">
           <RenderFormField
             field={{
-              label: "Email Address",
+              label: "Email",
               type: "email",
               name: "email",
               placeholder: "your@gmail.com",
@@ -55,7 +46,7 @@ const LoginPage = () => {
           />
           <RenderFormButton
             buttonLabel="Sign In"
-            isDisabled={loginWithCredentials.isLocked}
+            isDisabled={auth.isLocked}
             onSubmit={handleLogin}
             buttonClassName="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700"
           />
