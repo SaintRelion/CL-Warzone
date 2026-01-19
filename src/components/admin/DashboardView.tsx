@@ -1,4 +1,5 @@
 import { StatCard } from "./StatCard";
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -10,24 +11,88 @@ import {
   Legend,
 } from "recharts";
 import {
-  Activity,
   AlertCircle,
   DollarSign,
-  Signal,
+  Activity,
   Users,
-  WifiOff,
 } from "lucide-react";
+import type { BillingInfo } from "../../models/Billing";
+import type { ClientTicket } from "../../models/Tickets";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
 
 export const DashboardView = () => {
-  const bandwidthData = [
-    { time: "00:00", upload: 45, download: 120 },
-    { time: "04:00", upload: 30, download: 80 },
-    { time: "08:00", upload: 95, download: 280 },
-    { time: "12:00", upload: 110, download: 320 },
-    { time: "16:00", upload: 130, download: 380 },
-    { time: "20:00", upload: 150, download: 420 },
-    { time: "23:59", upload: 85, download: 250 },
-  ];
+  const [monthlyIncomeData, setMonthlyIncomeData] = useState<
+    { month: string; income: number }[]
+  >([]);
+
+  // Fetch actual data using useResourceLocked
+  const { useList: getSubscriptions } = useResourceLocked("subscription");
+  const subscriptions = getSubscriptions({ filters: { status: "Active" } }).data;
+
+  const { useList: getTickets } = useResourceLocked<ClientTicket>("tickets");
+  const tickets = getTickets({}).data;
+
+  const { useList: getBillings } = useResourceLocked<BillingInfo>("userbillings");
+  const billings = getBillings({}).data;
+
+  const activeSubscribers = subscriptions?.length || 0;
+  const totalTickets = tickets?.length || 0;
+  const openTickets = tickets?.filter(
+    (t) => t.status !== "Resolved" && t.status !== "Closed"
+  ).length || 0;
+
+  // Calculate total revenue from paid billings only
+  const totalRevenue = billings?.filter(b => b.status === "Paid").reduce((sum, billing) => {
+    const amount = parseFloat(
+      billing.amount?.toString().replace(/[^\d.]/g, "") || "0"
+    );
+    return sum + (isNaN(amount) ? 0 : amount);
+  }, 0) || 0;
+
+  // Calculate current month income
+  const currentMonthIncome = monthlyIncomeData.length > 0
+    ? monthlyIncomeData[monthlyIncomeData.length - 1]?.income || 0
+    : 0;
+
+  useEffect(() => {
+    if (billings && billings.length > 0) {
+      const monthlyData: { [key: string]: number } = {};
+
+      // Only include Paid billings in the monthly income chart
+      const paidBillings = billings.filter(b => b.status === "Paid");
+      
+      paidBillings.forEach((billing: BillingInfo) => {
+        // Use createdAt or nextBillingDate as fallback
+        const dateStr = billing.createdAt || billing.nextBillingDate;
+        const billingDate = dateStr ? new Date(dateStr) : new Date();
+        const monthKey = billingDate.toLocaleString("default", {
+          month: "short",
+        });
+        const amount = parseFloat(
+          billing.amount?.toString().replace(/[^\d.]/g, "") || "0"
+        );
+        monthlyData[monthKey] =
+          (monthlyData[monthKey] || 0) + (isNaN(amount) ? 0 : amount);
+      });
+
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+      ];
+      const chartData = months.map((month) => ({
+        month,
+        income: monthlyData[month] || 0,
+      }));
+
+      setMonthlyIncomeData(chartData);
+    } else {
+      const months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+      ];
+      setMonthlyIncomeData(months.map((month) => ({ month, income: 0 })));
+    }
+  }, [billings]);
 
   return (
     <div className="space-y-6">
@@ -35,25 +100,25 @@ export const DashboardView = () => {
         <StatCard
           icon={Users}
           title="Active Subscribers"
-          value="1,175"
+          value={activeSubscribers.toLocaleString()}
           color="blue"
         />
         <StatCard
           icon={DollarSign}
-          title="Revenue (Nov)"
-          value="₱338K"
+          title="Total Revenue"
+          value={`₱${Math.round(totalRevenue).toLocaleString()}`}
           color="green"
         />
         <StatCard
           icon={AlertCircle}
           title="Open Tickets"
-          value="47"
+          value={openTickets.toString()}
           color="yellow"
         />
         <StatCard
           icon={Activity}
-          title="Network Load"
-          value="68%"
+          title="Total Tickets"
+          value={totalTickets.toString()}
           color="purple"
         />
       </div>
@@ -61,54 +126,74 @@ export const DashboardView = () => {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-            24-Hour Bandwidth Usage
+            Monthly Income
           </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={bandwidthData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="download"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                name="Download (Mbps)"
-              />
-              <Line
-                type="monotone"
-                dataKey="upload"
-                stroke="#8b5cf6"
-                strokeWidth={2}
-                name="Upload (Mbps)"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {monthlyIncomeData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={monthlyIncomeData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip
+                  formatter={(value) =>
+                    `₱${typeof value === "number" ? Math.round(value).toLocaleString() : value}`
+                  }
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="income"
+                  stroke="#10b981"
+                  strokeWidth={2}
+                  name="Income (₱)"
+                  dot={{ fill: "#10b981", r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex h-[250px] items-center justify-center">
+              <p className="text-gray-500">No income data available</p>
+            </div>
+          )}
         </div>
 
         <div className="rounded-lg bg-white p-6 shadow">
           <h3 className="mb-4 text-lg font-semibold text-gray-900">
-            Recent Alerts
+            Support Tickets Summary
           </h3>
-          <div className="space-y-3">
-            <div className="flex gap-3 rounded border-l-4 border-red-500 bg-red-50 p-3">
-              <WifiOff className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between rounded bg-gray-50 p-4">
               <div>
-                <div className="text-sm font-semibold text-gray-900">
-                  Router R-07 Offline
-                </div>
-                <div className="text-xs text-gray-500">2 minutes ago</div>
+                <p className="text-sm text-gray-600">Total Tickets</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {totalTickets}
+                </p>
+              </div>
+              <div className="text-3xl text-blue-500">
+                <Activity className="h-8 w-8" />
               </div>
             </div>
-            <div className="flex gap-3 rounded border-l-4 border-yellow-500 bg-yellow-50 p-3">
-              <Signal className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-500" />
+            <div className="flex items-center justify-between rounded bg-yellow-50 p-4">
               <div>
-                <div className="text-sm font-semibold text-gray-900">
-                  High Latency Detected
-                </div>
-                <div className="text-xs text-gray-500">15 minutes ago</div>
+                <p className="text-sm text-gray-600">Open Tickets</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {openTickets}
+                </p>
+              </div>
+              <div className="text-3xl text-yellow-500">
+                <AlertCircle className="h-8 w-8" />
+              </div>
+            </div>
+            <div className="flex items-center justify-between rounded bg-green-50 p-4">
+              <div>
+                <p className="text-sm text-gray-600">Resolved Tickets</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {totalTickets - openTickets}
+                </p>
+              </div>
+              <div className="text-3xl text-green-500">
+                <Activity className="h-8 w-8" />
               </div>
             </div>
           </div>
