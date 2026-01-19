@@ -9,68 +9,85 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@saintrelion/auth-lib";
-import { useDBOperationsLocked } from "@saintrelion/data-access-layer";
-import type { Subscription } from "@/models/Subscription";
+import { useCurrentUser } from "@saintrelion/auth-lib";
+import type {
+  ClientSubscription,
+  CreateSubscription,
+  UpdateSubscriptionStatus,
+} from "@/models/Subscription";
 import { getCurrentDateTimeString, toDate } from "@saintrelion/time-functions";
 import { PLANS } from "@/constants";
 import type { Plan } from "@/models/Plan";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
+import type { BillingInfo, CreateBilling } from "@/models/Billing";
+import type { User } from "@/models/user";
 
 const BrowsePlansPage = () => {
-  const { user } = useAuth();
+  const user = useCurrentUser<User>();
   const [viewedPlan, setViewedPlan] = useState<Plan | null>(null);
 
   const {
-    useSelect: subscriptionSelect,
-    useInsert: subscriptionInsert,
-    useUpdate: subscriptionUpdate,
-  } = useDBOperationsLocked<Subscription>("Subscription");
+    useList: getSubscription,
+    useInsert: insertSubscription,
+    useUpdate: updateSubscription,
+  } = useResourceLocked<
+    ClientSubscription,
+    CreateSubscription,
+    UpdateSubscriptionStatus
+  >("subscription");
 
-  const { data: currentSubscriptions } = subscriptionSelect({
-    firebaseOptions: {
-      filterField: ["userId", "status"],
-      value: [user.id, "Active"],
-    },
-  });
-  let currentPlan: Plan | null = null;
+  const { useList: getBillings, useInsert: insertBilling } = useResourceLocked<
+    BillingInfo,
+    CreateBilling
+  >("billing");
 
-  let pendingBalance = false;
-  if (currentSubscriptions != undefined && currentSubscriptions.length > 0) {
-    currentPlan = PLANS.filter(
-      (v) => v.id == currentSubscriptions[0].planId,
-    )[0];
+  const currentSubscriptions = getSubscription({
+    filters: { userId: user.id, status: "Active" },
+  }).data;
+  const currentPlan =
+    currentSubscriptions && currentSubscriptions.length > 0
+      ? PLANS.filter((p) => p.id == currentSubscriptions[0].planId)[0]
+      : null;
 
-    pendingBalance = Number(currentSubscriptions[0].balance) > 0;
-  }
+  const currentBillings = getBillings({
+    filters: { userId: user.id },
+  }).data?.filter((b) => b.status === "Not Yet Paid");
+  console.log(currentBillings);
 
   async function handleConfirmPlan(confirmedPlan: Plan) {
     const currentDay = toDate(getCurrentDateTimeString());
 
     if (currentDay != null && confirmedPlan != null) {
-      if (
-        currentSubscriptions != undefined &&
-        currentSubscriptions.length > 0
-      ) {
+      if (currentSubscriptions.length > 0) {
         const currentSubscription = currentSubscriptions[0];
-        subscriptionUpdate.run({
-          field: "id",
-          value: currentSubscription.id,
-          updates: { status: "Disabled" },
+
+        await updateSubscription.run({
+          id: currentSubscription.id,
+          payload: { status: "Disabled" },
         });
       }
 
+      // + 30 days
       currentDay.setDate(currentDay.getDate() + 30);
 
-      const data = {
+      await insertSubscription.run({
         userId: user.id,
         planId: confirmedPlan.id,
-        balance: confirmedPlan.price, // Dont forget calculation here
+        amount: confirmedPlan.price,
         address: user.streetAddress,
         status: "Active",
         nextBillingDate: currentDay.toISOString(),
-      };
+      });
 
-      await subscriptionInsert.run(data);
+      await insertBilling.run({
+        userId: user.id,
+        planId: confirmedPlan.id,
+        customer: `${user.firstName} ${user.lastName}`,
+        amount: confirmedPlan.price,
+        method: "Cash",
+        status: "Not Yet Paid",
+        nextBillingDate: currentDay.toISOString(),
+      });
     }
   }
 
@@ -120,15 +137,15 @@ const BrowsePlansPage = () => {
               >
                 <DialogTrigger asChild>
                   <button
-                    disabled={subscriptionInsert.isLocked}
+                    disabled={insertSubscription.isLocked}
                     onClick={() => {
                       if (
                         currentSubscriptions != undefined &&
                         currentSubscriptions.length > 0
                       ) {
-                        if (pendingBalance) {
+                        if (currentBillings && currentBillings.length > 0) {
                           alert(
-                            "You have pending balance in current subscription, please complete any remaining balance.",
+                            "You have pending bills, please complete any remaining balance.",
                           );
                           return;
                         }

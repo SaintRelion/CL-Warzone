@@ -1,35 +1,13 @@
 import { DataTable } from "@/components/admin/DataTable";
+import type { ClientTicket } from "@/models/Tickets";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
 import type { ColumnDef } from "@tanstack/react-table";
 
 const TicketsPage = () => {
-  const tickets = [
-    {
-      id: 1,
-      customer: "Juan dela Cruz",
-      issue: "No Connection",
-      priority: "Critical",
-      status: "Open",
-      assignedTo: "Tech-01",
-    },
-    {
-      id: 2,
-      customer: "Maria Santos",
-      issue: "Slow Browsing",
-      priority: "High",
-      status: "In Progress",
-      assignedTo: "Tech-02",
-    },
-    {
-      id: 3,
-      customer: "Pedro Reyes",
-      issue: "Billing Issue",
-      priority: "Medium",
-      status: "Open",
-      assignedTo: "Tech-03",
-    },
-  ];
+  const { useList: getTickets } = useResourceLocked<ClientTicket>("tickets");
+  const tickets = getTickets().data;
 
-  const ticketsColumns: ColumnDef<(typeof tickets)[number]>[] = [
+  const ticketsColumns: ColumnDef<ClientTicket>[] = [
     { accessorKey: "customer", header: "Customer" },
     { accessorKey: "issue", header: "Issue" },
     {
@@ -56,6 +34,10 @@ const TicketsPage = () => {
     { accessorKey: "assignedTo", header: "Assigned To" },
   ];
 
-  return <DataTable type="tickets" data={tickets} columns={ticketsColumns} />;
+  return tickets.length > 0 ? (
+    <DataTable type="tickets" data={tickets} columns={ticketsColumns} />
+  ) : (
+    <div>No Tickets</div>
+  );
 };
 export default TicketsPage;

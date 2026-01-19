@@ -1,10 +1,8 @@
-export interface User {
-  id: string;
-  role: string;
+import type { RawAuthUser } from "@saintrelion/auth-lib/dist/models/types";
+
+export interface User extends RawAuthUser {
   firstName: string;
   lastName: string;
-  emailAddress: string;
-  paswordHash: string;
   phoneNumber: string;
   streetAddress: string;
   city: string;
