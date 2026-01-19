@@ -14,8 +14,8 @@ const LoginPage = () => {
 
   const handleLogin = (data: Record<string, string>) => {
     loginWithCredentials.run(
-      "emailAddress",
-      data.emailAddress,
+      "email",
+      data.email,
       data.password,
       setUser,
       (user) => {
@@ -32,12 +32,12 @@ const LoginPage = () => {
           <h1 className="ml-2 text-2xl font-bold text-gray-900">Warzone</h1>
         </div>
 
-        <RenderForm wrapperClass="space-y-4">
+        <RenderForm wrapperClassName="space-y-4">
           <RenderFormField
             field={{
               label: "Email Address",
               type: "email",
-              name: "emailAddress",
+              name: "email",
               placeholder: "your@gmail.com",
             }}
             labelClassName="mb-2 block text-sm font-medium text-gray-700"

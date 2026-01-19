@@ -45,7 +45,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <RenderForm wrapperClass="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center p-4">
+    <RenderForm wrapperClassName="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl h-[80vh] bg-white rounded-xl shadow-2xl p-6 flex flex-col sm:flex-row overflow-hidden">
         {/* Left Side - Branding */}
         <div className="hidden sm:flex sm:flex-col sm:justify-center sm:items-center sm:w-1/3 bg-indigo-600 rounded-l-xl text-white p-6">
@@ -88,7 +88,7 @@ const RegisterPage = () => {
 
             {/* Contact Details */}
             <RenderFormField
-              field={{ label: "Email Address *", type: "email", name: "emailAddress", placeholder: "youremail@gmail.com" }}
+              field={{ label: "Email Address *", type: "email", name: "email", placeholder: "youremail@gmail.com" }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
               inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
             />
