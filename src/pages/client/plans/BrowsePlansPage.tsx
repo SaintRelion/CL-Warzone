@@ -58,10 +58,7 @@ const BrowsePlansPage = () => {
     const currentDay = toDate(getCurrentDateTimeString());
 
     if (currentDay != null && confirmedPlan != null) {
-      if (
-        currentSubscriptions != undefined &&
-        currentSubscriptions.length > 0
-      ) {
+      if (currentSubscriptions.length > 0) {
         const currentSubscription = currentSubscriptions[0];
 
         await updateSubscription.run({

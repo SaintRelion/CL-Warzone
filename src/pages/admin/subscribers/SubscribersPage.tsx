@@ -17,16 +17,18 @@ const SubscribersPage = () => {
   const itemsPerPage = 20;
 
   // Calculate stats
-  const totalSubscribers = subscriptions?.length ?? 0;
-  const activeSubscribers = subscriptions
-    ? subscriptions.filter((s) => s.status === "Active").length
-    : 0;
-  const totalBalance =
-    subscriptions?.reduce((sum, s) => sum + parseFloat(s.amount), 0) ?? 0;
+  const totalSubscribers = subscriptions.length;
+  const activeSubscribers = subscriptions.filter(
+    (s) => s.status === "Active",
+  ).length;
+  const totalBalance = subscriptions.reduce(
+    (sum, s) => sum + parseFloat(s.amount),
+    0,
+  );
 
   // Filter by search term
   const filteredSubscriptions = useMemo(() => {
-    let result = [...(subscriptions ?? [])];
+    let result = [...subscriptions];
 
     if (searchTerm) {
       result = result.filter(

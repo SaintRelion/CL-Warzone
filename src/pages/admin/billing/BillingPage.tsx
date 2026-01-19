@@ -50,11 +50,7 @@ const BillingPage = () => {
   });
 
   let selectedCustomerBill: BillingInfo | undefined;
-  if (
-    cashierBehavior.customerId != "" &&
-    userBillings &&
-    userBillings.length > 0
-  )
+  if (cashierBehavior.customerId != "" && userBillings.length > 0)
     selectedCustomerBill =
       userBillings.filter((b) => b.userId == cashierBehavior.customerId)[0] ??
       undefined;
@@ -73,29 +69,23 @@ const BillingPage = () => {
   const currentYear = new Date().getFullYear();
 
   // Stats for summary cards
-  const totalPaid = userBillings
-    ? userBillings.filter((p) => p.status === "Paid").length
-    : 0;
-  const totalUnpaid = userBillings
-    ? userBillings.filter((p) => p.status === "Not Yet Paid").length
-    : 0;
-  const totalThisMonth = userBillings
-    ? userBillings.filter((p) => {
-        const paymentDate = new Date(p.createdAt);
-        return (
-          paymentDate.getMonth() === currentMonth &&
-          paymentDate.getFullYear() === currentYear
-        );
-      }).length
-    : 0;
+  const totalPaid = userBillings.filter((p) => p.status === "Paid").length;
+  const totalUnpaid = userBillings.filter(
+    (p) => p.status === "Not Yet Paid",
+  ).length;
+  const totalThisMonth = userBillings.filter((p) => {
+    const paymentDate = new Date(p.createdAt);
+    return (
+      paymentDate.getMonth() === currentMonth &&
+      paymentDate.getFullYear() === currentYear
+    );
+  }).length;
   const totalRevenue = userBillings
-    ? userBillings
-        .filter((p) => p.status === "Paid")
-        .reduce((sum, p) => sum + parseInt(p.amount), 0)
-    : 0;
+    .filter((p) => p.status === "Paid")
+    .reduce((sum, p) => sum + parseInt(p.amount), 0);
 
   const filteredAndSortBilling = useMemo(() => {
-    let result = userBillings ? [...userBillings] : [];
+    let result = [...userBillings];
 
     if (searchTerm) {
       result = result.filter(
@@ -344,7 +334,7 @@ const BillingPage = () => {
               <div
                 className="h-1.5 rounded-full bg-indigo-600"
                 style={{
-                  width: `${(totalPaid / (userBillings?.length ?? 0)) * 100}%`,
+                  width: `${(totalPaid / userBillings.length) * 100}%`,
                 }}
               ></div>
             </div>
@@ -367,7 +357,7 @@ const BillingPage = () => {
               <div
                 className="h-1.5 rounded-full bg-yellow-500"
                 style={{
-                  width: `${(totalUnpaid / (userBillings?.length ?? 0)) * 100}%`,
+                  width: `${(totalUnpaid / userBillings.length) * 100}%`,
                 }}
               ></div>
             </div>
@@ -390,7 +380,7 @@ const BillingPage = () => {
               <div
                 className="h-1.5 rounded-full bg-green-500"
                 style={{
-                  width: `${(totalThisMonth / (userBillings?.length ?? 0)) * 100}%`,
+                  width: `${(totalThisMonth / userBillings.length) * 100}%`,
                 }}
               ></div>
             </div>
@@ -593,7 +583,7 @@ const BillingPage = () => {
                         {bill.status === "Paid" && (
                           <button
                             onClick={() => {
-                              const paymentHistory = paymentHistories?.filter(
+                              const paymentHistory = paymentHistories.filter(
                                 (h) => h.billId == bill.id,
                               )[0];
 
@@ -1291,7 +1281,7 @@ const BillingPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {!paymentHistories || paymentHistories.length <= 0 ? (
+                    {paymentHistories.length <= 0 ? (
                       <div>No Payment History</div>
                     ) : (
                       paymentHistories
@@ -1340,16 +1330,14 @@ const BillingPage = () => {
                   </p>
                   <p className="mt-1 text-2xl font-black text-green-600">
                     ₱
-                    {!paymentHistories
-                      ? "0"
-                      : paymentHistories
-                          .filter(
-                            (p) =>
-                              p.userId === selectedCustomerBill.userId &&
-                              p.status === "Paid",
-                          )
-                          .reduce((sum, p) => sum + parseInt(p.amount), 0)
-                          .toLocaleString()}
+                    {paymentHistories
+                      .filter(
+                        (p) =>
+                          p.userId === selectedCustomerBill.userId &&
+                          p.status === "Paid",
+                      )
+                      .reduce((sum, p) => sum + parseInt(p.amount), 0)
+                      .toLocaleString()}
                   </p>
                 </div>
                 <div className="text-center">
@@ -1358,16 +1346,14 @@ const BillingPage = () => {
                   </p>
                   <p className="mt-1 text-2xl font-black text-yellow-600">
                     ₱
-                    {!paymentHistories
-                      ? "0"
-                      : paymentHistories
-                          .filter(
-                            (p) =>
-                              p.customer === selectedCustomerBill.customer &&
-                              p.status === "Not Yet Paid",
-                          )
-                          .reduce((sum, p) => sum + parseInt(p.amount), 0)
-                          .toLocaleString()}
+                    {paymentHistories
+                      .filter(
+                        (p) =>
+                          p.customer === selectedCustomerBill.customer &&
+                          p.status === "Not Yet Paid",
+                      )
+                      .reduce((sum, p) => sum + parseInt(p.amount), 0)
+                      .toLocaleString()}
                   </p>
                 </div>
                 <div className="text-center">
@@ -1376,14 +1362,12 @@ const BillingPage = () => {
                   </p>
                   <p className="mt-1 text-2xl font-black text-blue-600">
                     ₱
-                    {!paymentHistories
-                      ? "0"
-                      : paymentHistories
-                          .filter(
-                            (p) => p.customer === selectedCustomerBill.customer,
-                          )
-                          .reduce((sum, p) => sum + parseInt(p.amount), 0)
-                          .toLocaleString()}
+                    {paymentHistories
+                      .filter(
+                        (p) => p.customer === selectedCustomerBill.customer,
+                      )
+                      .reduce((sum, p) => sum + parseInt(p.amount), 0)
+                      .toLocaleString()}
                   </p>
                 </div>
               </div>

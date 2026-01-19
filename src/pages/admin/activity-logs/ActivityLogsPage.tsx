@@ -47,23 +47,21 @@ const ActivityLogsPage = () => {
 
   // Filter logs based on search term, category, and status
   const filteredLogs = useMemo(() => {
-    return !activityLogs
-      ? []
-      : activityLogs.filter((log) => {
-          const matchesSearch =
-            log.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            log.ipAddress.includes(searchTerm);
+    return activityLogs.filter((log) => {
+      const matchesSearch =
+        log.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.ipAddress.includes(searchTerm);
 
-          const matchesCategory =
-            selectedCategory === "all" || log.category === selectedCategory;
+      const matchesCategory =
+        selectedCategory === "all" || log.category === selectedCategory;
 
-          const matchesStatus =
-            selectedStatus === "all" || log.status === selectedStatus;
+      const matchesStatus =
+        selectedStatus === "all" || log.status === selectedStatus;
 
-          return matchesSearch && matchesCategory && matchesStatus;
-        });
+      return matchesSearch && matchesCategory && matchesStatus;
+    });
   }, [activityLogs, searchTerm, selectedCategory, selectedStatus]);
 
   // Pagination

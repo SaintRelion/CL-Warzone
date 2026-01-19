@@ -61,7 +61,7 @@ export const AdminDashboardPage = () => {
         <StatCard
           icon={Users}
           title="Active Subscribers"
-          value={subcriptions?.length.toString() ?? "0"}
+          value={subcriptions.length.toString()}
           color="blue"
         />
         <StatCard

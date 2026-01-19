@@ -42,9 +42,6 @@ registerDerivedResource({
         nextBillingDate: bill.nextBillingDate,
 
         status: bill.status,
-
-        // useful for UI actions
-        canPay: bill.balance > 0,
       };
     });
   },

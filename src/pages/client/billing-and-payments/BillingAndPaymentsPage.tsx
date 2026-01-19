@@ -32,15 +32,11 @@ const BillingAndPaymentsPage = () => {
     },
   }).data;
 
-  const sortedPaymentHistory =
-    paymentHistories && paymentHistories.length > 0
-      ? [...paymentHistories].sort((a, b) => {
-          const dateA = toDate(a.createdAt)?.getTime() ?? 0;
-          const dateB = toDate(b.createdAt)?.getTime() ?? 0;
-          return dateB - dateA;
-        })
-      : [];
-
+  const sortedPaymentHistory = [...paymentHistories].sort((a, b) => {
+    const dateA = toDate(a.createdAt)?.getTime() ?? 0;
+    const dateB = toDate(b.createdAt)?.getTime() ?? 0;
+    return dateB - dateA;
+  });
   /* ===================== SUBSCRIPTION ===================== */
   const { useList: getSubscriptions } = useResourceLocked<
     ClientSubscription,
@@ -53,9 +49,7 @@ const BillingAndPaymentsPage = () => {
   }).data;
 
   const currentSubscription =
-    currentSubscriptions && currentSubscriptions.length > 0
-      ? currentSubscriptions[0]
-      : null;
+    currentSubscriptions.length > 0 ? currentSubscriptions[0] : null;
 
   const currentPlan: Plan | null = currentSubscription
     ? (PLANS.find((p) => p.id === currentSubscription.planId) ?? null)

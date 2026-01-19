@@ -34,7 +34,7 @@ const TicketsPage = () => {
     { accessorKey: "assignedTo", header: "Assigned To" },
   ];
 
-  return tickets ? (
+  return tickets.length > 0 ? (
     <DataTable type="tickets" data={tickets} columns={ticketsColumns} />
   ) : (
     <div>No Tickets</div>

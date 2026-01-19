@@ -151,7 +151,7 @@ const SupportTicketsPage = () => {
 
       {/* ===================== TICKET LIST ===================== */}
       <div className="space-y-4">
-        {myTickets ? (
+        {myTickets.length > 0 ? (
           myTickets.map((t) => (
             <div
               key={t.id}
