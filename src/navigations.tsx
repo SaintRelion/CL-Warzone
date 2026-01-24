@@ -27,25 +27,20 @@ roleLayoutMap[""] = {
   redirect: "/",
   layout: PublicLayout,
 };
-roleLayoutMap["admin"] = {
-  redirect: "/admin",
-  layout: AdminLayout,
-};
-roleLayoutMap["client"] = {
-  redirect: "/",
-  layout: ClientLayout,
-};
-
 registerGroupAppRoutes({
   path: "/",
   layout: createRoleLayout(""),
   errorElement: <NotFound />,
   children: [
-    { path: "login", public: true, element: <LoginPage /> },
-    { path: "register", public: true, element: <RegisterPage /> },
+    { path: "login", auth: true, element: <LoginPage /> },
+    { path: "register", auth: true, element: <RegisterPage /> },
   ],
 });
 
+roleLayoutMap["admin"] = {
+  redirect: "/admin",
+  layout: AdminLayout,
+};
 registerGroupAppRoutes({
   path: "/admin",
   layout: createRoleLayout("admin"),
@@ -89,6 +84,10 @@ registerGroupAppRoutes({
   ],
 });
 
+roleLayoutMap["client"] = {
+  redirect: "/",
+  layout: ClientLayout,
+};
 registerGroupAppRoutes({
   path: "/",
   layout: createRoleLayout("client"),
