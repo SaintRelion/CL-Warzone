@@ -8,7 +8,7 @@ import type {
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import {
   formatReadableDate,
-  formatReadableDateTime,
+  // formatReadableDateTime,
   getCurrentDateTimeString,
 } from "@saintrelion/time-functions";
 import { useState, useRef, useMemo } from "react";
@@ -532,7 +532,7 @@ const BillingPage = () => {
                       {bill.createdAt}
                     </td> */}
                     <td className="px-4 py-3 font-black whitespace-nowrap text-indigo-600">
-                      {formatReadableDateTime(bill.nextBillingDate)}
+                      {formatReadableDate(bill.nextBillingDate)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span
@@ -600,7 +600,7 @@ const BillingPage = () => {
                                   transactionScreenshot:
                                     paymentHistory.transactionScreenshot,
                                   transactionRef: paymentHistory.transactionRef,
-                                  createdAt: formatReadableDateTime(
+                                  createdAt: formatReadableDate(
                                     paymentHistory.createdAt,
                                   ),
                                   nextBillingDate:

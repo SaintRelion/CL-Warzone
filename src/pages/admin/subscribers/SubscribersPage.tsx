@@ -1,14 +1,32 @@
 import { DataTable } from "@/components/admin/DataTable";
 import type { ClientSubscription } from "@/models/Subscription";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import { formatReadableDateTime } from "@saintrelion/time-functions";
+import { formatReadableDate, formatReadableDateTime } from "@saintrelion/time-functions";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState, useMemo } from "react";
+import { Eye, Edit, MoreHorizontal, ToggleLeft, ServerCog } from "lucide-react";
+import { useAuth } from "@saintrelion/auth-lib";
+import type { User } from "@/models/user";
 
 const SubscribersPage = () => {
-  const { useList: getSubscriptions } =
-    useResourceLocked<ClientSubscription>("usersubscriptions");
+  const { useList: getSubscriptions, useUpdate: updateSubscription } =
+    useResourceLocked<ClientSubscription, never, Partial<ClientSubscription>>("subscription");
   const subscriptions = getSubscriptions().data;
+  const { useList: getUsers } = useResourceLocked<User>("user");
+  const users = getUsers().data;
+  const { useUpdate: updateUser } = useResourceLocked<never, never, User>("user");
+  const { run: doUpdateUser } = updateUser;
+  const usersById = (users || []).reduce<Record<string, User>>((acc, u) => {
+    if (u?.id) acc[u.id] = u;
+    return acc;
+  }, {});
+  // Debug: log a sample subscription shape to help diagnose missing fields
+  if (typeof window !== "undefined") {
+    // avoid noisy logs in SSR; only log when subscriptions change in browser
+    // eslint-disable-next-line no-console
+    console.debug("[SubscribersPage] sample subscription:", subscriptions[0]);
+  }
+  const { run: doUpdateSubscription, isLocked: isUpdating } = updateSubscription;
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -54,22 +72,60 @@ const SubscribersPage = () => {
 
   const subscriptionColumns: ColumnDef<ClientSubscription>[] = [
     {
-      accessorKey: "name",
+      id: "name",
       header: "Subscriber Name",
-      cell: ({ getValue }) => (
-        <span className="text-sm font-medium text-gray-900">
-          {getValue<string>()}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const sub = row.original as any;
+
+        const tryNames: Array<string | null | undefined> = [];
+
+        // 1. explicit subscription name
+        tryNames.push(sub.name);
+
+        // 2. populated `user` object (server returns `user` from populateSubscription)
+        const user = sub.user || (typeof sub.userId === "object" ? sub.userId : null);
+        if (user) {
+          // prefer first/last, then other common variants
+          const first = user.firstName || user.first_name || user.first || null;
+          const last = user.lastName || user.last_name || user.last || null;
+          if (first || last) tryNames.push([first, last].filter(Boolean).join(" "));
+          // fallback to email
+          tryNames.push(user.emailAddress || user.email || user.username);
+        }
+
+        // 3. populated `userId` when it's an object with nested name fields (already covered),
+        // or when userId is a plain string - try to resolve via users map
+        if (typeof sub.userId === "string") {
+          // strip leading colon or non-alphanumeric characters
+          const cleanId = String(sub.userId).replace(/^[:\s]+/, "");
+          const resolved = usersById[cleanId];
+          if (resolved) tryNames.push([resolved.firstName, resolved.lastName].filter(Boolean).join(" ") || resolved.emailAddress || resolved.email);
+          else tryNames.push(cleanId);
+        }
+
+        // 4. plan/customer fields sometimes used
+        tryNames.push(sub.customer || sub.customerName);
+
+        // 5. lastly, subscription id
+        tryNames.push(sub.id || sub._id);
+
+        const name = tryNames.find((v) => typeof v === "string" && v.trim() !== "") || "—";
+
+        return <span className="text-sm font-medium text-gray-900">{name}</span>;
+      },
     },
     {
       accessorKey: "planId",
       header: "Plan",
-      cell: ({ getValue }) => (
-        <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-          Plan {getValue<string>()}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const sub = row.original as any;
+        const planName = sub.plan?.name || sub.planName || sub.planId;
+        return (
+          <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+            {planName ? `Plan ${planName}` : "—"}
+          </span>
+        );
+      },
     },
     {
       accessorKey: "status",
@@ -105,14 +161,15 @@ const SubscribersPage = () => {
           </div>
         </div>
       ),
-      cell: ({ getValue }) => (
-        <span className="font-semibold text-gray-900">
-          ₱
-          {parseFloat(getValue<string>()).toLocaleString("en-PH", {
-            minimumFractionDigits: 2,
-          })}
-        </span>
-      ),
+      cell: ({ row, getValue }) => {
+        const sub = row.original as any;
+        // server uses `balance` (number) while some client shapes use `amount`
+        const raw = sub.balance !== undefined ? String(sub.balance) : getValue<string>();
+        const num = parseFloat(raw as string) || 0;
+        return (
+          <span className="font-semibold text-gray-900">₱{num.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
+        );
+      },
     },
     {
       accessorKey: "address",
@@ -136,12 +193,153 @@ const SubscribersPage = () => {
         }
         return (
           <span className="text-sm font-medium text-gray-700">
-            📅 {formatReadableDateTime(dateStr)}
+            📅 {formatReadableDate(dateStr)}
           </span>
         );
       },
     },
+    // Actions column (custom)
+    {
+      id: "actions",
+      header: "",
+      cell: ({ row }) => {
+        const sub = row.original as ClientSubscription;
+        return (
+          <div className="flex items-center justify-end gap-2">
+            <button
+              aria-label={`View subscriber ${sub.id}`}
+              onClick={() => handleOpenView(sub)}
+              className="rounded p-2 hover:bg-gray-50"
+            >
+              <Eye className="h-4 w-4 text-gray-600" />
+            </button>
+
+            <button
+              aria-label={`Edit subscriber ${sub.id}`}
+              onClick={() => handleOpenEdit(sub)}
+              className="rounded p-2 hover:bg-gray-50"
+            >
+              <Edit className="h-4 w-4 text-gray-600" />
+            </button>
+
+            <div className="relative">
+              <button
+                aria-haspopup="menu"
+                aria-label={`More actions for ${sub.id}`}
+                onClick={(e) => toggleMoreMenu(e, sub.id)}
+                className="rounded p-2 hover:bg-gray-50"
+              >
+                <MoreHorizontal className="h-4 w-4 text-gray-600" />
+              </button>
+              {openMoreMenuId === sub.id && (
+                <div className="absolute right-0 z-50 mt-2 w-56 rounded-lg border bg-white shadow-lg">
+                  <ul className="py-2">
+                    {/* Enable / Disable */}
+                    {sub.status !== "Archived" && (
+                      <li>
+                        <button
+                          onClick={() => handleToggleStatus(sub)}
+                          className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
+                        >
+                          <ToggleLeft className="h-4 w-4 text-gray-600" />
+                          <span>{sub.status === "Active" ? "Deactivate" : "Enable"}</span>
+                        </button>
+                      </li>
+                    )}
+
+                    {/* Change Plan */}
+                    {sub.status !== "Archived" && (
+                      <li>
+                        <button
+                          onClick={() => handleChangePlan(sub)}
+                          className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
+                        >
+                          <ServerCog className="h-4 w-4 text-gray-600" />
+                          <span>Change Plan</span>
+                        </button>
+                      </li>
+                    )}
+
+                    {/* View-only actions: Enable/Disable and Change Plan remain */}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
   ];
+
+  // Local UI state for actions and modals
+  const [openMoreMenuId, setOpenMoreMenuId] = useState<string | null>(null);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selected, setSelected] = useState<ClientSubscription | null>(null);
+  const [editName, setEditName] = useState<string>("");
+
+  const auth = useAuth();
+
+  function toggleMoreMenu(e: React.MouseEvent, id: string) {
+    e.stopPropagation();
+    setOpenMoreMenuId((cur) => (cur === id ? null : id));
+  }
+
+  function handleOpenView(sub: ClientSubscription) {
+    setSelected(sub);
+    setViewOpen(true);
+    setOpenMoreMenuId(null);
+  }
+
+  function handleOpenEdit(sub: ClientSubscription) {
+    setSelected(sub);
+    // populate editable name from subscription or populated user or users map
+    const subAny = sub as any;
+    const userPop = subAny.user || (typeof subAny.userId === "object" ? subAny.userId : null);
+    let nameVal = "";
+    if (subAny.name && String(subAny.name).trim() !== "") nameVal = subAny.name;
+    else if (userPop) nameVal = `${userPop.firstName || userPop.first_name || ""} ${userPop.lastName || userPop.last_name || ""}`.trim();
+    else if (typeof subAny.userId === "string") {
+      const id = String(subAny.userId).replace(/^[:\s]+/, "");
+      const resolved = usersById[id];
+      if (resolved) nameVal = `${resolved.firstName || ""} ${resolved.lastName || ""}`.trim();
+    }
+    if (!nameVal && subAny.customer) nameVal = subAny.customer;
+    setEditName(nameVal);
+    setEditOpen(true);
+    setOpenMoreMenuId(null);
+  }
+
+  function handleToggleStatus(sub: ClientSubscription) {
+    const newStatus = sub.status === "Active" ? "Deactivate" : "Active";
+    setOpenMoreMenuId(null);
+    (async () => {
+      try {
+        await doUpdateSubscription({ id: sub.id, payload: { status: newStatus } });
+        alert(`Subscriber #${sub.id} status updated to ${newStatus}`);
+      } catch (err) {
+        console.error(err);
+        alert(`Failed to update status for subscriber #${sub.id}`);
+      }
+    })();
+  }
+
+  function handleChangePlan(sub: ClientSubscription) {
+    setOpenMoreMenuId(null);
+    const newPlan = prompt("Enter new plan ID:", sub.planId);
+    if (!newPlan || newPlan === sub.planId) return;
+    (async () => {
+      try {
+        await doUpdateSubscription({ id: sub.id, payload: { planId: newPlan } });
+        alert(`Subscriber #${sub.id} plan changed to ${newPlan}`);
+      } catch (err) {
+        console.error(err);
+        alert(`Failed to change plan for subscriber #${sub.id}`);
+      }
+    })();
+  }
+
+  // Removed Reset Portal Credentials, View Connection Info, and Archive handlers per request
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -227,9 +425,140 @@ const SubscribersPage = () => {
             type="Subcribers"
             data={paginatedSubscriptions}
             columns={subscriptionColumns}
+            showDefaultActions={false}
             getRowId={(row) => row.id}
           />
         </div>
+
+        {/* View Modal */}
+        {viewOpen && selected && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+              <div className="flex items-start justify-between">
+                <h2 className="text-lg font-bold">Subscriber Overview</h2>
+                <button onClick={() => setViewOpen(false)} aria-label="Close" className="text-gray-500">✕</button>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs text-gray-500">Full name</p>
+                  <p className="font-medium text-gray-900">{selected.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Plan</p>
+                  <p className="font-medium text-gray-900">{selected.planId}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Status</p>
+                  <p className="font-medium text-gray-900">{selected.status}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Address</p>
+                  <p className="font-medium text-gray-900">{selected.address}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Outstanding balance</p>
+                  <p className="font-medium text-gray-900">₱{parseFloat(selected.amount).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Next billing</p>
+                  <p className="font-medium text-gray-900">{formatReadableDate(selected.nextBillingDate)}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button onClick={() => setViewOpen(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm">Close</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Modal (Admin-only fields) */}
+        {editOpen && selected && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+              <div className="flex items-start justify-between">
+                <h2 className="text-lg font-bold">Edit Subscriber</h2>
+                <button onClick={() => setEditOpen(false)} aria-label="Close" className="text-gray-500">✕</button>
+              </div>
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const formData = new FormData(form);
+                  const payload: Partial<ClientSubscription> = {
+                    name: String(formData.get("name") || "").trim(),
+                    address: String(formData.get("address") || "").trim(),
+                    planId: String(formData.get("planId") || "").trim(),
+                  };
+                  const notes = String(formData.get("notes") || "").trim();
+                  if (notes) (payload as any).notes = notes;
+
+                  try {
+                    // Update subscription fields
+                    await doUpdateSubscription({ id: selected.id, payload });
+
+                    // Update user name if changed and user exists
+                    const formName = String(formData.get('name') || '').trim();
+                    const sub = selected as any;
+                    const user = sub.user || (typeof sub.userId === 'object' ? sub.userId : null);
+                    if (formName && user) {
+                      const existingName = `${user.firstName || user.first_name || ''} ${user.lastName || user.last_name || ''}`.trim();
+                      if (existingName !== formName) {
+                        const parts = formName.split(/\s+/);
+                        const firstName = parts.shift() || '';
+                        const lastName = parts.join(' ') || '';
+                        try {
+                          await doUpdateUser({ id: user.id || user._id, payload: { firstName, lastName } as any });
+                        } catch (uerr) {
+                          console.error('Failed to update user name', uerr);
+                        }
+                      }
+                    }
+
+                    alert(`Saved changes for subscriber #${selected.id}`);
+                    setEditOpen(false);
+                  } catch (err) {
+                    console.error(err);
+                    alert(`Failed to save changes for subscriber #${selected.id}`);
+                  }
+                }}
+                className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
+              >
+                <div className="sm:col-span-2">
+                  <label className="text-xs text-gray-500">Full name</label>
+                  <input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    name="name"
+                    className="w-full rounded border px-3 py-2"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-xs text-gray-500">Service address</label>
+                  <input defaultValue={selected.address} name="address" className="w-full rounded border px-3 py-2" />
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-500">Assigned plan</label>
+                  <input defaultValue={selected.planId} name="planId" className="w-full rounded border px-3 py-2" />
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-500">Notes / remarks</label>
+                  <input defaultValue={(selected as any).notes || ""} name="notes" className="w-full rounded border px-3 py-2" />
+                </div>
+
+                <div className="sm:col-span-2 mt-4 flex justify-end gap-3">
+                  <button type="button" onClick={() => setEditOpen(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm">Cancel</button>
+                  <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* PAGINATION */}
         {totalPages > 1 && (
