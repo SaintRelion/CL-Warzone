@@ -10,12 +10,12 @@ const RegisterPage = () => {
   const auth = useAuth();
 
   const serviceAreas = [
-    "Metro Manila",
-    "Cebu City",
-    "Davao City",
-    "Baguio City",
-    "Iloilo City",
-    "Cagayan de Oro",
+    "Katipunan",
+    "Roxas",
+    "Piñan",
+    "Osmeña",
+    "Polanco",
+
   ];
 
   const handleRegister = async (data: Record<string, string>) => {

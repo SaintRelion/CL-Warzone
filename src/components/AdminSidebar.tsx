@@ -53,15 +53,6 @@ const AdminSidebar = () => {
         </button>
       </div>
 
-      {sidebarOpen && (
-        <div className="border-t border-gray-700 p-4">
-          <div className="text-xs text-gray-400">System Status</div>
-          <div className="mt-2 flex items-center gap-2">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
-            <span className="text-sm">All Systems Operational</span>
-          </div>
-        </div>
-      )}
     </aside>
   );
 };
