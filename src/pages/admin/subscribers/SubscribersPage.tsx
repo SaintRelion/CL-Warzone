@@ -1,7 +1,10 @@
 import { DataTable } from "@/components/admin/DataTable";
 import type { ClientSubscription } from "@/models/Subscription";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import { formatReadableDate, formatReadableDateTime } from "@saintrelion/time-functions";
+import {
+  formatReadableDate,
+  formatReadableDateTime,
+} from "@saintrelion/time-functions";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useState, useMemo } from "react";
 import { Eye, Edit, MoreHorizontal, ToggleLeft, ServerCog } from "lucide-react";
@@ -10,11 +13,15 @@ import type { User } from "@/models/user";
 
 const SubscribersPage = () => {
   const { useList: getSubscriptions, useUpdate: updateSubscription } =
-    useResourceLocked<ClientSubscription, never, Partial<ClientSubscription>>("subscription");
+    useResourceLocked<ClientSubscription, never, Partial<ClientSubscription>>(
+      "subscription",
+    );
   const subscriptions = getSubscriptions().data;
   const { useList: getUsers } = useResourceLocked<User>("user");
   const users = getUsers().data;
-  const { useUpdate: updateUser } = useResourceLocked<never, never, User>("user");
+  const { useUpdate: updateUser } = useResourceLocked<never, never, User>(
+    "user",
+  );
   const { run: doUpdateUser } = updateUser;
   const usersById = (users || []).reduce<Record<string, User>>((acc, u) => {
     if (u?.id) acc[u.id] = u;
@@ -26,7 +33,8 @@ const SubscribersPage = () => {
     // eslint-disable-next-line no-console
     console.debug("[SubscribersPage] sample subscription:", subscriptions[0]);
   }
-  const { run: doUpdateSubscription, isLocked: isUpdating } = updateSubscription;
+  const { run: doUpdateSubscription, isLocked: isUpdating } =
+    updateSubscription;
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -83,12 +91,14 @@ const SubscribersPage = () => {
         tryNames.push(sub.name);
 
         // 2. populated `user` object (server returns `user` from populateSubscription)
-        const user = sub.user || (typeof sub.userId === "object" ? sub.userId : null);
+        const user =
+          sub.user || (typeof sub.userId === "object" ? sub.userId : null);
         if (user) {
           // prefer first/last, then other common variants
           const first = user.firstName || user.first_name || user.first || null;
           const last = user.lastName || user.last_name || user.last || null;
-          if (first || last) tryNames.push([first, last].filter(Boolean).join(" "));
+          if (first || last)
+            tryNames.push([first, last].filter(Boolean).join(" "));
           // fallback to email
           tryNames.push(user.emailAddress || user.email || user.username);
         }
@@ -99,7 +109,14 @@ const SubscribersPage = () => {
           // strip leading colon or non-alphanumeric characters
           const cleanId = String(sub.userId).replace(/^[:\s]+/, "");
           const resolved = usersById[cleanId];
-          if (resolved) tryNames.push([resolved.firstName, resolved.lastName].filter(Boolean).join(" ") || resolved.emailAddress || resolved.email);
+          if (resolved)
+            tryNames.push(
+              [resolved.firstName, resolved.lastName]
+                .filter(Boolean)
+                .join(" ") ||
+                resolved.emailAddress ||
+                resolved.email,
+            );
           else tryNames.push(cleanId);
         }
 
@@ -109,9 +126,12 @@ const SubscribersPage = () => {
         // 5. lastly, subscription id
         tryNames.push(sub.id || sub._id);
 
-        const name = tryNames.find((v) => typeof v === "string" && v.trim() !== "") || "—";
+        const name =
+          tryNames.find((v) => typeof v === "string" && v.trim() !== "") || "—";
 
-        return <span className="text-sm font-medium text-gray-900">{name}</span>;
+        return (
+          <span className="text-sm font-medium text-gray-900">{name}</span>
+        );
       },
     },
     {
@@ -164,10 +184,13 @@ const SubscribersPage = () => {
       cell: ({ row, getValue }) => {
         const sub = row.original as any;
         // server uses `balance` (number) while some client shapes use `amount`
-        const raw = sub.balance !== undefined ? String(sub.balance) : getValue<string>();
+        const raw =
+          sub.balance !== undefined ? String(sub.balance) : getValue<string>();
         const num = parseFloat(raw as string) || 0;
         return (
-          <span className="font-semibold text-gray-900">₱{num.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</span>
+          <span className="font-semibold text-gray-900">
+            ₱{num.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+          </span>
         );
       },
     },
@@ -242,7 +265,9 @@ const SubscribersPage = () => {
                           className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-50"
                         >
                           <ToggleLeft className="h-4 w-4 text-gray-600" />
-                          <span>{sub.status === "Active" ? "Deactivate" : "Enable"}</span>
+                          <span>
+                            {sub.status === "Active" ? "Deactivate" : "Enable"}
+                          </span>
                         </button>
                       </li>
                     )}
@@ -295,14 +320,19 @@ const SubscribersPage = () => {
     setSelected(sub);
     // populate editable name from subscription or populated user or users map
     const subAny = sub as any;
-    const userPop = subAny.user || (typeof subAny.userId === "object" ? subAny.userId : null);
+    const userPop =
+      subAny.user || (typeof subAny.userId === "object" ? subAny.userId : null);
     let nameVal = "";
     if (subAny.name && String(subAny.name).trim() !== "") nameVal = subAny.name;
-    else if (userPop) nameVal = `${userPop.firstName || userPop.first_name || ""} ${userPop.lastName || userPop.last_name || ""}`.trim();
+    else if (userPop)
+      nameVal =
+        `${userPop.firstName || userPop.first_name || ""} ${userPop.lastName || userPop.last_name || ""}`.trim();
     else if (typeof subAny.userId === "string") {
       const id = String(subAny.userId).replace(/^[:\s]+/, "");
       const resolved = usersById[id];
-      if (resolved) nameVal = `${resolved.firstName || ""} ${resolved.lastName || ""}`.trim();
+      if (resolved)
+        nameVal =
+          `${resolved.firstName || ""} ${resolved.lastName || ""}`.trim();
     }
     if (!nameVal && subAny.customer) nameVal = subAny.customer;
     setEditName(nameVal);
@@ -315,7 +345,10 @@ const SubscribersPage = () => {
     setOpenMoreMenuId(null);
     (async () => {
       try {
-        await doUpdateSubscription({ id: sub.id, payload: { status: newStatus } });
+        await doUpdateSubscription({
+          id: sub.id,
+          payload: { status: newStatus },
+        });
         alert(`Subscriber #${sub.id} status updated to ${newStatus}`);
       } catch (err) {
         console.error(err);
@@ -330,7 +363,10 @@ const SubscribersPage = () => {
     if (!newPlan || newPlan === sub.planId) return;
     (async () => {
       try {
-        await doUpdateSubscription({ id: sub.id, payload: { planId: newPlan } });
+        await doUpdateSubscription({
+          id: sub.id,
+          payload: { planId: newPlan },
+        });
         alert(`Subscriber #${sub.id} plan changed to ${newPlan}`);
       } catch (err) {
         console.error(err);
@@ -436,7 +472,13 @@ const SubscribersPage = () => {
             <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
               <div className="flex items-start justify-between">
                 <h2 className="text-lg font-bold">Subscriber Overview</h2>
-                <button onClick={() => setViewOpen(false)} aria-label="Close" className="text-gray-500">✕</button>
+                <button
+                  onClick={() => setViewOpen(false)}
+                  aria-label="Close"
+                  className="text-gray-500"
+                >
+                  ✕
+                </button>
               </div>
 
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -454,20 +496,34 @@ const SubscribersPage = () => {
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Address</p>
-                  <p className="font-medium text-gray-900">{selected.address}</p>
+                  <p className="font-medium text-gray-900">
+                    {selected.address}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Outstanding balance</p>
-                  <p className="font-medium text-gray-900">₱{parseFloat(selected.amount).toLocaleString("en-PH", { minimumFractionDigits: 2 })}</p>
+                  <p className="font-medium text-gray-900">
+                    ₱
+                    {parseFloat(selected.amount).toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500">Next billing</p>
-                  <p className="font-medium text-gray-900">{formatReadableDate(selected.nextBillingDate)}</p>
+                  <p className="font-medium text-gray-900">
+                    {formatReadableDate(selected.nextBillingDate)}
+                  </p>
                 </div>
               </div>
 
               <div className="mt-6 flex justify-end">
-                <button onClick={() => setViewOpen(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm">Close</button>
+                <button
+                  onClick={() => setViewOpen(false)}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
@@ -479,7 +535,13 @@ const SubscribersPage = () => {
             <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
               <div className="flex items-start justify-between">
                 <h2 className="text-lg font-bold">Edit Subscriber</h2>
-                <button onClick={() => setEditOpen(false)} aria-label="Close" className="text-gray-500">✕</button>
+                <button
+                  onClick={() => setEditOpen(false)}
+                  aria-label="Close"
+                  className="text-gray-500"
+                >
+                  ✕
+                </button>
               </div>
 
               <form
@@ -500,19 +562,25 @@ const SubscribersPage = () => {
                     await doUpdateSubscription({ id: selected.id, payload });
 
                     // Update user name if changed and user exists
-                    const formName = String(formData.get('name') || '').trim();
+                    const formName = String(formData.get("name") || "").trim();
                     const sub = selected as any;
-                    const user = sub.user || (typeof sub.userId === 'object' ? sub.userId : null);
+                    const user =
+                      sub.user ||
+                      (typeof sub.userId === "object" ? sub.userId : null);
                     if (formName && user) {
-                      const existingName = `${user.firstName || user.first_name || ''} ${user.lastName || user.last_name || ''}`.trim();
+                      const existingName =
+                        `${user.firstName || user.first_name || ""} ${user.lastName || user.last_name || ""}`.trim();
                       if (existingName !== formName) {
                         const parts = formName.split(/\s+/);
-                        const firstName = parts.shift() || '';
-                        const lastName = parts.join(' ') || '';
+                        const firstName = parts.shift() || "";
+                        const lastName = parts.join(" ") || "";
                         try {
-                          await doUpdateUser({ id: user.id || user._id, payload: { firstName, lastName } as any });
+                          await doUpdateUser({
+                            id: user.id || user._id,
+                            payload: { firstName, lastName } as any,
+                          });
                         } catch (uerr) {
-                          console.error('Failed to update user name', uerr);
+                          console.error("Failed to update user name", uerr);
                         }
                       }
                     }
@@ -521,7 +589,9 @@ const SubscribersPage = () => {
                     setEditOpen(false);
                   } catch (err) {
                     console.error(err);
-                    alert(`Failed to save changes for subscriber #${selected.id}`);
+                    alert(
+                      `Failed to save changes for subscriber #${selected.id}`,
+                    );
                   }
                 }}
                 className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
@@ -537,23 +607,50 @@ const SubscribersPage = () => {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-xs text-gray-500">Service address</label>
-                  <input defaultValue={selected.address} name="address" className="w-full rounded border px-3 py-2" />
+                  <label className="text-xs text-gray-500">
+                    Service address
+                  </label>
+                  <input
+                    defaultValue={selected.address}
+                    name="address"
+                    className="w-full rounded border px-3 py-2"
+                  />
                 </div>
 
                 <div>
                   <label className="text-xs text-gray-500">Assigned plan</label>
-                  <input defaultValue={selected.planId} name="planId" className="w-full rounded border px-3 py-2" />
+                  <input
+                    defaultValue={selected.planId}
+                    name="planId"
+                    className="w-full rounded border px-3 py-2"
+                  />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500">Notes / remarks</label>
-                  <input defaultValue={(selected as any).notes || ""} name="notes" className="w-full rounded border px-3 py-2" />
+                  <label className="text-xs text-gray-500">
+                    Notes / remarks
+                  </label>
+                  <input
+                    defaultValue={(selected as any).notes || ""}
+                    name="notes"
+                    className="w-full rounded border px-3 py-2"
+                  />
                 </div>
 
-                <div className="sm:col-span-2 mt-4 flex justify-end gap-3">
-                  <button type="button" onClick={() => setEditOpen(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm">Cancel</button>
-                  <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white">Save</button>
+                <div className="mt-4 flex justify-end gap-3 sm:col-span-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditOpen(false)}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white"
+                  >
+                    Save
+                  </button>
                 </div>
               </form>
             </div>

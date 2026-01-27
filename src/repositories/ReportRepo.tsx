@@ -1,9 +1,13 @@
-import { registerResource, registerDerivedResource } from "@saintrelion/data-access-layer";
+import {
+  registerResource,
+  registerDerivedResource,
+} from "@saintrelion/data-access-layer";
 
 // Register the reports resource
 registerResource({
   name: "reports",
   endpoint: "reports/",
+  store: "Reports",
 });
 
 // Register monthly payment report derived resource
@@ -26,8 +30,6 @@ registerDerivedResource({
   resolve: ({ user, billing, paymenthistory }) => {
     // This is handled by the backend endpoint
     // Frontend just calls the endpoint directly
-    return {
-      message: "Use the API endpoint directly to generate reports",
-    };
+    return [];
   },
 });
