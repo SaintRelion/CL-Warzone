@@ -8,7 +8,7 @@ import type {
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import {
   formatReadableDate,
-  // formatReadableDateTime,
+  formatReadableDateTime,
   getCurrentDateTimeString,
 } from "@saintrelion/time-functions";
 import { useState, useRef, useMemo } from "react";
@@ -23,11 +23,13 @@ const BillingPage = () => {
   >("billing");
   const { useList: getUserBillings } =
     useResourceLocked<BillingInfo>("userbillings");
+  const { useList: getBillings } = useResourceLocked<BillingInfo>("billing");
   const { useList: getPaymentHistory, useInsert: insertPaymentHistory } =
     useResourceLocked<PaymentHistory, CreatePaymentHistory>("paymenthistory");
 
-  const userBillings = getUserBillings().data;
-  const paymentHistories = getPaymentHistory().data;
+  const userBillings = getUserBillings().data || [];
+  const billingsData = getBillings().data || [];
+  const paymentHistories = getPaymentHistory().data || [];
 
   const receiptRef = useRef<HTMLDivElement>(null);
   const [selectedReceipt, setSelectedReceipt] = useState<PaymentHistory | null>(
@@ -50,9 +52,9 @@ const BillingPage = () => {
   });
 
   let selectedCustomerBill: BillingInfo | undefined;
-  if (cashierBehavior.customerId != "" && userBillings.length > 0)
+  if (cashierBehavior.customerId != "" && billingsData.length > 0)
     selectedCustomerBill =
-      userBillings.filter((b) => b.userId == cashierBehavior.customerId)[0] ??
+      billingsData.filter((b) => b.userId == cashierBehavior.customerId)[0] ??
       undefined;
 
   const [paymentMethod, setPaymentMethod] = useState("Cash");
@@ -293,13 +295,51 @@ const BillingPage = () => {
   };
 
   // Handler for saving payment updates
-  const handleSavePaymentUpdate = (): void => {
+  const handleSavePaymentUpdate = async (): Promise<void> => {
     if (!updateBill || !updateForm.status || !updateForm.method) {
       alert("Please fill in all required fields!");
       return;
     }
-    alert(`Payment #${updateBill.id} updated successfully!`);
-    setCashierBehavior({ action: "", customerId: "" });
+
+    // Find the billing record to update
+    const billToUpdate = billingsData?.find((b) => b.id === updateBill.id);
+    if (!billToUpdate) {
+      alert("Bill not found!");
+      return;
+    }
+
+    try {
+      // Call the API to update the billing record
+      const updatePayload: UpdateBilling = {
+        status: updateForm.status as string,
+      };
+
+      // Use the updateBilling hook to update
+      await updateBilling.run({
+        id: billToUpdate.id,
+        payload: updatePayload,
+      });
+
+      alert(`Payment #${updateBill.id} updated successfully!`);
+      log({
+        action: "BILL_UPDATED",
+        category: "billing",
+        description: `Updated bill #${updateBill.id} - Status: ${updateForm.status}, Method: ${updateForm.method}`,
+        additionalInfo: {
+          billId: updateBill.id,
+          newStatus: updateForm.status,
+          newMethod: updateForm.method,
+        },
+      });
+
+      setCashierBehavior({ action: "", customerId: "" });
+      setUpdateForm({});
+      setUpdateBill(null);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "Failed to update payment";
+      alert(errorMsg);
+    }
   };
 
   return (
@@ -583,29 +623,40 @@ const BillingPage = () => {
                         {bill.status === "Paid" && (
                           <button
                             onClick={() => {
-                              const paymentHistory = paymentHistories.filter(
-                                (h) => h.billId == bill.id,
-                              )[0];
+                              if (paymentHistories.length === 0) {
+                                alert("No payment history found for this bill");
+                                return;
+                              }
 
-                              if (paymentHistory)
-                                setSelectedReceipt({
-                                  id: paymentHistory.id,
-                                  billId: paymentHistory.billId,
-                                  userId: paymentHistory.userId,
-                                  customer: paymentHistory.customer,
-                                  method: paymentHistory.method,
-                                  amount: paymentHistory.amount,
-                                  change: paymentHistory.change,
-                                  status: paymentHistory.status,
-                                  transactionScreenshot:
-                                    paymentHistory.transactionScreenshot,
-                                  transactionRef: paymentHistory.transactionRef,
-                                  createdAt: formatReadableDate(
-                                    paymentHistory.createdAt,
-                                  ),
-                                  nextBillingDate:
-                                    paymentHistory.nextBillingDate,
-                                });
+                              const paymentHistory = paymentHistories.find(
+                                (h) => h.billId === bill.id && h.status === "Paid",
+                              );
+
+                              if (!paymentHistory) {
+                                alert("No paid payment found for this bill. Bill ID: " + bill.id);
+                                console.log("Bill ID searching for:", bill.id);
+                                console.log("Available payments:", paymentHistories.map(p => ({ id: p.id, billId: p.billId, status: p.status, userId: p.userId })));
+                                return;
+                              }
+
+                              setSelectedReceipt({
+                                id: paymentHistory.id,
+                                billId: paymentHistory.billId,
+                                userId: paymentHistory.userId,
+                                customer: paymentHistory.customer,
+                                method: paymentHistory.method,
+                                amount: paymentHistory.amount,
+                                change: paymentHistory.change,
+                                status: paymentHistory.status,
+                                transactionScreenshot:
+                                  paymentHistory.transactionScreenshot,
+                                transactionRef: paymentHistory.transactionRef,
+                                createdAt: formatReadableDate(
+                                  paymentHistory.createdAt,
+                                ),
+                                nextBillingDate:
+                                  paymentHistory.nextBillingDate,
+                              });
                             }}
                             title="Print Receipt - View and print payment receipt"
                             className="rounded-lg bg-indigo-600 p-2 text-white shadow transition-all duration-150 hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:outline-none active:scale-95"
@@ -646,12 +697,13 @@ const BillingPage = () => {
 
                         {/* View Payment History Button */}
                         <button
-                          onClick={() =>
+                          onClick={() => {
+                            setUpdateBill(bill);
                             setCashierBehavior({
                               action: "paymenthistory",
                               customerId: bill.userId,
-                            })
-                          }
+                            });
+                          }}
                           title="View Payment History - See all payments from this customer"
                           className="rounded-lg bg-blue-600 p-2 text-white shadow transition-all duration-150 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:outline-none active:scale-95"
                         >
@@ -668,7 +720,13 @@ const BillingPage = () => {
                         {/* Update Payment Button - Only for Paid Payments */}
                         {bill.status === "Paid" && (
                           <button
-                            onClick={() => setUpdateBill(bill)}
+                            onClick={() => {
+                              setUpdateBill(bill);
+                              setCashierBehavior({
+                                action: "updatepayment",
+                                customerId: bill.userId,
+                              });
+                            }}
                             title="Update Payment - Edit payment status and method only"
                             className="rounded-lg bg-amber-600 p-2 text-white shadow transition-all duration-150 hover:bg-amber-700 focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:outline-none active:scale-95"
                           >
@@ -1252,9 +1310,10 @@ const BillingPage = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() =>
-                    setCashierBehavior({ action: "", customerId: "" })
-                  }
+                  onClick={() => {
+                    setCashierBehavior({ action: "", customerId: "" });
+                    setUpdateBill(null);
+                  }}
                   className="rounded-lg bg-gray-100 px-3 py-1 text-lg font-bold text-gray-600 transition-colors hover:bg-gray-200"
                 >
                   ✕
@@ -1400,9 +1459,11 @@ const BillingPage = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() =>
-                    setCashierBehavior({ action: "", customerId: "" })
-                  }
+                  onClick={() => {
+                    setCashierBehavior({ action: "", customerId: "" });
+                    setUpdateBill(null);
+                    setUpdateForm({});
+                  }}
                   className="rounded-lg bg-gray-100 px-3 py-1 text-lg font-bold text-gray-600 transition-colors hover:bg-gray-200"
                 >
                   ✕

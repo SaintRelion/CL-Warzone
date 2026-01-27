@@ -18,6 +18,7 @@ import "@/repositories/BillingRepo";
 import "@/repositories/PaymentHistoryRepo";
 import "@/repositories/TicketsRepo";
 import "@/repositories/ActivityLogRepo";
+import "@/repositories/ReportRepo";
 
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(
