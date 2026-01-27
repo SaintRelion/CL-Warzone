@@ -1,7 +1,10 @@
 import { useState, useCallback, useMemo } from "react";
 import { toast } from "@saintrelion/notifications";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import type { MonthlyPaymentReport, MonthlyPaymentReportItem } from "@/models/Report";
+import type {
+  MonthlyPaymentReport,
+  MonthlyPaymentReportItem,
+} from "@/models/Report";
 import type { BillingInfo } from "@/models/Billing";
 import type { PaymentHistory } from "@/models/PaymentHistory";
 import type { User } from "@/models/user";
@@ -23,11 +26,14 @@ const AdminReportingPage = () => {
   const { useList: getPaymentHistory } =
     useResourceLocked<PaymentHistory>("paymenthistory");
 
-  const usersData = getUsers().data || [];
-  const billingsData = getBillings().data || [];
-  const paymentsData = getPaymentHistory().data || [];
-  
-  const isLoading = usersData.length === 0 || billingsData.length === 0 || paymentsData.length === 0;
+  const usersData = getUsers().data;
+  const billingsData = getBillings().data;
+  const paymentsData = getPaymentHistory().data;
+
+  const isLoading =
+    usersData.length === 0 ||
+    billingsData.length === 0 ||
+    paymentsData.length === 0;
 
   // Helper to get month/year range
   const getMonthRange = (monthNum: number, yearNum: number) => {
@@ -49,13 +55,13 @@ const AdminReportingPage = () => {
     console.log("Report calculation - Data status:", {
       users: usersData.length,
       billings: billingsData.length,
-      payments: paymentsData.length
+      payments: paymentsData.length,
     });
 
     // If no billing data, return empty report
     if (billingsData.length === 0) {
       console.log("No billing data found");
-      
+
       return {
         month,
         year,
@@ -78,8 +84,16 @@ const AdminReportingPage = () => {
     const startTime = new Date(startDate).getTime();
     const endTime = new Date(endDate).getTime();
 
-    console.log("Generating report for:", { month: month + 1, year, startDate, endDate });
-    console.log("Total users with email:", usersData.filter(u => u.emailAddress).length);
+    console.log("Generating report for:", {
+      month: month + 1,
+      year,
+      startDate,
+      endDate,
+    });
+    console.log(
+      "Total users with email:",
+      usersData.filter((u) => u.emailAddress).length,
+    );
     console.log("Total billings:", billingsData.length);
     console.log("Sample billing:", billingsData[0]);
     console.log("Sample user:", usersData[0]);
@@ -95,7 +109,10 @@ const AdminReportingPage = () => {
     });
 
     console.log("Monthly payments found:", monthlyPayments.length);
-    console.log("Users without email:", usersData.filter(u => !u.emailAddress).length);
+    console.log(
+      "Users without email:",
+      usersData.filter((u) => !u.emailAddress).length,
+    );
     console.log("Total billings:", billingsData.length);
 
     // Build report items directly from billing data
@@ -103,9 +120,11 @@ const AdminReportingPage = () => {
       .map((billing) => {
         // Find the user for this billing
         const user = usersData.find((u) => u.id === billing.userId);
-        
+
         // Get payments for this billing/user in this month
-        const userPayments = monthlyPayments.filter((p) => p.userId === billing.userId);
+        const userPayments = monthlyPayments.filter(
+          (p) => p.userId === billing.userId,
+        );
 
         const billingAmount = parseFloat(billing.amount as any) || 0;
         const paidAmount = userPayments
@@ -113,7 +132,10 @@ const AdminReportingPage = () => {
           .reduce((sum, p) => sum + parseFloat(p.amount || "0"), 0);
 
         // Use billing status directly
-        const paymentStatus = (billing.status || "Not Yet Paid") as "Paid" | "Partially Paid" | "Not Yet Paid";
+        const paymentStatus = (billing.status || "Not Yet Paid") as
+          | "Paid"
+          | "Partially Paid"
+          | "Not Yet Paid";
 
         // Filter by status if requested
         if (statusFilter !== "all" && statusFilter !== paymentStatus) {
@@ -130,8 +152,7 @@ const AdminReportingPage = () => {
           paidAmount: paidAmount.toFixed(2),
           status: paymentStatus,
           planId: billing.planId || "",
-          paymentDate:
-            userPayments.length > 0 ? userPayments[0].createdAt : "",
+          paymentDate: userPayments.length > 0 ? userPayments[0].createdAt : "",
           paymentMethod: userPayments.length > 0 ? userPayments[0].method : "",
           transactionRef:
             userPayments.length > 0 ? userPayments[0].transactionRef : "",
@@ -147,20 +168,20 @@ const AdminReportingPage = () => {
     // Calculate summary
     const totalBillable = items.reduce(
       (sum, item) => sum + parseFloat(item.billingAmount),
-      0
+      0,
     );
     const totalCollected = items.reduce(
       (sum, item) => sum + parseFloat(item.paidAmount),
-      0
+      0,
     );
     const totalPending = totalBillable - totalCollected;
 
     const paidCount = items.filter((item) => item.status === "Paid").length;
     const partiallyPaidCount = items.filter(
-      (item) => item.status === "Partially Paid"
+      (item) => item.status === "Partially Paid",
     ).length;
     const unpaidCount = items.filter(
-      (item) => item.status === "Not Yet Paid"
+      (item) => item.status === "Not Yet Paid",
     ).length;
 
     const collectionRate =
@@ -241,7 +262,7 @@ const AdminReportingPage = () => {
       a.href = url;
       a.download = `payment-report-${year}-${String(month + 1).padStart(
         2,
-        "0"
+        "0",
       )}.csv`;
       document.body.appendChild(a);
       a.click();
