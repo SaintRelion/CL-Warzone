@@ -14,6 +14,7 @@ import TicketsPage from "./pages/admin/tickets/TicketsPage";
 import { AdminLayout } from "./layout/AdminLayout";
 import { ClientLayout } from "./layout/ClientLayout";
 import { PublicLayout } from "./layout/PublicLayout";
+import AdminReportingPage from "./pages/admin/reporting/AdminReportingPage";
 
 import {
   registerGroupAppRoutes,
@@ -79,6 +80,13 @@ registerGroupAppRoutes({
       element: <ActivityLogsPage />,
       label: "Activity Logs",
       iconClassName: "fa-solid fa-clock-rotate-left text-lg",
+      allowedRoles: ["admin"],
+    },
+    {
+      path: "reports",
+      element: <AdminReportingPage />,
+      label: "Reports",
+      iconClassName: "fa-solid fa-chart-bar text-lg",
       allowedRoles: ["admin"],
     },
   ],

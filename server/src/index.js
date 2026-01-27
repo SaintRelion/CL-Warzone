@@ -14,6 +14,7 @@ const installationRoutes = require('./routes/installations');
 const emailRoutes = require('./routes/email');
 const activityLogRoutes = require('./routes/activityLogs');
 const dashboardRoutes = require('./routes/dashboard');
+const reportRoutes = require('./routes/reports');
 
 // Import middleware
 const { errorHandler } = require('./middleware/errorHandler');
@@ -42,6 +43,7 @@ app.use('/api/installations', installationRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
