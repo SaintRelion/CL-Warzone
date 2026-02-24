@@ -2,16 +2,16 @@ import { PLANS } from "@/constants";
 import type { PaymentHistory } from "@/models/PaymentHistory";
 import type { Plan } from "@/models/Plan";
 import type {
-  ClientSubscription,
+  Subscription,
   UpdateSubscriptionBalance,
-} from "@/models/Subscription";
+} from "@/models/subscription";
 import { useCurrentUser } from "@saintrelion/auth-lib";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import { toast } from "@saintrelion/notifications";
 import {
   formatReadableDate,
   formatReadableDateTime,
-  toDate,
+  sortByTime,
 } from "@saintrelion/time-functions";
 import { useState } from "react";
 
@@ -26,33 +26,31 @@ const BillingAndPaymentsPage = () => {
     },
   );
 
-  const paymentHistories = getPaymentHistories({
-    filters: {
-      userId: user.id,
-    },
-  }).data;
+  const paymentHistories = sortByTime(
+    getPaymentHistories({
+      filters: {
+        user: user.id,
+      },
+    }).data,
+    "created_at",
+  );
 
-  const sortedPaymentHistory = [...paymentHistories].sort((a, b) => {
-    const dateA = toDate(a.createdAt)?.getTime() ?? 0;
-    const dateB = toDate(b.createdAt)?.getTime() ?? 0;
-    return dateB - dateA;
-  });
   /* ===================== SUBSCRIPTION ===================== */
   const { useList: getSubscriptions } = useResourceLocked<
-    ClientSubscription,
+    Subscription,
     never,
     UpdateSubscriptionBalance
   >("subscription", { showToast: false });
 
   const currentSubscriptions = getSubscriptions({
-    filters: { userId: user.id },
+    filters: { user: user.id },
   }).data;
 
   const currentSubscription =
     currentSubscriptions.length > 0 ? currentSubscriptions[0] : null;
 
   const currentPlan: Plan | null = currentSubscription
-    ? (PLANS.find((p) => p.id === currentSubscription.planId) ?? null)
+    ? (PLANS.find((p) => p.id === currentSubscription.plan) ?? null)
     : null;
 
   /* ===================== UI STATE ===================== */
@@ -82,7 +80,7 @@ const BillingAndPaymentsPage = () => {
       </div>
 
       {/* ===================== SUBSCRIPTION CARD ===================== */}
-      <div className="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 p-5 text-white">
+      <div className="rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 p-5 text-white">
         {currentSubscription && currentPlan ? (
           <div className="space-y-5">
             <h3 className="text-lg font-semibold">Current Subscription</h3>
@@ -92,7 +90,9 @@ const BillingAndPaymentsPage = () => {
               <Info label="Status" value={currentSubscription.status} />
               <Info
                 label="Next Due Date"
-                value={formatReadableDate(currentSubscription.nextBillingDate)}
+                value={formatReadableDate(
+                  currentSubscription.next_billing_date,
+                )}
               />
               <Info
                 label="Outstanding Balance"
@@ -171,10 +171,10 @@ const BillingAndPaymentsPage = () => {
 
       {/* ===================== PAYMENT HISTORY ===================== */}
       <div className="rounded-xl bg-white p-4 shadow sm:p-6">
-        <h3 className="mb-4 text-lg font-semibold">Payment Historyiesy</h3>
+        <h3 className="mb-4 text-lg font-semibold">Payment History</h3>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-160 text-sm">
             <thead className="border-b bg-gray-50">
               <tr>
                 <th className="px-3 py-2 text-left">Date</th>
@@ -185,25 +185,25 @@ const BillingAndPaymentsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedPaymentHistory.length === 0 ? (
+              {paymentHistories.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-6 text-center text-gray-500">
                     No payment history
                   </td>
                 </tr>
               ) : (
-                sortedPaymentHistory.map((p) => (
+                paymentHistories.map((p) => (
                   <tr
                     key={p.id}
                     className="border-b last:border-0 hover:bg-gray-50"
                   >
                     <td className="px-3 py-2">
-                      {formatReadableDateTime(p.createdAt)}
+                      {formatReadableDateTime(p.created_at)}
                     </td>
                     <td className="px-3 py-2 font-medium">₱{p.amount}</td>
                     <td className="px-3 py-2 capitalize">{p.status}</td>
                     <td className="px-3 py-2 text-right text-indigo-600">
-                      {p.transactionScreenshot}
+                      {p.transaction_screenshot}
                     </td>
                   </tr>
                 ))

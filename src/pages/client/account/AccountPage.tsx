@@ -19,14 +19,14 @@ const AccountPage = () => {
   const [editMode, setEditMode] = useState(false);
 
   const information: Record<string, string> = {
-    firstName: user.firstName,
-    lastName: user.lastName,
+    first_name: user.first_name,
+    last_name: user.last_name,
     email: user.email,
-    phoneNumber: user.phoneNumber,
-    streetAddress: user.streetAddress,
-    city: user.city,
-    zipCode: user.zipCode,
-    serviceArea: user.serviceArea,
+    phone_number: user.phone_number,
+    street_address: user.street_address,
+    city_municipality: user.city_municipality,
+    zip_code: user.zip_code,
+    service_area: user.service_area,
   };
 
   async function handleSubmit(data: Record<string, string>) {
@@ -54,7 +54,7 @@ const AccountPage = () => {
       {/* ACCOUNT CARD */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
         {/* Card Header */}
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4">
+        <div className="flex items-center justify-between bg-linear-to-r from-indigo-50 to-purple-50 px-6 py-4">
           <h3 className="text-lg font-semibold text-gray-900">
             Personal Details
           </h3>
@@ -88,14 +88,14 @@ const AccountPage = () => {
         {/* Card Content */}
         <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2">
           {[
-            { label: "First Name", name: "firstName" },
-            { label: "Last Name", name: "lastName" },
+            { label: "First Name", name: "first_name" },
+            { label: "Last Name", name: "last_name" },
             { label: "Email Address", name: "email" },
-            { label: "Street Address", name: "streetAddress", full: true },
-            { label: "Phone Number", name: "phoneNumber" },
-            { label: "City / Municipality", name: "city" },
-            { label: "ZIP Code", name: "zipCode" },
-            { label: "Service Area", name: "serviceArea" },
+            { label: "Street Address", name: "street_address", full: true },
+            { label: "Phone Number", name: "phone_number" },
+            { label: "City / Municipality", name: "city_municipality" },
+            { label: "ZIP Code", name: "zip_code" },
+            { label: "Service Area", name: "service_area" },
           ].map((field) => (
             <div key={field.name} className={field.full ? "sm:col-span-2" : ""}>
               <p className="mb-1 text-xs font-medium tracking-wide text-gray-500 uppercase">

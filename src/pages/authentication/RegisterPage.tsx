@@ -9,17 +9,10 @@ import {
 const RegisterPage = () => {
   const auth = useAuth();
 
-  const serviceAreas = [
-    "Katipunan",
-    "Roxas",
-    "Piñan",
-    "Osmeña",
-    "Polanco",
-
-  ];
+  const serviceAreas = ["Katipunan", "Roxas", "Piñan", "Osmeña", "Polanco"];
 
   const handleRegister = async (data: Record<string, string>) => {
-    await auth.register({ ...data, roles: ["client"] }, data.password);
+    await auth.register({ ...data, roles: ["admin"] }, data.password);
   };
 
   return (
@@ -49,7 +42,7 @@ const RegisterPage = () => {
               field={{
                 label: "First Name *",
                 type: "text",
-                name: "firstName",
+                name: "first_name",
                 placeholder: "Juan",
               }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
@@ -59,7 +52,7 @@ const RegisterPage = () => {
               field={{
                 label: "Last Name *",
                 type: "text",
-                name: "lastName",
+                name: "last_name",
                 placeholder: "Dela Cruz",
               }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
@@ -93,7 +86,7 @@ const RegisterPage = () => {
               field={{
                 label: "Phone Number *",
                 type: "text",
-                name: "phoneNumber",
+                name: "phone_number",
                 placeholder: "+63 9XX XXX XXXX",
               }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
@@ -105,7 +98,7 @@ const RegisterPage = () => {
               field={{
                 label: "Street Address *",
                 type: "text",
-                name: "streetAddress",
+                name: "street_address",
                 placeholder: "123 Main St",
               }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
@@ -115,7 +108,7 @@ const RegisterPage = () => {
               field={{
                 label: "City/Municapality *",
                 type: "text",
-                name: "city/municipality",
+                name: "city_municipality",
                 placeholder: "City/Municipality",
               }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
@@ -125,7 +118,7 @@ const RegisterPage = () => {
               field={{
                 label: "Barangay *",
                 type: "text",
-                name: "Barangay",
+                name: "barangay",
                 placeholder: "Barangay",
               }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
@@ -135,7 +128,7 @@ const RegisterPage = () => {
               field={{
                 label: "ZIP Code *",
                 type: "text",
-                name: "zipCode",
+                name: "zip_code",
                 placeholder: "10001",
               }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"
@@ -145,7 +138,7 @@ const RegisterPage = () => {
               field={{
                 label: "Service Area *",
                 type: "select",
-                name: "serviceArea",
+                name: "service_area",
                 options: serviceAreas,
               }}
               labelClassName="mb-2 block text-sm font-medium text-gray-700"

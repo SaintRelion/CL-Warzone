@@ -10,11 +10,10 @@ import SupportTicketsPage from "./pages/client/support-tickets/SupportTicketsPag
 import AccountPage from "./pages/client/account/AccountPage";
 import FAQPage from "./pages/client/faq/FAQPage";
 import RegisterPage from "./pages/authentication/RegisterPage";
-import TicketsPage from "./pages/admin/tickets/TicketsPage";
+import AdminSupportTicketsPage from "./pages/admin/support-tickets/AdminSupportTicketsPage";
 import { AdminLayout } from "./layout/AdminLayout";
 import { ClientLayout } from "./layout/ClientLayout";
 import { PublicLayout } from "./layout/PublicLayout";
-import AdminReportingPage from "./pages/admin/reporting/AdminReportingPage";
 
 import {
   registerGroupAppRoutes,
@@ -23,6 +22,7 @@ import {
 } from "@saintrelion/routers";
 import { roleLayoutMap } from "@saintrelion/auth-lib";
 import ActivityLogsPage from "./pages/admin/activity-logs/ActivityLogsPage";
+import AdminReportingPage from "./pages/admin/admin-reporting/AdminReportingPage";
 
 roleLayoutMap[""] = {
   redirect: "/",
@@ -70,7 +70,7 @@ registerGroupAppRoutes({
     },
     {
       path: "tickets",
-      element: <TicketsPage />,
+      element: <AdminSupportTicketsPage />,
       label: "Support Tickets",
       iconClassName: "fa-solid fa-ticket text-lg",
       allowedRoles: ["admin"],

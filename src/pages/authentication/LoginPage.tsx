@@ -1,6 +1,4 @@
-import type { CreateOTP, VerifyOTP } from "@/models/OTP";
 import { useAuth } from "@saintrelion/auth-lib";
-import { useResourceLocked } from "@saintrelion/data-access-layer";
 import {
   RenderForm,
   RenderFormButton,
@@ -8,65 +6,54 @@ import {
 } from "@saintrelion/forms";
 import { toast } from "@saintrelion/notifications";
 import { useState } from "react";
-import emailjs from "@emailjs/browser";
 import { Button } from "@/components/ui/button";
+import { apiRequest } from "../to-be-library/sr-api";
 
 const LoginPage = () => {
   const auth = useAuth();
-
-  const { useList: getOTP, useInsert: insertOTP } = useResourceLocked<
-    VerifyOTP,
-    CreateOTP
-  >("otpsmtp", { showConsoleLogs: false, showToast: false });
-
-  const otps = getOTP().data;
 
   const [sendingOTP, setSendingOTP] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [otpStep, setOtpStep] = useState(false);
+  const [otpId, setOtpId] = useState("");
   const [otpInput, setOtpInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
-  const sendOTP = async () => {
+  const sendOTP = async (email: string) => {
     try {
       setSendingOTP(true);
-      const randomPIN = Math.floor(100000 + Math.random() * 900000).toString();
-
-      await insertOTP.run({
-        randomPIN,
-      });
-
-      await emailjs.send(
-        "service_sb73kdi", // from EmailJS dashboard
-        "template_gz6iw72", // OTP email template
-        {
-          email: email,
-          passcode: randomPIN,
-        },
-        "MbyggPp_mN3XQDDmC", // EmailJS public key
+      const result = await apiRequest(
+        "http://localhost:8000/api/otp_sms/send/",
+        { email: email, type: "email" },
+        { auth: false },
       );
 
-      toast.success(`OTP sent to ${email}`);
-      setOtpStep(true);
+      console.log(result);
+      toast.success(`OTP sent to ${email} : | ${result.detail}`);
+      setOtpId(result.otp_id);
     } catch (error) {
       const err = error as Record<string, string>;
-      console.log(err.message || "Failed to send OTP");
+      console.log(`Failed to send OTP: ${err.message}`);
     } finally {
       setSendingOTP(false);
     }
   };
 
   const verifyOTP = async () => {
+    setLoading(true);
+    setStatus(null);
+
     try {
-      setLoading(true);
-      setStatus(null);
+      const result = await apiRequest(
+        "http://localhost:8000/api/otp_sms/verify/",
+        { otp_id: otpId, code: otpInput },
+        { auth: false },
+      );
+      console.log(result);
 
-      const found = otps.find((o) => o.randomPIN == otpInput);
-
-      if (found) {
+      if (result.success == true) {
         setStatus("✅ OTP Verified");
 
         // Login the user
@@ -77,10 +64,9 @@ const LoginPage = () => {
       } else {
         setStatus("❌ Invalid OTP");
       }
-    } catch (error) {
-      const err = error as Record<string, string>;
-      setStatus(err?.message || "Error verifying OTP");
-    } finally {
+
+      setLoading(false);
+    } catch {
       setLoading(false);
     }
   };
@@ -89,7 +75,11 @@ const LoginPage = () => {
     setEmail(data.email);
     setPassword(data.password);
 
-    await sendOTP();
+    // await auth.login({
+    //   username: data.email,
+    //   password: data.password,
+    // });
+    await sendOTP(data.email);
   };
 
   return (
@@ -101,7 +91,7 @@ const LoginPage = () => {
             <h1 className="ml-2 text-2xl font-bold text-gray-900">Warzone</h1>
           </div>
 
-          {!otpStep ? (
+          {otpId == "" ? (
             // LOGIN FORM
             <RenderForm wrapperClassName="space-y-4">
               <RenderFormField

@@ -11,15 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@saintrelion/auth-lib";
 import type {
-  ClientSubscription,
+  Subscription,
   CreateSubscription,
   UpdateSubscriptionStatus,
-} from "@/models/Subscription";
+} from "@/models/subscription";
 import { getCurrentDateTimeString, toDate } from "@saintrelion/time-functions";
 import { PLANS } from "@/constants";
 import type { Plan } from "@/models/Plan";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import type { BillingInfo, CreateBilling } from "@/models/Billing";
+import type { CreateBilling, UserBillingInfo } from "@/models/Billing";
 import type { User } from "@/models/user";
 
 const BrowsePlansPage = () => {
@@ -31,28 +31,33 @@ const BrowsePlansPage = () => {
     useInsert: insertSubscription,
     useUpdate: updateSubscription,
   } = useResourceLocked<
-    ClientSubscription,
+    Subscription,
     CreateSubscription,
     UpdateSubscriptionStatus
   >("subscription");
 
-  const { useList: getBillings, useInsert: insertBilling } = useResourceLocked<
-    BillingInfo,
-    CreateBilling
-  >("billing");
+  const { useInsert: insertBilling } = useResourceLocked<never, CreateBilling>(
+    "billing",
+  );
+
+  const { useList: getUserBilling } =
+    useResourceLocked<UserBillingInfo>("userbilling");
 
   const currentSubscriptions = getSubscription({
-    filters: { userId: user.id, status: "Active" },
+    filters: { user: user.id, status: "Active" },
   }).data;
   const currentPlan =
-    currentSubscriptions && currentSubscriptions.length > 0
-      ? PLANS.filter((p) => p.id == currentSubscriptions[0].planId)[0]
+    currentSubscriptions.length > 0
+      ? PLANS.filter((p) => p.id == currentSubscriptions[0].plan)[0]
       : null;
 
-  const currentBillings = getBillings({
-    filters: { userId: user.id },
-  }).data?.filter((b) => b.status === "Not Yet Paid");
-  console.log(currentBillings);
+  const myActiveBilling = getUserBilling({
+    filters: {
+      user: user.id,
+      subscription:
+        currentSubscriptions.length == 0 ? -1 : currentSubscriptions[0].id,
+    },
+  }).data;
 
   async function handleConfirmPlan(confirmedPlan: Plan) {
     const currentDay = toDate(getCurrentDateTimeString());
@@ -70,23 +75,22 @@ const BrowsePlansPage = () => {
       // + 30 days
       currentDay.setDate(currentDay.getDate() + 30);
 
-      await insertSubscription.run({
-        userId: user.id,
-        planId: confirmedPlan.id,
+      const result = await insertSubscription.run({
+        user: user.id,
+        plan: confirmedPlan.id,
         amount: confirmedPlan.price,
-        address: user.streetAddress,
+        address: user.street_address,
         status: "Active",
-        nextBillingDate: currentDay.toISOString(),
+        next_billing_date: currentDay.toISOString().split("T")[0],
       });
 
       await insertBilling.run({
-        userId: user.id,
-        planId: confirmedPlan.id,
-        customer: `${user.firstName} ${user.lastName}`,
+        user: user.id,
+        plan: confirmedPlan.id,
+        subscription: result.id,
+        customer: `${user.first_name} ${user.last_name}`,
         amount: confirmedPlan.price,
-        method: "Cash",
-        status: "Not Yet Paid",
-        nextBillingDate: currentDay.toISOString(),
+        due_date: currentDay.toISOString().split("T")[0],
       });
     }
   }
@@ -123,7 +127,7 @@ const BrowsePlansPage = () => {
                     key={i}
                     className="flex items-start gap-2 text-sm text-gray-700"
                   >
-                    <span className="fa-solid fa-check mt-0.5 flex-shrink-0 text-lg text-green-500" />
+                    <span className="fa-solid fa-check mt-0.5 shrink-0 text-lg text-green-500" />
                     {feature}
                   </li>
                 ))}
@@ -139,11 +143,11 @@ const BrowsePlansPage = () => {
                   <button
                     disabled={insertSubscription.isLocked}
                     onClick={() => {
-                      if (
-                        currentSubscriptions != undefined &&
-                        currentSubscriptions.length > 0
-                      ) {
-                        if (currentBillings && currentBillings.length > 0) {
+                      if (currentSubscriptions.length > 0) {
+                        if (
+                          myActiveBilling.length > 0 &&
+                          myActiveBilling[0].status == "Unpaid"
+                        ) {
                           alert(
                             "You have pending bills, please complete any remaining balance.",
                           );
@@ -151,6 +155,12 @@ const BrowsePlansPage = () => {
                         }
                       }
 
+                      console.log(
+                        myActiveBilling.find(
+                          (b) => b.subscription == currentSubscriptions[0].id,
+                        ),
+                      );
+                      console.log(myActiveBilling);
                       setViewedPlan(plan);
                     }}
                     className={`w-full rounded-lg py-3 font-medium transition ${

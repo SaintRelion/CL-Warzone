@@ -1,19 +1,27 @@
-import type { ClientTicket, CreateTicket } from "@/models/Tickets";
+import type { SupportTicket, CreateTicket } from "@/models/SupportTicket";
 import type { User } from "@/models/user";
 import { useCurrentUser } from "@saintrelion/auth-lib";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
+import { sortByTime } from "@saintrelion/time-functions";
 import { useState } from "react";
 
 const SupportTicketsPage = () => {
   const user = useCurrentUser<User>();
 
   const { useList: getMyTickets, useInsert: insertTicket } = useResourceLocked<
-    ClientTicket,
+    SupportTicket,
     CreateTicket,
     never
-  >("tickets");
+  >("supportticket");
 
-  const myTickets = getMyTickets().data;
+  const myTickets = sortByTime(
+    getMyTickets({
+      filters: {
+        user: user.id,
+      },
+    }).data,
+    "created_at",
+  );
 
   /* ===================== FORM STATE ===================== */
   const [issueType, setIssueType] = useState("");
@@ -27,13 +35,13 @@ const SupportTicketsPage = () => {
       return alert("Please complete all required fields.");
 
     const myTicket = {
-      userId: user.id,
-      customer: `${user.firstName} ${user.firstName}`,
+      user: user.id,
+      customer: `${user.first_name} ${user.last_name}`,
       issue: issueType,
       description: description,
       priority: priority,
       status: "open",
-      assignedTo: "",
+      assigned_to: "",
     };
 
     await insertTicket.run(myTicket);

@@ -16,9 +16,8 @@ import "@/repositories/UserRepo";
 import "@/repositories/SubscriptionRepo";
 import "@/repositories/BillingRepo";
 import "@/repositories/PaymentHistoryRepo";
-import "@/repositories/TicketsRepo";
+import "@/repositories/SupportTicketRepo";
 import "@/repositories/ActivityLogRepo";
-import "@/repositories/ReportRepo";
 import "@/repositories/OTPRepo";
 
 const queryClient = new QueryClient();
