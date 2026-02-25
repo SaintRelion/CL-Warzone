@@ -8,6 +8,7 @@ import { toast } from "@saintrelion/notifications";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "../to-be-library/sr-api";
+import { formatReadableDateTime } from "@saintrelion/time-functions";
 
 const LoginPage = () => {
   const auth = useAuth();
@@ -17,6 +18,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otpId, setOtpId] = useState("");
+  const [otpExpiration, setOtpExpiration] = useState("");
   const [otpInput, setOtpInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -25,14 +27,16 @@ const LoginPage = () => {
     try {
       setSendingOTP(true);
       const result = await apiRequest(
-        "http://localhost:8000/api/otp_sms/send/",
+        "http://localhost:8000/api/otp/send/",
         { email: email, type: "email" },
         { auth: false },
       );
 
       console.log(result);
       toast.success(`OTP sent to ${email} : | ${result.detail}`);
+
       setOtpId(result.otp_id);
+      setOtpExpiration(result.expires_at);
     } catch (error) {
       const err = error as Record<string, string>;
       console.log(`Failed to send OTP: ${err.message}`);
@@ -47,22 +51,18 @@ const LoginPage = () => {
 
     try {
       const result = await apiRequest(
-        "http://localhost:8000/api/otp_sms/verify/",
+        "http://localhost:8000/api/otp/verify/",
         { otp_id: otpId, code: otpInput },
         { auth: false },
       );
       console.log(result);
 
       if (result.success == true) {
-        setStatus("✅ OTP Verified");
-
         // Login the user
         await auth.login({
           username: email,
           password: password,
         });
-      } else {
-        setStatus("❌ Invalid OTP");
       }
 
       setLoading(false);
@@ -128,6 +128,15 @@ const LoginPage = () => {
                 OTP sent to <strong>{email}</strong>
               </p>
               {status && <p className="text-sm">{status}</p>}
+
+              <div className="rounded-lg bg-gray-50 px-3 py-1 text-sm text-gray-600">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-700">Expires</span>
+                  <span className="font-mono text-gray-800">
+                    {formatReadableDateTime(otpExpiration)}
+                  </span>
+                </div>
+              </div>
               <input
                 placeholder="Enter OTP"
                 className="w-full rounded border p-3"
