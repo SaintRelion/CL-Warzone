@@ -44,7 +44,7 @@ const BrowsePlansPage = () => {
     useResourceLocked<UserBillingInfo>("userbilling");
 
   const currentSubscriptions = getSubscription({
-    filters: { user: user.id, status: "Active" },
+    filters: { user: user.id },
   }).data;
   const currentPlan =
     currentSubscriptions.length > 0
@@ -68,7 +68,7 @@ const BrowsePlansPage = () => {
 
         await updateSubscription.run({
           id: currentSubscription.id,
-          payload: { status: "Disabled" },
+          payload: { status: "disabled" },
         });
       }
 
@@ -80,7 +80,7 @@ const BrowsePlansPage = () => {
         plan: confirmedPlan.id,
         amount: confirmedPlan.price,
         address: user.street_address,
-        status: "Active",
+        status: "active",
         next_billing_date: currentDay.toISOString().split("T")[0],
       });
 

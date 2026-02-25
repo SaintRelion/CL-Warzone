@@ -6,9 +6,8 @@ import {
 } from "@saintrelion/forms";
 import { toast } from "@saintrelion/notifications";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { apiRequest } from "../to-be-library/sr-api";
-import { formatReadableDateTime } from "@saintrelion/time-functions";
+import OtpVerification from "@/components/authentication/OtpVerificaction";
 
 const LoginPage = () => {
   const auth = useAuth();
@@ -33,10 +32,12 @@ const LoginPage = () => {
       );
 
       console.log(result);
-      toast.success(`OTP sent to ${email} : | ${result.detail}`);
+      if (result.otp_id) {
+        toast.success(`OTP sent to ${email}`);
 
-      setOtpId(result.otp_id);
-      setOtpExpiration(result.expires_at);
+        setOtpId(result.otp_id);
+        setOtpExpiration(result.expires_at);
+      }
     } catch (error) {
       const err = error as Record<string, string>;
       console.log(`Failed to send OTP: ${err.message}`);
@@ -123,35 +124,15 @@ const LoginPage = () => {
             </RenderForm>
           ) : (
             // OTP VERIFICATION FORM
-            <div className="flex flex-col gap-4">
-              <p>
-                OTP sent to <strong>{email}</strong>
-              </p>
-              {status && <p className="text-sm">{status}</p>}
-
-              <div className="rounded-lg bg-gray-50 px-3 py-1 text-sm text-gray-600">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-700">Expires</span>
-                  <span className="font-mono text-gray-800">
-                    {formatReadableDateTime(otpExpiration)}
-                  </span>
-                </div>
-              </div>
-              <input
-                placeholder="Enter OTP"
-                className="w-full rounded border p-3"
-                value={otpInput}
-                maxLength={6}
-                onChange={(e) => setOtpInput(e.target.value)}
-              />
-              <Button
-                onClick={verifyOTP}
-                disabled={otpInput.length !== 6 || loading}
-                className="rounded bg-green-500 py-2 text-white"
-              >
-                Verify OTP
-              </Button>
-            </div>
+            <OtpVerification
+              email={email}
+              otpExpiration={otpExpiration}
+              otpInput={otpInput}
+              setOtpInput={setOtpInput}
+              verifyOTP={verifyOTP}
+              status={status ?? ""}
+              loading={loading}
+            />
           )}
 
           <div className="mt-6 text-center">

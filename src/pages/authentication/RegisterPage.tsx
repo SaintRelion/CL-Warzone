@@ -9,10 +9,10 @@ import {
 const RegisterPage = () => {
   const auth = useAuth();
 
-  const serviceAreas = ["Katipunan", "Roxas", "Piñan", "Osmeña", "Polanco"];
+  const serviceAreas = ["katipunan", "roxas", "piñan", "osmeña", "polanco"];
 
   const handleRegister = async (data: Record<string, string>) => {
-    await auth.register({ ...data, roles: ["admin"] }, data.password);
+    await auth.register({ ...data, roles: ["client"] }, data.password);
   };
 
   return (

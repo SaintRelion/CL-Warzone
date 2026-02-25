@@ -21,7 +21,7 @@ export function useActivityLogger() {
   const { useInsert: insertActivityLog } = useResourceLocked<
     never,
     CreateActivityLog
-  >("activitylog");
+  >("activitylog", { showToast: false });
 
   const isLocked = insertActivityLog.isLocked;
   const log = (input: ActivityLogInput) => {
