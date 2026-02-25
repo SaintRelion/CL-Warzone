@@ -43,7 +43,7 @@ const BillingAndPaymentsPage = () => {
   >("subscription", { showToast: false });
 
   const currentSubscriptions = getSubscriptions({
-    filters: { user: user.id },
+    filters: { user: user.id, status: "active" },
   }).data;
 
   const currentSubscription =

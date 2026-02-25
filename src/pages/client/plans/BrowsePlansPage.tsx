@@ -44,7 +44,7 @@ const BrowsePlansPage = () => {
     useResourceLocked<UserBillingInfo>("userbilling");
 
   const currentSubscriptions = getSubscription({
-    filters: { user: user.id },
+    filters: { user: user.id, status: "active" },
   }).data;
   const currentPlan =
     currentSubscriptions.length > 0
