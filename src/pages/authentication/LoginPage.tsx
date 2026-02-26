@@ -9,6 +9,8 @@ import { useState } from "react";
 import { apiRequest } from "../to-be-library/sr-api";
 import OtpVerification from "@/components/authentication/OtpVerificaction";
 
+import { BASE_API } from "@/sr-config";
+
 const LoginPage = () => {
   const auth = useAuth();
 
@@ -31,8 +33,8 @@ const LoginPage = () => {
       setSendingOTP(true);
       const endpoint =
         deliveryMethod === "sms"
-          ? "http://localhost:8000/api/otp/send_sms/"
-          : "http://localhost:8000/api/otp/send/";
+          ? `http://${BASE_API}:8000/api/otp/send_sms/`
+          : `http://${BASE_API}:8000/api/otp/send/`;
 
       const payload =
         deliveryMethod === "sms"
@@ -63,8 +65,8 @@ const LoginPage = () => {
     try {
       const endpoint =
         deliveryMethod === "sms"
-          ? "http://localhost:8000/api/otp/verify_sms/"
-          : "http://localhost:8000/api/otp/verify/";
+          ? `http://${BASE_API}:8000/api/otp/verify_sms/`
+          : `http://${BASE_API}:8000/api/otp/verify/`;
 
       const result = await apiRequest(
         endpoint,
@@ -123,7 +125,7 @@ const LoginPage = () => {
                   Email
                 </button>
 
-                <button
+                {/* <button
                   type="button"
                   onClick={() => setDeliveryMethod("sms")}
                   className={`rounded-lg px-4 py-2 text-sm font-medium ${
@@ -133,7 +135,7 @@ const LoginPage = () => {
                   }`}
                 >
                   SMS
-                </button>
+                </button> */}
               </div>
               <RenderForm wrapperClassName="space-y-4">
                 <RenderFormField
