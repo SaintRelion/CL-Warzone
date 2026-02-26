@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 
 export default function OtpVerification({
   email,
+  deliveryMethod,
   otpExpiration,
   otpInput,
   setOtpInput,
@@ -11,6 +12,7 @@ export default function OtpVerification({
   loading,
 }: {
   email: string;
+  deliveryMethod: string;
   otpExpiration: string | Date;
   otpInput: string;
   setOtpInput: (val: string) => void;
@@ -29,7 +31,10 @@ export default function OtpVerification({
   return (
     <div className="flex flex-col gap-3">
       <p>
-        OTP sent to <strong>{email}</strong>
+        OTP sent to{" "}
+        <strong>
+          {deliveryMethod == "email" ? email : "Your registered phone number"}
+        </strong>
       </p>
       {status && <p className="text-sm">{status}</p>}
 
