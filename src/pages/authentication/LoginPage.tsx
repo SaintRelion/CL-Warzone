@@ -91,11 +91,11 @@ const LoginPage = () => {
     setEmail(data.email);
     setPassword(data.password);
 
-    await auth.login({
-      username: data.email,
-      password: data.password,
-    });
-    // await sendOTP(data.email);
+    // await auth.login({
+    //   username: data.email,
+    //   password: data.password,
+    // });
+    await sendOTP(data.email);
   };
 
   return (
@@ -168,6 +168,7 @@ const LoginPage = () => {
             // OTP VERIFICATION FORM
             <OtpVerification
               email={email}
+              deliveryMethod={deliveryMethod}
               otpExpiration={otpExpiration}
               otpInput={otpInput}
               setOtpInput={setOtpInput}
