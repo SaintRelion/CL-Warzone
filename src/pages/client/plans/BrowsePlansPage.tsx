@@ -19,7 +19,7 @@ import { getCurrentDateTimeString, toDate } from "@saintrelion/time-functions";
 import { PLANS } from "@/constants";
 import type { Plan } from "@/models/Plan";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import type { CreateBilling, UserBillingInfo } from "@/models/Billing";
+import type { UserBillingInfo } from "@/models/Billing";
 import type { User } from "@/models/user";
 
 const BrowsePlansPage = () => {
@@ -35,10 +35,6 @@ const BrowsePlansPage = () => {
     CreateSubscription,
     UpdateSubscriptionStatus
   >("subscription");
-
-  const { useInsert: insertBilling } = useResourceLocked<never, CreateBilling>(
-    "billing",
-  );
 
   const { useList: getUserBilling } =
     useResourceLocked<UserBillingInfo>("userbilling");
@@ -75,22 +71,13 @@ const BrowsePlansPage = () => {
       // + 30 days
       currentDay.setDate(currentDay.getDate() + 30);
 
-      const result = await insertSubscription.run({
+      await insertSubscription.run({
         user: user.id,
         plan: confirmedPlan.id,
         amount: confirmedPlan.price,
         address: user.street_address,
         status: "active",
         next_billing_date: currentDay.toISOString().split("T")[0],
-      });
-
-      await insertBilling.run({
-        user: user.id,
-        plan: confirmedPlan.id,
-        subscription: result.id,
-        customer: `${user.first_name} ${user.last_name}`,
-        amount: confirmedPlan.price,
-        due_date: currentDay.toISOString().split("T")[0],
       });
     }
   }

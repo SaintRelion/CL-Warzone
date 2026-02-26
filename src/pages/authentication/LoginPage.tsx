@@ -14,6 +14,10 @@ const LoginPage = () => {
 
   const [sendingOTP, setSendingOTP] = useState(false);
 
+  const [deliveryMethod, setDeliveryMethod] = useState<"email" | "sms">(
+    "email",
+  );
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otpId, setOtpId] = useState("");
@@ -25,15 +29,21 @@ const LoginPage = () => {
   const sendOTP = async (email: string) => {
     try {
       setSendingOTP(true);
-      const result = await apiRequest(
-        "http://localhost:8000/api/otp/send/",
-        { email: email, type: "email" },
-        { auth: false },
-      );
+      const endpoint =
+        deliveryMethod === "sms"
+          ? "http://localhost:8000/api/otp/send_sms/"
+          : "http://localhost:8000/api/otp/send/";
+
+      const payload =
+        deliveryMethod === "sms"
+          ? { email: email, type: "sms" } // backend can resolve phone from user
+          : { email: email, type: "email" };
+
+      const result = await apiRequest(endpoint, payload, { auth: false });
 
       console.log(result);
       if (result.otp_id) {
-        toast.success(`OTP sent to ${email}`);
+        toast.success(`OTP sent via ${deliveryMethod.toUpperCase()}`);
 
         setOtpId(result.otp_id);
         setOtpExpiration(result.expires_at);
@@ -51,13 +61,18 @@ const LoginPage = () => {
     setStatus(null);
 
     try {
+      const endpoint =
+        deliveryMethod === "sms"
+          ? "http://localhost:8000/api/otp/verify_sms/"
+          : "http://localhost:8000/api/otp/verify/";
+
       const result = await apiRequest(
-        "http://localhost:8000/api/otp/verify/",
+        endpoint,
         { otp_id: otpId, code: otpInput },
         { auth: false },
       );
-      console.log(result);
 
+      console.log(result);
       if (result.success == true) {
         // Login the user
         await auth.login({
@@ -76,11 +91,11 @@ const LoginPage = () => {
     setEmail(data.email);
     setPassword(data.password);
 
-    // await auth.login({
-    //   username: data.email,
-    //   password: data.password,
-    // });
-    await sendOTP(data.email);
+    await auth.login({
+      username: data.email,
+      password: data.password,
+    });
+    // await sendOTP(data.email);
   };
 
   return (
@@ -93,35 +108,62 @@ const LoginPage = () => {
           </div>
 
           {otpId == "" ? (
-            // LOGIN FORM
-            <RenderForm wrapperClassName="space-y-4">
-              <RenderFormField
-                field={{
-                  label: "Email",
-                  type: "email",
-                  name: "email",
-                  placeholder: "your@gmail.com",
-                }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
-              />
-              <RenderFormField
-                field={{
-                  label: "Password",
-                  type: "password",
-                  name: "password",
-                  placeholder: "••••••••",
-                }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
-              />
-              <RenderFormButton
-                buttonLabel="Sign In"
-                isDisabled={sendingOTP}
-                onSubmit={handleLogin}
-                buttonClassName="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700"
-              />
-            </RenderForm>
+            <>
+              {/* Delivery Method Toggle */}
+              <div className="mb-4 flex justify-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod("email")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                    deliveryMethod === "email"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  Email
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod("sms")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                    deliveryMethod === "sms"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  SMS
+                </button>
+              </div>
+              <RenderForm wrapperClassName="space-y-4">
+                <RenderFormField
+                  field={{
+                    label: "Email",
+                    type: "email",
+                    name: "email",
+                    placeholder: "your@gmail.com",
+                  }}
+                  labelClassName="mb-2 block text-sm font-medium text-gray-700"
+                  inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
+                />
+                <RenderFormField
+                  field={{
+                    label: "Password",
+                    type: "password",
+                    name: "password",
+                    placeholder: "••••••••",
+                  }}
+                  labelClassName="mb-2 block text-sm font-medium text-gray-700"
+                  inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
+                />
+                <RenderFormButton
+                  buttonLabel="Sign In"
+                  isDisabled={sendingOTP}
+                  onSubmit={handleLogin}
+                  buttonClassName="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700"
+                />
+              </RenderForm>
+            </>
           ) : (
             // OTP VERIFICATION FORM
             <OtpVerification
