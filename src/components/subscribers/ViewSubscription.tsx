@@ -34,7 +34,7 @@ const ViewSubscription = () => {
           <div>
             <p className="text-xs text-gray-500">Plan</p>
             <p className="font-medium text-gray-900">
-              {selectedSubscription.plan}
+              {selectedSubscription.plan.name}
             </p>
           </div>
           <div>

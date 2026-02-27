@@ -53,9 +53,9 @@ const BillingTable = ({
 
       const matchesFilter =
         billingFilter === "paid"
-          ? b.status === "Paid"
+          ? b.status === "paid"
           : billingFilter === "unpaid"
-            ? b.status === "Unpaid"
+            ? b.status === "unpaid"
             : billingFilter === "this-month"
               ? toDateBill?.getMonth() === currentMonth &&
                 toDateBill.getFullYear() === currentYear
@@ -127,7 +127,7 @@ const BillingTable = ({
       header: "Status",
       cell: ({ getValue }) => {
         const val = getValue<string>();
-        const paid = val === "Paid";
+        const paid = val === "paid";
 
         return (
           <span
@@ -154,7 +154,7 @@ const BillingTable = ({
         const bill = row.original;
 
         const paymentHistory = paymentHistories.find(
-          (h) => h.bill === bill.id && h.status === "Completed",
+          (h) => h.bill === bill.id && h.status === "completed",
         );
 
         return <BillingActions bill={bill} paymentHistory={paymentHistory} />;

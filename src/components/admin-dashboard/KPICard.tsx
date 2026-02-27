@@ -16,7 +16,7 @@ const KPICard = ({
   const totalUsers = subscriptions.length;
   const totalRevenue =
     billings
-      ?.filter((b) => b.status === "Paid")
+      ?.filter((b) => b.status === "paid")
       .reduce((sum, billing) => {
         const amount = parseFloat(
           billing.amount?.toString().replace(/[^\d.]/g, "") || "0",
@@ -26,7 +26,7 @@ const KPICard = ({
 
   const totalTickets = tickets.length;
   const openTickets = tickets.filter(
-    (t) => t.status !== "Resolved" && t.status !== "Closed",
+    (t) => t.status !== "resolved" && t.status !== "closed",
   ).length;
 
   return (

@@ -1,3 +1,5 @@
+import type { Plan } from "./Plan";
+
 export interface Subscription {
   id: string;
   user: string;
@@ -30,7 +32,7 @@ export interface UserSubscription {
   id: string;
   user: string;
   name: string;
-  plan: string;
+  plan: Plan;
   amount: string;
   address: string;
   status: string;

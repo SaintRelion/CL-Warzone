@@ -87,7 +87,7 @@ const EditSubscription = () => {
             />
             <RenderFormField
               field={{ label: "Assigned plan", name: "planId", type: "text" }}
-              defaultValue={selectedUserSubscription.plan}
+              defaultValue={selectedUserSubscription.plan.id}
               labelClassName="text-xs text-gray-500"
               inputClassName="w-full rounded border px-3 py-2 col"
             />

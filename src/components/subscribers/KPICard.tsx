@@ -1,6 +1,6 @@
-import type { Subscription } from "@/models/subscription";
+import type { UserSubscription } from "@/models/subscription";
 
-const KPICard = ({ subscriptions }: { subscriptions: Subscription[] }) => {
+const KPICard = ({ subscriptions }: { subscriptions: UserSubscription[] }) => {
   // Calculate stats
   const totalSubscribers = subscriptions.length;
   const activeSubscribers = subscriptions.filter(

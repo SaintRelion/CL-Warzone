@@ -10,7 +10,7 @@ export const AdminDashboardPage = () => {
   const { useList: getSubscriptions } =
     useResourceLocked<Subscription>("subscription");
   const subscriptions = getSubscriptions({
-    filters: { status: "Active" },
+    filters: { status: "active" },
   }).data;
 
   const { useList: allTickets } =
@@ -25,11 +25,10 @@ export const AdminDashboardPage = () => {
     <div className="space-y-10">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-          Network Operations Dashboard
+          Operations Dashboard
         </h1>
         <p className="text-sm text-gray-500">
-          Enterprise overview of subscribers, revenue, network health, and
-          incidents
+          Enterprise overview of subscribers, revenue, and tickets
         </p>
       </div>
 

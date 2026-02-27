@@ -86,7 +86,7 @@ const ProcessPayment = () => {
           transaction_screenshot: transactionScreenshot,
           transaction_ref: paymentMethod !== "Cash" ? transactionRef : "",
           next_billing_date: nextBillingDate.toISOString().split("T")[0],
-          status: "Completed",
+          status: "completed",
         };
 
         const id = await insertPaymentHistory.run(completedPayment);
@@ -118,7 +118,7 @@ const ProcessPayment = () => {
           transaction_ref: paymentMethod !== "Cash" ? transactionRef : "",
           created_at: formatReadableDateTime(getCurrentDateTimeString()),
           next_billing_date: nextBillingReadable,
-          status: "Completed",
+          status: "completed",
           voided_at: "",
           voided_reason: "",
         });

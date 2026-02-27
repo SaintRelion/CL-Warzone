@@ -10,8 +10,8 @@ import type { UserBillingInfo } from "@/models/Billing";
 import type { PaymentHistory } from "@/models/PaymentHistory";
 import { useAdminReportingStore } from "@/stores/admin-reporting/useAdminReportingStore";
 import type { User } from "@/models/user";
-import { PLANS } from "@/constants";
 import { toDate } from "@saintrelion/time-functions";
+import type { Plan } from "@/models/Plan";
 
 const getMonthRange = (monthNum: number, yearNum: number) => {
   const startDate = new Date(yearNum, monthNum, 1);
@@ -47,6 +47,12 @@ const GenerateReport = () => {
     useResourceLocked<UserBillingInfo>("userbilling");
   const { useList: getPaymentHistory } =
     useResourceLocked<PaymentHistory>("paymenthistory");
+
+  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
+    showToast: false,
+  });
+
+  const plans = getPlans().data;
 
   const users = getUsers().data;
   const userBillings = getUserBilling().data;
@@ -107,9 +113,9 @@ const GenerateReport = () => {
           total_change_given_back: billing.total_change_given_back,
           total_credits: billing.total_credits,
           status: billing.status,
-          plan: !PLANS[parseInt(billing.plan)]
+          plan: !plans[parseInt(billing.plan)]
             ? billing.plan
-            : PLANS[parseInt(billing.plan)].name,
+            : plans[parseInt(billing.plan)].name,
           payment_date: !assumeOnly1Payment
             ? ""
             : assumeOnly1Payment.created_at,
@@ -128,18 +134,18 @@ const GenerateReport = () => {
     );
 
     const totalRevenue = filteredBillings
-      .filter((b) => b.status == "Paid")
+      .filter((b) => b.status == "paid")
       .reduce((sum, i) => sum + parseFloat(i.amount), 0);
 
     const totalUnpaid = filteredBillings
-      .filter((b) => b.status != "Paid")
+      .filter((b) => b.status != "paid")
       .reduce((sum, i) => sum + parseFloat(i.amount), 0);
 
     const summary = items.reduce(
       (acc, i) => {
         acc.total_subscribers += 1;
-        if (i.status === "Paid") acc.paid_subscribers += 1;
-        if (i.status === "Unpaid") acc.unpaid_subscribers += 1;
+        if (i.status === "paid") acc.paid_subscribers += 1;
+        if (i.status === "unpaid") acc.unpaid_subscribers += 1;
 
         acc.total_collected += Number(i.total_paid);
         acc.total_change_given_back += i.total_change_given_back;

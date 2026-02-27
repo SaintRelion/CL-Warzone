@@ -12,12 +12,14 @@ import KPICards from "@/components/billing/KPICards";
 import { sortByTime } from "@saintrelion/time-functions";
 
 const BillingPage = () => {
-  const { useList: getUserBilling } =
-    useResourceLocked<UserBillingInfo>("userbilling");
+  const { useList: getUserBilling } = useResourceLocked<UserBillingInfo>(
+    "userbilling",
+    { showToast: false },
+  );
   const { useList: getPaymentHistory } = useResourceLocked<
     PaymentHistory,
     CreatePaymentHistory
-  >("paymenthistory");
+  >("paymenthistory", { showToast: false });
 
   const userBilling = sortByTime(getUserBilling().data, "due_date");
   const paymentHistories = getPaymentHistory().data || [];

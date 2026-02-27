@@ -48,7 +48,7 @@ const PaymentHistoryTable = ({
     updatePaymentHistory.run({
       id: payment.id,
       payload: {
-        status: "Voided",
+        status: "voided",
         voided_at: new Date().toISOString(),
         voided_reason: reason,
       },

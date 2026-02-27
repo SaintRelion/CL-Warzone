@@ -13,8 +13,8 @@ const MoreMenu = ({ subscription }: { subscription: UserSubscription }) => {
     Partial<Subscription>
   >("subscription");
 
-  function handleToggleStatus(sub: Subscription) {
-    const newStatus = sub.status === "Active" ? "Deactivate" : "Active";
+  function handleToggleStatus(sub: UserSubscription) {
+    const newStatus = sub.status === "active" ? "disabled" : "active";
     closeAll();
 
     (async () => {
@@ -43,14 +43,14 @@ const MoreMenu = ({ subscription }: { subscription: UserSubscription }) => {
       </PopoverTrigger>
       <PopoverContent align="end" side="bottom" className="w-56 bg-white">
         <ul className="py-2">
-          {subscription.status !== "Archived" && (
+          {subscription.status !== "archived" && (
             <li>
               <button
                 onClick={() => handleToggleStatus(subscription)}
                 className="flex w-full items-center gap-2 text-sm hover:bg-gray-50"
               >
                 <ToggleLeft className="h-4 w-4 text-gray-600" />
-                {subscription.status === "Active" ? "Deactivate" : "Enable"}
+                {subscription.status == "active" ? "Disabled" : "Active"}
               </button>
             </li>
           )}

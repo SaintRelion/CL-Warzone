@@ -49,8 +49,8 @@ const ReportSummary = () => {
       (u) => u.email && u.roles?.find((r) => r == "client"),
     ).length;
 
-    const paidBillings = userBillings.filter((b) => b.status === "Paid");
-    const unpaidBillings = userBillings.filter((b) => b.status != "Paid");
+    const paidBillings = userBillings.filter((b) => b.status === "paid");
+    const unpaidBillings = userBillings.filter((b) => b.status != "paid");
 
     const totalBillable = userBillings.reduce(
       (sum, b) => sum + parseFloat(b.amount || "0"),

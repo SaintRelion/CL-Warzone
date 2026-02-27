@@ -4,7 +4,6 @@ import { Eye, Edit, Search } from "lucide-react";
 
 import type { UserSubscription } from "@/models/subscription";
 import { formatReadableDate } from "@saintrelion/time-functions";
-import { PLANS } from "@/constants";
 import { useSubscribersStore } from "@/stores/subscribers/useSubscribersStore";
 import { useMemo } from "react";
 import MoreMenu from "./MoreMenu";
@@ -33,7 +32,7 @@ const SubscribersTable = ({
         !term ||
         sub.name.toLowerCase().includes(term) ||
         sub.address.toLowerCase().includes(term) ||
-        sub.plan.includes(term) ||
+        sub.plan.name.includes(term) ||
         sub.id.toString().includes(term),
     );
   }, [userSubscriptions, searchTerm]);
@@ -63,10 +62,9 @@ const SubscribersTable = ({
       header: "Plan",
       cell: ({ row }) => {
         const sub = row.original;
-        const planName = PLANS[parseInt(sub.plan) - 1].name;
         return (
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-            {planName ? `Plan ${planName}` : "—"}
+            {sub.plan.name}
           </span>
         );
       },

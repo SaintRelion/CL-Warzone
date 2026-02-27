@@ -1,4 +1,3 @@
-import { PLANS } from "@/constants";
 import type { PaymentHistory } from "@/models/PaymentHistory";
 import type { Plan } from "@/models/Plan";
 import type {
@@ -17,6 +16,12 @@ import { useState } from "react";
 
 const BillingAndPaymentsPage = () => {
   const user = useCurrentUser();
+
+  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
+    showToast: false,
+  });
+
+  const plans = getPlans().data;
 
   /* ===================== PAYMENT HISTORY ===================== */
   const { useList: getPaymentHistories } = useResourceLocked<PaymentHistory>(
@@ -43,14 +48,14 @@ const BillingAndPaymentsPage = () => {
   >("subscription", { showToast: false });
 
   const currentSubscriptions = getSubscriptions({
-    filters: { user: user.id },
+    filters: { user: user.id, status: "active" },
   }).data;
 
   const currentSubscription =
     currentSubscriptions.length > 0 ? currentSubscriptions[0] : null;
 
   const currentPlan: Plan | null = currentSubscription
-    ? (PLANS.find((p) => p.id === currentSubscription.plan) ?? null)
+    ? (plans.find((p) => p.id === currentSubscription.plan) ?? null)
     : null;
 
   /* ===================== UI STATE ===================== */

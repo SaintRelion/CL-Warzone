@@ -13,6 +13,8 @@ import "@/lib/firebase-client";
 import "@/sr-config";
 
 import "@/repositories/UserRepo";
+
+import "@/repositories/PlanRepo";
 import "@/repositories/SubscriptionRepo";
 import "@/repositories/BillingRepo";
 import "@/repositories/PaymentHistoryRepo";

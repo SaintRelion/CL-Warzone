@@ -9,36 +9,25 @@ import {
 const RegisterPage = () => {
   const auth = useAuth();
 
-  const serviceAreas = [
-    "Katipunan",
-    "Roxas",
-    "Piñan",
-    "Osmeña",
-    "Polanco",
-  ];
+  const serviceAreas = ["katipunan", "roxas", "piñan", "osmeña", "polanco"];
 
   const handleRegister = async (data: Record<string, string>) => {
-    await auth.register({ ...data, roles: ["admin"] }, data.password);
+    await auth.register({ ...data, roles: ["client"] }, data.password);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-      
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-black text-white backdrop-blur-md">
+      <nav className="fixed top-0 right-0 left-0 z-50 border-b bg-black text-white backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          
           <div className="flex items-center gap-2">
             <span className="fa-solid fa-wifi text-xl text-[#78fbcf]" />
-            <span className="text-xl font-bold uppercase tracking-tight">
+            <span className="text-xl font-bold tracking-tight uppercase">
               Warzone
             </span>
           </div>
 
-          <Button
-            asChild
-            className="bg-[#78fbcf] text-black hover:opacity-90"
-          >
+          <Button asChild className="bg-[#78fbcf] text-black hover:opacity-90">
             <a href="/login">Login</a>
           </Button>
         </div>
@@ -47,7 +36,6 @@ const RegisterPage = () => {
       {/* FORM SECTION */}
       <div className="flex items-center justify-center px-4 pt-24 pb-12">
         <div className="w-full max-w-4xl rounded-2xl bg-white p-8 shadow-xl">
-          
           <h2 className="mb-2 text-3xl font-bold text-gray-900">
             Create Account
           </h2>
@@ -57,7 +45,6 @@ const RegisterPage = () => {
 
           <RenderForm wrapperClassName="space-y-6">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              
               <RenderFormField
                 field={{
                   label: "First Name *",
@@ -184,7 +171,6 @@ const RegisterPage = () => {
                 <a href="/login">Back to Login</a>
               </Button>
             </div>
-
           </RenderForm>
         </div>
       </div>

@@ -40,34 +40,43 @@ export async function apiRequest<T>(
       credentials: options?.credentials,
     });
 
-    if (!res.ok) {
-      let errorBody;
-
-      try {
-        errorBody = await res.json();
-      } catch {
-        errorBody = await res.text();
-      }
-
-      console.error("API Error:", res.status, errorBody);
-
-      const message =
-        typeof errorBody === "string"
-          ? errorBody
-          : JSON.stringify(errorBody, null, 2);
-
-      toast.error(`Error ${res.status}: ${message}`);
-
-      throw new Error(message);
+    let body = null;
+    try {
+      body = await res.json();
+    } catch {
+      body = null;
     }
 
-    // Handle empty responses (204 etc.)
+    if (!res.ok) {
+      // Priority 1: Your standard { error: "..." }
+      if (body?.error) {
+        throw new Error(body.error);
+      }
+
+      // Priority 2: If backend returns random format
+      if (typeof body === "object" && body !== null) {
+        throw new Error(JSON.stringify(body));
+      }
+
+      // Priority 3: If plain text
+      if (typeof body === "string") {
+        throw new Error(body);
+      }
+
+      // Priority 4: Fallback generic
+      throw new Error(
+        "body was null for some reason, failed to read response.json",
+      );
+    }
+
+    // 204 No Content
     if (res.status === 204) return {};
 
-    return await res.json();
+    return body;
   } catch (err) {
-    const error = err as Record<string, string>;
-    toast.error(error.message || "Unknown error");
+    const message = err instanceof Error ? err.message : "Unknown error";
+
+    toast.error(message || "Unknown error");
     throw err;
   }
 }

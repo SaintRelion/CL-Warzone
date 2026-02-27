@@ -25,7 +25,7 @@ const KPICards = ({
     return userBilling.reduce((acc, b) => {
       const created = new Date(b.created_at);
 
-      if (b.status === "Paid") {
+      if (b.status === "paid") {
         acc.paid += 1;
         acc.revenue += parseInt(b.amount);
       } else {
