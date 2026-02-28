@@ -11,8 +11,8 @@ import { DataTable } from "../general/DataTable";
 import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { toast } from "@saintrelion/notifications";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import { PLANS } from "@/constants";
 import { useActivityLogger } from "@/lib/activity-logger";
+import type { Plan } from "@/models/Plan";
 
 const PaymentHistoryTable = ({
   paymentHistories,
@@ -30,6 +30,12 @@ const PaymentHistoryTable = ({
     never,
     VoidPaymentHistory
   >("paymenthistory", { showToast: false });
+
+  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
+    showToast: false,
+  });
+
+  const plans = getPlans().data;
 
   if (!selectedBillingInfo || cashierBehavior != "paymenthistory") return <></>;
 
@@ -61,7 +67,8 @@ const PaymentHistoryTable = ({
       status: "success",
       additional_info: {
         amount: selectedBillingInfo.amount,
-        planName: PLANS[parseInt(selectedBillingInfo.plan) - 1].name,
+        planName:
+          plans.find((p) => p.id == selectedBillingInfo.plan)?.name ?? "",
       },
     });
 

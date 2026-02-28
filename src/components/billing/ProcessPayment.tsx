@@ -1,6 +1,6 @@
-import { PLANS } from "@/constants";
 import { useActivityLogger } from "@/lib/activity-logger";
 import type { CreatePaymentHistory } from "@/models/PaymentHistory";
+import type { Plan } from "@/models/Plan";
 import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import {
@@ -18,6 +18,12 @@ const ProcessPayment = () => {
     never,
     CreatePaymentHistory
   >("paymenthistory");
+
+  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
+    showToast: false,
+  });
+
+  const plans = getPlans().data;
 
   const cashierBehavior = useBillingStore((s) => s.cashierBehavior);
   const selectedBillingInfo = useBillingStore((s) => s.selectedBillingInfo);
@@ -91,16 +97,17 @@ const ProcessPayment = () => {
 
         const id = await insertPaymentHistory.run(completedPayment);
 
-        const plan = PLANS.filter((f) => f.id == selectedBillingInfo.plan)[0];
+        const plan_name =
+          plans.find((p) => p.id == selectedBillingInfo.plan)?.name ?? "";
         await log({
           action: "create",
           category: "billing",
-          description: `Processed GCash payment ₱${received} for ${selectedBillingInfo.customer} - Plan: ${plan.name}`,
+          description: `Processed GCash payment ₱${received} for ${selectedBillingInfo.customer} - Plan: ${plan_name}`,
           status: "success",
           additional_info: {
             amount: selectedBillingInfo.amount,
             payment_method: paymentMethod,
-            plan_name: plan.name,
+            plan_name: plan_name,
           },
         });
 

@@ -1,5 +1,6 @@
-import { PLANS } from "@/constants";
+import type { Plan } from "@/models/Plan";
 import { useBillingStore } from "@/stores/billing/useBillingStore";
+import { useResourceLocked } from "@saintrelion/data-access-layer";
 import {
   formatReadableDate,
   getCurrentDateTimeString,
@@ -12,6 +13,12 @@ const ReceiptView = () => {
   const selectedBillingInfo = useBillingStore((s) => s.selectedBillingInfo);
   const selectedReceipt = useBillingStore((s) => s.selectedPaymentHistory);
   const clearAll = useBillingStore((s) => s.clearAll);
+
+  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
+    showToast: false,
+  });
+
+  const plans = getPlans().data;
 
   const printReceipt = (): void => {
     if (!receiptRef.current) return;
@@ -146,7 +153,7 @@ const ReceiptView = () => {
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span style={{ textAlign: "left" }}>PLAN:</span>
             <span style={{ textAlign: "right" }}>
-              {PLANS[parseInt(selectedBillingInfo.plan) - 1].name}
+              {plans.find((p) => p.id == selectedBillingInfo.plan)?.name ?? ""}
             </span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
