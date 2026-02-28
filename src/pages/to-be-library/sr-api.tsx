@@ -13,7 +13,6 @@ export async function apiRequest<T>(
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     auth?: boolean; // default true
     headers?: Record<string, string>;
-    credentials?: RequestCredentials;
   },
 ) {
   const method = options?.method || "POST";
@@ -33,12 +32,16 @@ export async function apiRequest<T>(
   }
 
   try {
-    const res = await fetch(endpoint, {
-      method,
-      headers,
-      body: payload ? JSON.stringify(payload) : undefined,
-      credentials: options?.credentials,
-    });
+    const res = await (payload
+      ? fetch(endpoint, {
+          method,
+          headers,
+          body: JSON.stringify(payload),
+        })
+      : fetch(endpoint, {
+          method,
+          headers,
+        }));
 
     let body = null;
     try {

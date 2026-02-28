@@ -21,7 +21,7 @@
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
-    "@saintrelion/auth-lib": "^5.2.26",
+    "@saintrelion/auth-lib": "^5.3.2",
     "@saintrelion/cache": "^1.0.1",
     "@saintrelion/data-access-layer": "^6.3.5",
     "@saintrelion/forms": "^1.1.13",

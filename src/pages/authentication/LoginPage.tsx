@@ -37,6 +37,17 @@ const LoginPage = () => {
 
   const plans = getPlans().data;
 
+  const checkDevice = async (email: string, password: string) => {
+    const result = await apiRequest(
+      `http://${BASE_API}:8000/api/auth/check/device/`,
+      { identifier: auth.deviceId, username: email, password: password },
+      {
+        auth: false,
+      },
+    );
+
+    return result.is_trusted;
+  };
   const sendOTP = async (email: string) => {
     try {
       setSendingOTP(true);
@@ -51,8 +62,6 @@ const LoginPage = () => {
           : { email: email, otp_type: "email" };
 
       const result = await apiRequest(endpoint, payload, { auth: false });
-
-      console.log(result);
       if (result.otp_id) {
         toast.success(`OTP sent via ${deliveryMethod.toUpperCase()}`);
 
@@ -102,11 +111,15 @@ const LoginPage = () => {
     setEmail(data.email);
     setPassword(data.password);
 
-    // await auth.login({
-    //   username: data.email,
-    //   password: data.password,
-    // });
-    await sendOTP(data.email);
+    const isTrusted = await checkDevice(data.email, data.password);
+    if (isTrusted) {
+      await auth.login({
+        username: data.email,
+        password: data.password,
+      });
+    } else {
+      await sendOTP(data.email);
+    }
   };
 
   return (
@@ -426,17 +439,17 @@ const LoginPage = () => {
                     Email
                   </button>
 
-                  {/* <button
-                  type="button"
-                  onClick={() => setDeliveryMethod("sms")}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                    deliveryMethod === "sms"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-200 text-gray-700"
-                  }`}
-                >
-                  SMS
-                </button> */}
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryMethod("sms")}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium ${
+                      deliveryMethod === "sms"
+                        ? "bg-indigo-600 text-white"
+                        : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    SMS
+                  </button>
                 </div>
                 <RenderForm wrapperClassName="space-y-4">
                   <RenderFormField
