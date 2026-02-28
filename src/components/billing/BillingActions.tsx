@@ -18,7 +18,7 @@ const BillingActions = ({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Print Receipt Button - Only for Paid Payments */}
-      {bill.status === "Paid" && (
+      {bill.status === "paid" && (
         <button
           onClick={() => {
             if (!paymentHistory) {
@@ -39,7 +39,7 @@ const BillingActions = ({
       )}
 
       {/* Cashiering Button - Only for Pending Payments */}
-      {bill.status === "Unpaid" && (
+      {bill.status === "unpaid" && (
         <button
           onClick={() => processPayment(bill)}
           title="Process Payment - Collect payment from customer"
