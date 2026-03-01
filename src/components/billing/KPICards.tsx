@@ -3,7 +3,7 @@ import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { useMemo } from "react";
 
 const KPICards = ({
-  userBillings: userBilling,
+  userBillings,
   currentMonth,
   currentYear,
 }: {
@@ -19,10 +19,10 @@ const KPICards = ({
       unpaid: 0,
       thisMonth: 0,
       revenue: 0,
-      total: userBilling.length,
+      total: userBillings.length,
     };
 
-    return userBilling.reduce((acc, b) => {
+    return userBillings.reduce((acc, b) => {
       const created = new Date(b.created_at);
 
       if (b.status === "paid") {
@@ -41,7 +41,7 @@ const KPICards = ({
 
       return acc;
     }, base);
-  }, [userBilling, currentMonth, currentYear]);
+  }, [userBillings, currentMonth, currentYear]);
 
   const statCards = [
     {

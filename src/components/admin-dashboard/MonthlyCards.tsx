@@ -32,16 +32,17 @@ const months = [
 ];
 
 const MonthlyCards = ({
-  billings,
+  userBillings,
   tickets,
 }: {
-  billings: UserBillingInfo[];
+  userBillings: UserBillingInfo[];
   tickets: SupportTicket[];
 }) => {
   const monthlyIncomeData = useMemo(() => {
-    if (!billings?.length) return months.map((m) => ({ month: m, income: 0 }));
+    if (!userBillings?.length)
+      return months.map((m) => ({ month: m, income: 0 }));
 
-    const paid = billings.filter((b) => b.status === "Paid");
+    const paid = userBillings.filter((b) => b.status === "paid");
     const map: Record<string, number> = {};
 
     paid.forEach((b) => {
@@ -52,7 +53,7 @@ const MonthlyCards = ({
     });
 
     return months.map((m) => ({ month: m, income: map[m] || 0 }));
-  }, [billings]);
+  }, [userBillings]);
 
   const monthlyTicketsData = useMemo(() => {
     const currentMonth = new Date().toLocaleString("default", {

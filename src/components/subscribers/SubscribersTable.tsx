@@ -75,8 +75,8 @@ const SubscribersTable = ({
       cell: ({ getValue }) => {
         const val = getValue<string>();
         const statusConfig = {
-          Active: { bg: "bg-green-100", text: "text-green-800" },
-          Suspended: { bg: "bg-red-100", text: "text-red-800" },
+          active: { bg: "bg-green-100", text: "text-green-800" },
+          disabled: { bg: "bg-red-100", text: "text-red-800" },
           Inactive: { bg: "bg-gray-100", text: "text-gray-800" },
         };
         const config =

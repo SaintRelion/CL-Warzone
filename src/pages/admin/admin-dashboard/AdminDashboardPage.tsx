@@ -2,14 +2,14 @@ import { useResourceLocked } from "@saintrelion/data-access-layer";
 import type { UserBillingInfo } from "@/models/Billing";
 import type { SupportTicket } from "@/models/SupportTicket";
 import TicketSummary from "@/components/admin-dashboard/TicketSummary";
-import type { Subscription } from "@/models/subscription";
+import type { UserSubscription } from "@/models/subscription";
 import KPICard from "@/components/admin-dashboard/KPICard";
 import MonthlyCards from "@/components/admin-dashboard/MonthlyCards";
 
 export const AdminDashboardPage = () => {
-  const { useList: getSubscriptions } =
-    useResourceLocked<Subscription>("subscription");
-  const subscriptions = getSubscriptions({
+  const { useList: getUserSubscriptions } =
+    useResourceLocked<UserSubscription>("subscription");
+  const userSubscriptions = getUserSubscriptions({
     filters: { status: "active" },
   }).data;
 
@@ -17,9 +17,9 @@ export const AdminDashboardPage = () => {
     useResourceLocked<SupportTicket>("supportticket");
   const tickets = allTickets().data;
 
-  const { useList: allBillings } =
+  const { useList: allUserBillings } =
     useResourceLocked<UserBillingInfo>("userbilling");
-  const billings = allBillings().data;
+  const userBillings = allUserBillings().data;
 
   return (
     <div className="space-y-10">
@@ -34,13 +34,13 @@ export const AdminDashboardPage = () => {
 
       {/* ===================== KPI ROW ===================== */}
       <KPICard
-        subscriptions={subscriptions}
-        billings={billings}
+        userSubscriptions={userSubscriptions}
+        userBillings={userBillings}
         tickets={tickets}
       />
 
       {/* ===================== ANALYTICS ===================== */}
-      <MonthlyCards billings={billings} tickets={tickets} />
+      <MonthlyCards userBillings={userBillings} tickets={tickets} />
 
       {/* ===================== OPERATIONS ===================== */}
       <TicketSummary tickets={tickets} />

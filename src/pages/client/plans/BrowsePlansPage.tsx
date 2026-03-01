@@ -149,7 +149,7 @@ const BrowsePlansPage = () => {
                         if (currentSubscriptions.length > 0) {
                           if (
                             myActiveBilling.length > 0 &&
-                            myActiveBilling[0].status == "Unpaid"
+                            myActiveBilling[0].status == "unpaid"
                           ) {
                             alert(
                               "You have pending bills, please complete any remaining balance.",
@@ -166,9 +166,9 @@ const BrowsePlansPage = () => {
                           : "bg-indigo-600 text-white hover:bg-indigo-700"
                       }`}
                     >
-                      {currentPlan?.id === plan.id
+                      {!currentPlan ? "Avail Plan" : (currentPlan.id === plan.id
                         ? "Current Plan"
-                        : "Switch Plan"}
+                        : "Switch Plan")}
                     </button>
                   </DialogTrigger>
 

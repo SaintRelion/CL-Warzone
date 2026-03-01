@@ -2,20 +2,20 @@ import { Activity, AlertCircle, DollarSign, Users } from "lucide-react";
 import { StatCard } from "../general/StatCard";
 import type { UserBillingInfo } from "@/models/Billing";
 import type { SupportTicket } from "@/models/SupportTicket";
-import type { Subscription } from "@/models/subscription";
+import type { UserSubscription } from "@/models/subscription";
 
 const KPICard = ({
-  subscriptions,
-  billings,
+  userSubscriptions,
+  userBillings,
   tickets,
 }: {
-  subscriptions: Subscription[];
-  billings: UserBillingInfo[];
+  userSubscriptions: UserSubscription[];
+  userBillings: UserBillingInfo[];
   tickets: SupportTicket[];
 }) => {
-  const totalUsers = subscriptions.length;
+  const totalUsers = userSubscriptions.length;
   const totalRevenue =
-    billings
+    userBillings
       ?.filter((b) => b.status === "paid")
       .reduce((sum, billing) => {
         const amount = parseFloat(
