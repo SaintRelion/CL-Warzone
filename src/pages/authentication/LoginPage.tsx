@@ -131,7 +131,7 @@ const LoginPage = () => {
             <div className="flex items-center gap-2">
               <span className="fa-solid fa-wifi text-xl text-[#78fbcf]" />
               <span className="text-xl font-bold tracking-tighter uppercase">
-                Warzone
+                WARZONE
               </span>
             </div>
 
