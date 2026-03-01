@@ -9,13 +9,13 @@ import {
   setGlobalMode,
 } from "@saintrelion/data-access-layer";
 
-export const BASE_API = "127.0.0.1";
+export const BASE_API = "https://api.warzonecafe.tech/";
 // AUTH-LIB
 setAuthLibClientAppName("warzone");
-setAuthAPIBaseUrl(`http://${BASE_API}:8000/api/auth/`);
+setAuthAPIBaseUrl(`${BASE_API}api/auth/`);
 setAuthMode("api-jwt");
 
 // DAL
 setDALClientAppName("warzone");
-setDALApiBaseUrl(`http://${BASE_API}:8000/api/`);
+setDALApiBaseUrl(`${BASE_API}api/`);
 setGlobalMode("api");

@@ -39,7 +39,7 @@ const LoginPage = () => {
 
   const checkDevice = async (email: string, password: string) => {
     const result = await apiRequest(
-      `http://${BASE_API}:8000/api/auth/check/device/`,
+      `${BASE_API}api/auth/check/device/`,
       { identifier: auth.deviceId, username: email, password: password },
       {
         auth: false,
@@ -53,8 +53,8 @@ const LoginPage = () => {
       setSendingOTP(true);
       const endpoint =
         deliveryMethod === "sms"
-          ? `http://${BASE_API}:8000/api/otp/send_sms/`
-          : `http://${BASE_API}:8000/api/otp/send/`;
+          ? `${BASE_API}api/otp/send_sms/`
+          : `${BASE_API}api/otp/send/`;
 
       const payload =
         deliveryMethod === "sms"
@@ -83,8 +83,8 @@ const LoginPage = () => {
     try {
       const endpoint =
         deliveryMethod === "sms"
-          ? `http://${BASE_API}:8000/api/otp/verify_sms/`
-          : `http://${BASE_API}:8000/api/otp/verify/`;
+          ? `${BASE_API}api/otp/verify_sms/`
+          : `${BASE_API}api/otp/verify/`;
 
       const result = await apiRequest(
         endpoint,
