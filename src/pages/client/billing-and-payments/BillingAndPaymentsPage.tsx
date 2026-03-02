@@ -1,9 +1,6 @@
+import type { UserBillingInfo } from "@/models/Billing";
 import type { PaymentHistory } from "@/models/PaymentHistory";
-import type { Plan } from "@/models/Plan";
-import type {
-  Subscription,
-  UpdateSubscriptionBalance,
-} from "@/models/subscription";
+import type { UserSubscription } from "@/models/subscription";
 import { useCurrentUser } from "@saintrelion/auth-lib";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import { toast } from "@saintrelion/notifications";
@@ -16,12 +13,6 @@ import { useState } from "react";
 
 const BillingAndPaymentsPage = () => {
   const user = useCurrentUser();
-
-  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
-    showToast: false,
-  });
-
-  const plans = getPlans().data;
 
   /* ===================== PAYMENT HISTORY ===================== */
   const { useList: getPaymentHistories } = useResourceLocked<PaymentHistory>(
@@ -41,22 +32,27 @@ const BillingAndPaymentsPage = () => {
   );
 
   /* ===================== SUBSCRIPTION ===================== */
-  const { useList: getSubscriptions } = useResourceLocked<
-    Subscription,
-    never,
-    UpdateSubscriptionBalance
-  >("subscription", { showToast: false });
+  const { useList: getUserSubscriptions } = useResourceLocked<UserSubscription>(
+    "usersubscription",
+    { showToast: false },
+  );
 
-  const currentSubscriptions = getSubscriptions({
-    filters: { user: user.id, status: "active" },
+  const currentSubscriptions = getUserSubscriptions({
+    filters: { user: user.id },
   }).data;
 
   const currentSubscription =
     currentSubscriptions.length > 0 ? currentSubscriptions[0] : null;
 
-  const currentPlan: Plan | null = currentSubscription
-    ? (plans.find((p) => p.id === currentSubscription.plan) ?? null)
-    : null;
+  const { useList: getUserBilling } =
+    useResourceLocked<UserBillingInfo>("userbilling");
+
+  const myActiveBilling = getUserBilling({
+    filters: {
+      user: user.id,
+      subscription: currentSubscription ? currentSubscription.id : -1,
+    },
+  }).data;
 
   /* ===================== UI STATE ===================== */
   const [showGcashModal, setShowGcashModal] = useState(false);
@@ -86,33 +82,82 @@ const BillingAndPaymentsPage = () => {
 
       {/* ===================== SUBSCRIPTION CARD ===================== */}
       <div className="rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 p-5 text-white">
-        {currentSubscription && currentPlan ? (
+        {currentSubscription ? (
           <div className="space-y-5">
             <h3 className="text-lg font-semibold">Current Subscription</h3>
 
+            {/* ===================== APPROVAL PROCESS STEPS ===================== */}
+            <div className="mb-4 flex items-center gap-3">
+              {/* Step 1: Plan Chosen */}
+              <div className="flex items-center gap-2">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500 font-bold text-white">
+                  ✓
+                </div>
+                <span>Plan Chosen</span>
+              </div>
+
+              <div className="h-1 flex-1 bg-white/50"></div>
+
+              {/* Step 2: Status */}
+              <div className="flex items-center gap-2">
+                <div
+                  className={`flex h-6 w-6 items-center justify-center rounded-full font-bold ${
+                    currentSubscription.status === "pending"
+                      ? "bg-yellow-500 text-white" // waiting approval
+                      : currentSubscription.status === "active"
+                        ? "bg-green-500 text-white" // approved & active
+                        : currentSubscription.status === "suspended"
+                          ? "bg-gray-400 text-white" // temporarily suspended
+                          : "bg-red-500 text-white" // cancelled
+                  }`}
+                >
+                  {currentSubscription.status === "pending"
+                    ? "!"
+                    : currentSubscription.status === "active"
+                      ? "✓"
+                      : currentSubscription.status === "suspended"
+                        ? "–"
+                        : "✕"}
+                </div>
+                <span>
+                  {currentSubscription.status === "pending"
+                    ? "Approval Pending"
+                    : currentSubscription.status === "active"
+                      ? "Active"
+                      : currentSubscription.status === "suspended"
+                        ? "Suspended"
+                        : "Cancelled"}
+                </span>
+              </div>
+            </div>
+
+            {/* ===================== SUBSCRIPTION INFO ===================== */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Info label="Plan" value={currentPlan.name} />
+              <Info label="Plan" value={currentSubscription.plan.name} />
               <Info label="Status" value={currentSubscription.status} />
-              <Info
-                label="Next Due Date"
-                value={formatReadableDate(
-                  currentSubscription.next_billing_date,
-                )}
-              />
+              {myActiveBilling?.[0] && (
+                <Info
+                  label="Next Due Date"
+                  value={formatReadableDate(myActiveBilling[0].due_date)}
+                />
+              )}
               <Info
                 label="Outstanding Balance"
-                value={`₱${currentSubscription.amount}`}
+                value={`₱${currentSubscription.amount ?? 0}`}
               />
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                onClick={() => setShowGcashModal(true)}
-                className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 sm:w-auto"
-              >
-                Pay via GCash
-              </button>
-            </div>
+            {/* ===================== PAYMENT BUTTON ===================== */}
+            {currentSubscription.status === "active" && (
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <button
+                  onClick={() => setShowGcashModal(true)}
+                  className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 sm:w-auto"
+                >
+                  Pay via GCash
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-center font-semibold">No Active Subscription</p>

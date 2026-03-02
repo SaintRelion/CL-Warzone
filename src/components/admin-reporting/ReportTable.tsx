@@ -118,8 +118,8 @@ const ReportTable = () => {
         const val = getValue<string>() as Exclude<FilterStatus, "all">;
 
         const statusColors = {
-          Paid: "bg-green-100 text-green-700",
-          Unpaid: "bg-red-100 text-red-700",
+          paid: "bg-green-100 text-green-700",
+          unpaid: "bg-red-100 text-red-700",
         };
 
         return (

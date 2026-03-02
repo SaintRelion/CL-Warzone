@@ -11,11 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@saintrelion/auth-lib";
 import type {
-  Subscription,
   CreateSubscription,
   UpdateSubscriptionStatus,
+  Subscription,
 } from "@/models/subscription";
-import { getCurrentDateTimeString, toDate } from "@saintrelion/time-functions";
 import type { Plan } from "@/models/Plan";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import type { UserBillingInfo } from "@/models/Billing";
@@ -45,44 +44,41 @@ const BrowsePlansPage = () => {
     useResourceLocked<UserBillingInfo>("userbilling");
 
   const currentSubscriptions = getSubscription({
-    filters: { user: user.id, status: "active" },
+    filters: { user: user.id },
   }).data;
-  const currentPlan =
-    currentSubscriptions.length > 0
-      ? plans.filter((p) => p.id == currentSubscriptions[0].plan)[0]
-      : null;
+
+  const openSubscription =
+    currentSubscriptions.find((sub) =>
+      ["pending", "active", "suspended"].includes(sub.status),
+    ) ?? null;
+
+  const currentPlan = openSubscription
+    ? plans.find((p) => p.id == openSubscription.plan)
+    : null;
 
   const myActiveBilling = getUserBilling({
     filters: {
       user: user.id,
-      subscription:
-        currentSubscriptions.length == 0 ? -1 : currentSubscriptions[0].id,
+      subscription: openSubscription ? openSubscription.id : -1,
     },
   }).data;
 
+  const hasUnpaidBill =
+    myActiveBilling.length > 0 && myActiveBilling[0].status === "unpaid";
+
   async function handleConfirmPlan(confirmedPlan: Plan) {
-    const currentDay = toDate(getCurrentDateTimeString());
-
-    if (currentDay != null && confirmedPlan != null) {
-      if (currentSubscriptions.length > 0) {
-        const currentSubscription = currentSubscriptions[0];
-
+    if (confirmedPlan != null) {
+      if (openSubscription) {
         await updateSubscription.run({
-          id: currentSubscription.id,
-          payload: { status: "disabled" },
+          id: openSubscription.id,
+          payload: { status: "cancelled" },
         });
       }
-
-      // + 30 days
-      currentDay.setDate(currentDay.getDate() + 30);
 
       await insertSubscription.run({
         user: user.id,
         plan: confirmedPlan.id,
-        amount: confirmedPlan.price,
         address: user.street_address,
-        status: "active",
-        next_billing_date: currentDay.toISOString().split("T")[0],
       });
     }
   }
@@ -106,6 +102,40 @@ const BrowsePlansPage = () => {
             plan.name === "Enterprise Fiber" ? "Dedicated IP Option" : null,
             "24/7 Customer Support", // generic feature
           ].filter(Boolean); // remove nulls
+
+          const disableButton =
+            insertSubscription.isLocked || // generic lock
+            hasUnpaidBill || // cannot switch if unpaid bills
+            (openSubscription && openSubscription.status === "pending");
+
+          let buttonLabel = "Avail Plan";
+          if (openSubscription) {
+            if (openSubscription.status === "pending") {
+              buttonLabel = "Approval Pending";
+            } else if (currentPlan?.id === plan.id) {
+              buttonLabel = "Current Plan";
+            } else if (
+              openSubscription.status === "active" ||
+              openSubscription.status === "suspended"
+            ) {
+              buttonLabel = "Subscription Active";
+            }
+          }
+
+          // Determine button color classes
+          let buttonClass = "w-full rounded-lg py-3 font-medium transition ";
+          if (
+            openSubscription?.status === "pending" &&
+            currentPlan?.id === plan.id
+          ) {
+            buttonClass += "bg-yellow-500 text-white cursor-not-allowed";
+          } else if (!currentPlan) {
+            buttonClass += "bg-indigo-600 text-white hover:bg-indigo-700";
+          } else if (currentPlan?.id === plan.id) {
+            buttonClass += "bg-green-600 text-white hover:bg-green-700";
+          } else {
+            buttonClass += "bg-indigo-600 text-white hover:bg-indigo-700";
+          }
 
           return (
             <div
@@ -144,31 +174,19 @@ const BrowsePlansPage = () => {
                 >
                   <DialogTrigger asChild>
                     <button
-                      disabled={insertSubscription.isLocked}
+                      disabled={disableButton ?? false}
                       onClick={() => {
-                        if (currentSubscriptions.length > 0) {
-                          if (
-                            myActiveBilling.length > 0 &&
-                            myActiveBilling[0].status == "unpaid"
-                          ) {
-                            alert(
-                              "You have pending bills, please complete any remaining balance.",
-                            );
-                            return;
-                          }
+                        if (hasUnpaidBill) {
+                          alert(
+                            "You have pending bills, please complete any remaining balance.",
+                          );
+                          return;
                         }
-
                         setViewedPlan(plan);
                       }}
-                      className={`w-full rounded-lg py-3 font-medium transition ${
-                        currentPlan?.id === plan.id
-                          ? "bg-green-600 text-white hover:bg-green-700"
-                          : "bg-indigo-600 text-white hover:bg-indigo-700"
-                      }`}
+                      className={buttonClass}
                     >
-                      {!currentPlan ? "Avail Plan" : (currentPlan.id === plan.id
-                        ? "Current Plan"
-                        : "Switch Plan")}
+                      {buttonLabel}
                     </button>
                   </DialogTrigger>
 

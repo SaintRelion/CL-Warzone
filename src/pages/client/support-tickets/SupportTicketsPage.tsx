@@ -115,6 +115,7 @@ const SupportTicketsPage = () => {
             <option>Billing Inquiry</option>
             <option>Installation / Activation</option>
             <option>Router / Modem Issue</option>
+            <option>Others</option>
           </select>
 
           <select

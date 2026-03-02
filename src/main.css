@@ -8,14 +8,21 @@ i {
   box-shadow: none !important;
   display: inline-block; /* optional, depends on layout */
 }
+
 @media print {
-  body {
-    background: white !important;
+  body * {
+    visibility: hidden; /* hide everything */
   }
 
-  .shadow,
-  .shadow-md,
-  .shadow-lg {
-    box-shadow: none !important;
+  #printable-report,
+  #printable-report * {
+    visibility: visible; /* show only report container */
+  }
+
+  #printable-report {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
   }
 }

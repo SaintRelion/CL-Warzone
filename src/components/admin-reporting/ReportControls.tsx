@@ -19,7 +19,7 @@ import {
   type FilterStatus,
 } from "@/stores/admin-reporting/useAdminReportingStore";
 import GenerateReport from "./GenerateReport";
-import ExportReport from "./ExportReport";
+import PrintableReport from "./PrintableReport";
 import { MONTH_NAMES } from "./constants";
 
 const MonthButton = ({
@@ -66,10 +66,10 @@ const YearButton = ({
   </button>
 );
 
-const StatusIcon = ({ status }: { status: "Paid" | "Unpaid" | "all" }) => {
+const StatusIcon = ({ status }: { status: "paid" | "unpaid" | "all" }) => {
   const map = {
-    Paid: { icon: "fa-check-circle", color: " text-green-600 " },
-    Unpaid: { icon: "fa-exclamation-circle", color: " text-red-600 " },
+    paid: { icon: "fa-check-circle", color: " text-green-600 " },
+    unpaid: { icon: "fa-exclamation-circle", color: " text-red-600 " },
     all: { icon: "fa-list", color: " text-indigo-600 " },
   };
 
@@ -82,7 +82,7 @@ const StatusIcon = ({ status }: { status: "Paid" | "Unpaid" | "all" }) => {
   );
 };
 
-const filterStatuses: FilterStatus[] = ["all", "Paid", "Unpaid"];
+const filterStatuses: FilterStatus[] = ["all", "paid", "unpaid"];
 
 const ReportControls = () => {
   const dateToReport = useAdminReportingStore((s) => s.dateToReport);
@@ -244,7 +244,7 @@ const ReportControls = () => {
       </div>
 
       {/* Export Section */}
-      <ExportReport />
+      <PrintableReport />
     </div>
   );
 };

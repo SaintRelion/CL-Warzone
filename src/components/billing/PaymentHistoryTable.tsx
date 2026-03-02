@@ -12,7 +12,6 @@ import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { toast } from "@saintrelion/notifications";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import { useActivityLogger } from "@/lib/activity-logger";
-import type { Plan } from "@/models/Plan";
 
 const PaymentHistoryTable = ({
   paymentHistories,
@@ -30,12 +29,6 @@ const PaymentHistoryTable = ({
     never,
     VoidPaymentHistory
   >("paymenthistory", { showToast: false });
-
-  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
-    showToast: false,
-  });
-
-  const plans = getPlans().data;
 
   if (!selectedBillingInfo || cashierBehavior != "paymenthistory") return <></>;
 
@@ -67,8 +60,7 @@ const PaymentHistoryTable = ({
       status: "success",
       additional_info: {
         amount: selectedBillingInfo.amount,
-        planName:
-          plans.find((p) => p.id == selectedBillingInfo.plan)?.name ?? "",
+        planName: selectedBillingInfo.plan.name,
       },
     });
 
@@ -135,7 +127,7 @@ const PaymentHistoryTable = ({
       cell: ({ getValue }) => {
         const val = getValue<string>();
 
-        const isCompleted = val === "Completed";
+        const isCompleted = val === "completed";
 
         return (
           <span
@@ -156,7 +148,7 @@ const PaymentHistoryTable = ({
       cell: ({ row }) => {
         const payment = row.original;
 
-        if (payment.status === "Voided") return null;
+        if (payment.status === "voided") return null;
 
         return (
           <button
@@ -214,7 +206,7 @@ const PaymentHistoryTable = ({
                   (p) =>
                     p.user === selectedBillingInfo.user &&
                     p.bill == selectedBillingInfo.id &&
-                    p.status === "Completed",
+                    p.status === "completed",
                 )
                 .reduce((sum, p) => sum + parseInt(p.amount), 0)
                 .toLocaleString()}

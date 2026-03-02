@@ -13,10 +13,7 @@ export interface Subscription {
 export interface CreateSubscription {
   user: string;
   plan: string;
-  amount: string;
   address: string;
-  status: string;
-  next_billing_date: string;
 }
 
 export interface UpdateSubscriptionStatus {
@@ -36,5 +33,5 @@ export interface UserSubscription {
   amount: string;
   address: string;
   status: string;
-  next_billing_date: string;
+  created_at: string;
 }

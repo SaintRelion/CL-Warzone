@@ -8,7 +8,7 @@ import MonthlyCards from "@/components/admin-dashboard/MonthlyCards";
 
 export const AdminDashboardPage = () => {
   const { useList: getUserSubscriptions } =
-    useResourceLocked<UserSubscription>("subscription");
+    useResourceLocked<UserSubscription>("usersubscription");
   const userSubscriptions = getUserSubscriptions({
     filters: { status: "active" },
   }).data;

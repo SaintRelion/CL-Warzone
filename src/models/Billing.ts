@@ -1,3 +1,6 @@
+import type { Plan } from "./Plan";
+import type { UserSubscription } from "./subscription";
+
 export interface BillingInfo {
   id: string;
   user: string;
@@ -21,9 +24,9 @@ export interface CreateBilling {
 export interface UserBillingInfo {
   id: string;
   user: string;
-  plan: string;
-  subscription: string;
   customer: string;
+  plan: Plan;
+  subscription: UserSubscription;
   amount: string;
   due_date: string;
   created_at: string;

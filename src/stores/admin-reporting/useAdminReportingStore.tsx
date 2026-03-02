@@ -1,7 +1,7 @@
 import type { MonthlyPaymentReport } from "@/models/Report";
 import { create } from "zustand";
 
-export type FilterStatus = "all" | "Paid" | "Unpaid";
+export type FilterStatus = "all" | "paid" | "unpaid";
 
 interface AdminReportingStore {
   report: MonthlyPaymentReport | null;

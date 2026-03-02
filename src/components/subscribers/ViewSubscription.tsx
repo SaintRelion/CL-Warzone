@@ -1,5 +1,4 @@
 import { useSubscribersStore } from "@/stores/subscribers/useSubscribersStore";
-import { formatReadableDate } from "@saintrelion/time-functions";
 
 const ViewSubscription = () => {
   const selectedSubscription = useSubscribersStore(
@@ -56,12 +55,6 @@ const ViewSubscription = () => {
               {parseFloat(selectedSubscription.amount).toLocaleString("en-PH", {
                 minimumFractionDigits: 2,
               })}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Next billing</p>
-            <p className="font-medium text-gray-900">
-              {formatReadableDate(selectedSubscription.next_billing_date)}
             </p>
           </div>
         </div>

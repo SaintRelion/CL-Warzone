@@ -3,7 +3,6 @@ import { DataTable } from "../general/DataTable";
 import { Eye, Edit, Search } from "lucide-react";
 
 import type { UserSubscription } from "@/models/subscription";
-import { formatReadableDate } from "@saintrelion/time-functions";
 import { useSubscribersStore } from "@/stores/subscribers/useSubscribersStore";
 import { useMemo } from "react";
 import MoreMenu from "./MoreMenu";
@@ -96,10 +95,10 @@ const SubscribersTable = ({
       accessorKey: "amount",
       header: () => (
         <div className="group relative inline-flex cursor-help items-center gap-1">
-          <span>Outstanding Balance</span>
+          <span>Amount</span>
           <span className="text-gray-400">ⓘ</span>
           <div className="absolute bottom-full left-1/2 z-50 mb-2 hidden -translate-x-1/2 rounded bg-gray-900 px-3 py-2 text-xs whitespace-nowrap text-white group-hover:block">
-            Sum of unpaid balances from subscriber
+            Plan Price
           </div>
         </div>
       ),
@@ -120,18 +119,7 @@ const SubscribersTable = ({
         <span className="text-sm text-gray-600">📍 {getValue<string>()}</span>
       ),
     },
-    {
-      accessorKey: "next_billing_date",
-      header: "Next Billing",
-      cell: ({ getValue }) => {
-        const dateStr = getValue<string>();
-        return (
-          <span className="text-sm font-medium text-gray-700">
-            📅 {formatReadableDate(dateStr)}
-          </span>
-        );
-      },
-    },
+
     // Actions column (custom)
     {
       id: "actions",

@@ -11,7 +11,6 @@ import type { PaymentHistory } from "@/models/PaymentHistory";
 import { useAdminReportingStore } from "@/stores/admin-reporting/useAdminReportingStore";
 import type { User } from "@/models/user";
 import { toDate } from "@saintrelion/time-functions";
-import type { Plan } from "@/models/Plan";
 
 const getMonthRange = (monthNum: number, yearNum: number) => {
   const startDate = new Date(yearNum, monthNum, 1);
@@ -47,12 +46,6 @@ const GenerateReport = () => {
     useResourceLocked<UserBillingInfo>("userbilling");
   const { useList: getPaymentHistory } =
     useResourceLocked<PaymentHistory>("paymenthistory");
-
-  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
-    showToast: false,
-  });
-
-  const plans = getPlans().data;
 
   const users = getUsers().data;
   const userBillings = getUserBilling().data;
@@ -113,9 +106,7 @@ const GenerateReport = () => {
           total_change_given_back: billing.total_change_given_back,
           total_credits: billing.total_credits,
           status: billing.status,
-          plan: !plans[parseInt(billing.plan)]
-            ? billing.plan
-            : plans[parseInt(billing.plan)].name,
+          plan: billing.plan.name,
           payment_date: !assumeOnly1Payment
             ? ""
             : assumeOnly1Payment.created_at,

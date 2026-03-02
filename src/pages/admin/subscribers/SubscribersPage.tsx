@@ -4,15 +4,11 @@ import KPICard from "@/components/subscribers/KPICard";
 import SubscribersTable from "@/components/subscribers/SubscribersTable";
 import ViewSubscription from "@/components/subscribers/ViewSubscription";
 import EditSubscription from "@/components/subscribers/EditSubscribption";
-import { sortByTime } from "@saintrelion/time-functions";
 
 const SubscribersPage = () => {
   const { useList: getUserSubscriptions } =
     useResourceLocked<UserSubscription>("usersubscription");
-  const userSubscriptions = sortByTime(
-    getUserSubscriptions().data,
-    "next_billing_date",
-  );
+  const userSubscriptions = getUserSubscriptions().data;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
