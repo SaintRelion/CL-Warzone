@@ -84,7 +84,9 @@ const ReceiptView = () => {
           <div className="text-xs font-semibold">
             Internet Services Provider
           </div>
-          <div className="text-xs text-gray-600">Metro Manila, Philippines</div>
+          <div className="text-xs text-gray-600">
+            San Antonio, Looy, Katipunan, Dipolog, Zamboanga del Norte
+          </div>
         </div>
 
         {/* DIVIDER */}
