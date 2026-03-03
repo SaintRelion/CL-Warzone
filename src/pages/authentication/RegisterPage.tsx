@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@saintrelion/auth-lib";
 import {
@@ -8,12 +9,28 @@ import {
 
 const RegisterPage = () => {
   const auth = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const serviceAreas = ["katipunan", "roxas", "piñan", "osmeña", "polanco"];
 
   const handleRegister = async (data: Record<string, string>) => {
-    await auth.register({ ...data, roles: ["client"] }, data.password);
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      await auth.register(
+        { ...data, roles: ["client"] },
+        data.password
+      );
+    } catch (err: any) {
+      setError(err?.message || "Registration failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -43,8 +60,15 @@ const RegisterPage = () => {
             Fill in your details to get started with high-speed internet.
           </p>
 
+          {error && (
+            <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
+              {error}
+            </div>
+          )}
+
           <RenderForm wrapperClassName="space-y-6">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              {/* Fields unchanged */}
               <RenderFormField
                 field={{
                   label: "First Name *",
@@ -52,8 +76,6 @@ const RegisterPage = () => {
                   name: "first_name",
                   placeholder: "Juan",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -63,8 +85,6 @@ const RegisterPage = () => {
                   name: "last_name",
                   placeholder: "Dela Cruz",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -74,8 +94,6 @@ const RegisterPage = () => {
                   name: "password",
                   placeholder: "••••••••",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -85,8 +103,6 @@ const RegisterPage = () => {
                   name: "email",
                   placeholder: "youremail@gmail.com",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -96,8 +112,6 @@ const RegisterPage = () => {
                   name: "phone_number",
                   placeholder: "+63 9XX XXX XXXX",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -107,8 +121,6 @@ const RegisterPage = () => {
                   name: "street_address",
                   placeholder: "123 Main St",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -118,8 +130,6 @@ const RegisterPage = () => {
                   name: "city_municipality",
                   placeholder: "City/Municipality",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -129,8 +139,6 @@ const RegisterPage = () => {
                   name: "barangay",
                   placeholder: "Barangay",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -140,8 +148,6 @@ const RegisterPage = () => {
                   name: "zip_code",
                   placeholder: "10001",
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
 
               <RenderFormField
@@ -151,23 +157,17 @@ const RegisterPage = () => {
                   name: "service_area",
                   options: serviceAreas,
                 }}
-                labelClassName="mb-2 block text-sm font-medium text-gray-700"
-                inputClassName="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-indigo-600"
               />
             </div>
 
             <div className="flex gap-4 pt-4">
               <RenderFormButton
                 onSubmit={handleRegister}
-                isDisabled={auth.isLocked}
-                buttonLabel="Create Account"
-                buttonClassName="flex-1 rounded-lg bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-700 transition"
+                isDisabled={auth.isLocked || isSubmitting}
+                buttonLabel={isSubmitting ? "Creating..." : "Create Account"}
               />
 
-              <Button
-                asChild
-                className="flex-1 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300"
-              >
+              <Button asChild>
                 <a href="/login">Back to Login</a>
               </Button>
             </div>

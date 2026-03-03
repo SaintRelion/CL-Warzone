@@ -21,7 +21,12 @@ import "@/repositories/PaymentHistoryRepo";
 import "@/repositories/SupportTicketRepo";
 import "@/repositories/ActivityLogRepo";
 import "@/repositories/OTPRepo";
+import { initializeServices } from "@/sr-config";
 // import { LiveEventSubscriber } from "./components/LiveEventSubscriber";
+
+
+
+initializeServices();
 
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(
