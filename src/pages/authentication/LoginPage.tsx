@@ -129,12 +129,11 @@ const LoginPage = () => {
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
             {/* Logo Section */}
             <div className="flex items-center gap-2">
-              <span className="fa-solid fa-wifi text-xl text-[#78fbcf]" />
-              <span className="text-xl font-bold tracking-tighter uppercase">
-                WARZONE
+              <span className="fa-solid fa-wifi text-xl text-[#78fbcf]" />          
+              <span className="text-xl font-bold tracking-tighter uppercase">   
+                 WARZONENETCAFE
               </span>
             </div>
-
             {/* Navigation Links - Desktop */}
             <div className="hidden items-center gap-8 text-sm font-medium text-gray-400 md:flex">
               <a href="#" className="transition-colors hover:text-white">
@@ -147,7 +146,6 @@ const LoginPage = () => {
                 Documentation
               </a>
             </div>
-
             {/* Action Buttons */}
             <div className="flex items-center gap-4">
               <button
@@ -170,14 +168,7 @@ const LoginPage = () => {
             control. Built for gamers, streamers, students, and growing
             businesses.
           </p>
-          <div className="mt-10 inline-flex items-center rounded-lg bg-[#1a1a1a] p-1">
-            <button className="px-4 py-1.5 text-sm font-medium text-gray-400">
-              Annually
-            </button>
-            <button className="rounded-md bg-[#333333] px-4 py-1.5 text-sm font-medium text-white shadow-sm">
-              Monthly
-            </button>
-          </div>
+      
         </div>
 
         <div className="mx-auto grid max-w-6xl grid-cols-1 items-end gap-8 md:grid-cols-3">
