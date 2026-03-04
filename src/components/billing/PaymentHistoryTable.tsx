@@ -18,9 +18,8 @@ const PaymentHistoryTable = ({
 }: {
   paymentHistories: PaymentHistory[];
 }) => {
-  const cashierBehavior = useBillingStore((s) => s.cashierBehavior);
+  const cashierBehavior = useBillingStore((s) => s.billBehavior);
   const selectedBillingInfo = useBillingStore((s) => s.selectedBillingInfo);
-  const processPayment = useBillingStore((s) => s.processPayment);
   const clearAll = useBillingStore((s) => s.clearAll);
 
   const { log } = useActivityLogger();
@@ -40,11 +39,33 @@ const PaymentHistoryTable = ({
     "created_at",
   );
 
+  const handleComplete = async (payment: PaymentHistory) => {
+    if (payment.status !== "pending") return;
+
+    await updatePaymentHistory.run({
+      id: payment.id,
+      payload: {
+        status: "completed",
+      },
+    });
+
+    await log({
+      action: "update",
+      category: "billing",
+      description: `Completed Payment Id: ${payment.id} for ${selectedBillingInfo.customer}`,
+      status: "success",
+    });
+
+    toast.success("Payment marked as completed");
+  };
+
   const handleVoid = async (payment: PaymentHistory) => {
+    if (payment.status === "voided") return;
+
     const reason = prompt("Reason for voiding this payment?");
     if (!reason) return;
 
-    updatePaymentHistory.run({
+    await updatePaymentHistory.run({
       id: payment.id,
       payload: {
         status: "voided",
@@ -59,13 +80,12 @@ const PaymentHistoryTable = ({
       description: `Voided Payment Id: ${payment.id} for ${selectedBillingInfo.customer}`,
       status: "success",
       additional_info: {
-        amount: selectedBillingInfo.amount,
+        amount: payment.amount,
         planName: selectedBillingInfo.plan.name,
       },
     });
 
     toast.success("Payment voided");
-    processPayment(selectedBillingInfo);
   };
 
   const paymentHistoryColumns: ColumnDef<PaymentHistory>[] = [
@@ -88,11 +108,41 @@ const PaymentHistoryTable = ({
     {
       accessorKey: "method",
       header: "Method",
-      cell: ({ getValue }) => (
-        <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-          {getValue<string>()}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const method = row.original.method;
+        const transactionRef = row.original.transaction_ref;
+        const screenshot = row.original.transaction_screenshot;
+
+        const isCash = method === "CASH";
+
+        return (
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex w-fit items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+              {method}
+            </span>
+
+            {!isCash && (
+              <>
+                <span className="text-xs text-gray-600">
+                  Ref:{" "}
+                  <span className="font-mono font-semibold text-gray-800">
+                    {transactionRef || "—"}
+                  </span>
+                </span>
+
+                {screenshot && (
+                  <button
+                    onClick={() => window.open(screenshot, "_blank")}
+                    className="text-xs text-blue-600 hover:underline"
+                  >
+                    View Screenshot
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        );
+      },
     },
     {
       id: "excess",
@@ -127,17 +177,25 @@ const PaymentHistoryTable = ({
       cell: ({ getValue }) => {
         const val = getValue<string>();
 
-        const isCompleted = val === "completed";
+        const styles = {
+          pending: "bg-yellow-100 text-yellow-700",
+          completed: "bg-green-100 text-green-700",
+          voided: "bg-red-100 text-red-700",
+        };
+
+        const labels = {
+          pending: "⏳ Pending",
+          completed: "✓ Completed",
+          voided: "✕ Voided",
+        };
 
         return (
           <span
             className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-bold ${
-              isCompleted
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
+              styles[val as keyof typeof styles]
             }`}
           >
-            {isCompleted ? "✓ Completed" : "✕ Voided"}
+            {labels[val as keyof typeof labels]}
           </span>
         );
       },
@@ -151,12 +209,34 @@ const PaymentHistoryTable = ({
         if (payment.status === "voided") return null;
 
         return (
-          <button
-            onClick={() => handleVoid(payment)}
-            className="text-xs font-semibold text-red-600 hover:underline"
-          >
-            Void
-          </button>
+          <div className="flex gap-3 text-xs font-semibold">
+            {payment.status === "pending" && (
+              <>
+                <button
+                  onClick={() => handleComplete(payment)}
+                  className="text-green-600 hover:underline"
+                >
+                  Complete
+                </button>
+
+                <button
+                  onClick={() => handleVoid(payment)}
+                  className="text-red-600 hover:underline"
+                >
+                  Void
+                </button>
+              </>
+            )}
+
+            {payment.status === "completed" && (
+              <button
+                onClick={() => handleVoid(payment)}
+                className="text-red-600 hover:underline"
+              >
+                Void
+              </button>
+            )}
+          </div>
         );
       },
     },

@@ -4,7 +4,6 @@ import {
   RenderFormButton,
   RenderFormField,
 } from "@saintrelion/forms";
-import { toast } from "@saintrelion/notifications";
 import { useState } from "react";
 import { apiRequest } from "../to-be-library/sr-api";
 import OtpVerification from "@/components/authentication/OtpVerificaction";
@@ -16,19 +15,11 @@ import type { Plan } from "@/models/Plan";
 const LoginPage = () => {
   const auth = useAuth();
 
-  const [sendingOTP, setSendingOTP] = useState(false);
-
-  const [deliveryMethod, setDeliveryMethod] = useState<"email" | "sms">(
-    "email",
-  );
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [otpId, setOtpId] = useState("");
-  const [otpExpiration, setOtpExpiration] = useState("");
-  const [otpInput, setOtpInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [requireOtp, setRequireOtp] = useState(false);
+  const [checkingTrust, setCheckingTrust] = useState(false);
+
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const { useList: getPlans } = useResourceLocked<Plan>("plan", {
@@ -48,68 +39,12 @@ const LoginPage = () => {
 
     return result.is_trusted;
   };
-  const sendOTP = async (email: string) => {
-    try {
-      setSendingOTP(true);
-      const endpoint =
-        deliveryMethod === "sms"
-          ? `${BASE_API}api/otp/send_sms/`
-          : `${BASE_API}api/otp/send/`;
-
-      const payload =
-        deliveryMethod === "sms"
-          ? { email: email, otp_type: "sms" } // backend can resolve phone from user
-          : { email: email, otp_type: "email" };
-
-      const result = await apiRequest(endpoint, payload, { auth: false });
-      if (result.otp_id) {
-        toast.success(`OTP sent via ${deliveryMethod.toUpperCase()}`);
-
-        setOtpId(result.otp_id);
-        setOtpExpiration(result.expires_at);
-      }
-    } catch (error) {
-      const err = error as Record<string, string>;
-      console.log(`Failed to send OTP: ${err.message}`);
-    } finally {
-      setSendingOTP(false);
-    }
-  };
-
-  const verifyOTP = async () => {
-    setLoading(true);
-    setStatus(null);
-
-    try {
-      const endpoint =
-        deliveryMethod === "sms"
-          ? `${BASE_API}api/otp/verify_sms/`
-          : `${BASE_API}api/otp/verify/`;
-
-      const result = await apiRequest(
-        endpoint,
-        { otp_id: otpId, code: otpInput },
-        { auth: false },
-      );
-
-      console.log(result);
-      if (result.success == true) {
-        // Login the user
-        await auth.login({
-          username: email,
-          password: password,
-        });
-      }
-
-      setLoading(false);
-    } catch {
-      setLoading(false);
-    }
-  };
 
   const handleLogin = async (data: Record<string, string>) => {
     setEmail(data.email);
     setPassword(data.password);
+
+    setCheckingTrust(true);
 
     const isTrusted = await checkDevice(data.email, data.password);
     if (isTrusted) {
@@ -118,7 +53,8 @@ const LoginPage = () => {
         password: data.password,
       });
     } else {
-      await sendOTP(data.email);
+      setRequireOtp(true);
+      setCheckingTrust(false);
     }
   };
 
@@ -171,44 +107,16 @@ const LoginPage = () => {
             businesses.
           </p>
           <div className="mt-10 inline-flex items-center rounded-lg bg-[#1a1a1a] p-1">
-            <button className="px-4 py-1.5 text-sm font-medium text-gray-400">
-              Annually
-            </button>
             <button className="rounded-md bg-[#333333] px-4 py-1.5 text-sm font-medium text-white shadow-sm">
               Monthly
             </button>
           </div>
         </div>
 
-        <div className="mx-auto grid max-w-6xl grid-cols-1 items-end gap-8 md:grid-cols-3">
+        <div className="mx-auto grid max-w-4xl grid-cols-1 items-end gap-8 md:grid-cols-2">
           {plans.map((plan, index) => {
-            // Determine styling for "featured" middle plan
-            const isFeatured = plan.name === "Pro Gamer";
-
-            // Generate simple feature list (frontend decides what to display)
-            let features: string[] = [];
-            if (plan.name === "Basic Fiber") {
-              features = [
-                `Up to ${plan.speed_mbps} Mbps Speed`,
-                "Unlimited Data",
-                "Free Installation",
-                "24/7 Customer Support",
-              ];
-            } else if (plan.name === "Pro Gamer") {
-              features = [
-                `Up to ${plan.speed_mbps} Mbps Speed`,
-                "Low Latency Routing",
-                "Priority Technical Support",
-                "Free Router Upgrade",
-              ];
-            } else if (plan.name === "Enterprise Fiber") {
-              features = [
-                `Up to ${plan.speed_mbps} Mbps Speed`,
-                "Dedicated IP Option",
-                "Service Level Agreement (SLA)",
-                "Dedicated Account Manager",
-              ];
-            }
+            // Determine if this plan should be "featured"
+            const isFeatured = plan.name === "Pro Fiber";
 
             return (
               <div
@@ -226,11 +134,7 @@ const LoginPage = () => {
                 </h3>
 
                 <div className="mb-2 flex items-baseline">
-                  <span
-                    className={`text-4xl font-bold ${isFeatured ? "" : ""}`}
-                  >
-                    ₱{plan.price}
-                  </span>
+                  <span className="text-4xl font-bold">₱{plan.price}</span>
                   <span
                     className={`ml-2 ${isFeatured ? "text-black/70" : "text-gray-500"}`}
                   >
@@ -245,6 +149,7 @@ const LoginPage = () => {
                 </p>
 
                 <button
+                  onClick={() => setShowLoginModal(true)}
                   className={`mb-8 w-full rounded-xl py-3 font-semibold transition-colors ${
                     isFeatured
                       ? "bg-black text-white hover:bg-black/80"
@@ -260,18 +165,8 @@ const LoginPage = () => {
                   <p
                     className={`font-semibold ${isFeatured ? "font-bold" : "text-white"}`}
                   >
-                    {index === 0
-                      ? "Plan Includes:"
-                      : index === 1
-                        ? "Everything in Basic +"
-                        : "Everything in Pro +"}
+                    {index === 0 ? "" : "Everything in Starter +"}
                   </p>
-
-                  {features.map((feat, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <span>✔ {feat}</span>
-                    </div>
-                  ))}
                 </div>
               </div>
             );
@@ -423,34 +318,8 @@ const LoginPage = () => {
               <h1 className="ml-2 text-2xl font-bold text-white">Warzone</h1>
             </div>
 
-            {otpId == "" ? (
+            {requireOtp == false ? (
               <>
-                {/* Delivery Method Toggle */}
-                <div className="mb-4 flex justify-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setDeliveryMethod("email")}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                      deliveryMethod === "email"
-                        ? "bg-indigo-600 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    Email
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setDeliveryMethod("sms")}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium ${
-                      deliveryMethod === "sms"
-                        ? "bg-indigo-600 text-white"
-                        : "bg-gray-200 text-gray-700"
-                    }`}
-                  >
-                    SMS
-                  </button>
-                </div>
                 <RenderForm wrapperClassName="space-y-4">
                   <RenderFormField
                     field={{
@@ -474,35 +343,28 @@ const LoginPage = () => {
                   />
                   <RenderFormButton
                     buttonLabel="Sign In"
-                    isDisabled={sendingOTP}
+                    isDisabled={auth.isLocked || checkingTrust}
                     onSubmit={handleLogin}
-                    buttonClassName="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700"
+                    buttonClassName="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-70"
                   />
                 </RenderForm>
+
+                <div className="mt-6 text-center">
+                  <p className="text-sm text-gray-200">
+                    Don't have an account?
+                  </p>
+                  <a
+                    href="/register"
+                    className="mt-1 font-medium text-indigo-600 hover:text-indigo-700"
+                  >
+                    Create an account
+                  </a>
+                </div>
               </>
             ) : (
               // OTP VERIFICATION FORM
-              <OtpVerification
-                email={email}
-                deliveryMethod={deliveryMethod}
-                otpExpiration={otpExpiration}
-                otpInput={otpInput}
-                setOtpInput={setOtpInput}
-                verifyOTP={verifyOTP}
-                status={status ?? ""}
-                loading={loading}
-              />
+              <OtpVerification email={email} password={password} />
             )}
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-200">Don't have an account?</p>
-              <a
-                href="/register"
-                className="mt-1 font-medium text-indigo-600 hover:text-indigo-700"
-              >
-                Create an account
-              </a>
-            </div>
           </div>
         </div>
       )}

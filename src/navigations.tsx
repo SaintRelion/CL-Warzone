@@ -23,6 +23,7 @@ import {
 import { roleLayoutMap } from "@saintrelion/auth-lib";
 import ActivityLogsPage from "./pages/admin/activity-logs/ActivityLogsPage";
 import AdminReportingPage from "./pages/admin/admin-reporting/AdminReportingPage";
+import UserAccountsPage from "./pages/admin/user-accounts/UserAccountsPage";
 
 roleLayoutMap[""] = {
   redirect: "/",
@@ -55,10 +56,17 @@ registerGroupAppRoutes({
       allowedRoles: ["admin"],
     },
     {
+      path: "accounts",
+      element: <UserAccountsPage />,
+      label: "Accounts",
+      iconClassName: "fa-solid fa-users text-lg",
+      allowedRoles: ["admin"],
+    },
+    {
       path: "subscribers",
       element: <SubscribersPage />,
       label: "Subscribers",
-      iconClassName: "fa-solid fa-users text-lg",
+      iconClassName: "fa-solid fa-user-check text-lg",
       allowedRoles: ["admin"],
     },
     {

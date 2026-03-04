@@ -12,6 +12,7 @@ export interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   showDefaultActions?: boolean;
   getRowId?: (row: T, index: number) => string;
+  getRowClassName?: (row: T) => string;
 }
 
 export function DataTable<T>({
@@ -20,6 +21,7 @@ export function DataTable<T>({
   columns,
   showDefaultActions = true,
   getRowId,
+  getRowClassName,
 }: DataTableProps<T>) {
   const table = useReactTable({
     data,
@@ -90,28 +92,34 @@ export function DataTable<T>({
             ))}
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="hover:bg-gray-50">
-                {row.getVisibleCells().map((cell) => (
-                  <td
-                    key={cell.id}
-                    className="px-6 py-4 text-sm whitespace-nowrap text-gray-900"
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-                {showDefaultActions && (
-                  <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                    <button className="mr-3 text-blue-600 hover:text-blue-900">
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))}
+            {table.getRowModel().rows.map((row) => {
+              const rowClass = getRowClassName?.(row.original) || "";
+              return (
+                <tr key={row.id} className={` ${rowClass}`}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="px-6 py-4 text-sm whitespace-nowrap text-gray-900"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  ))}
+                  {showDefaultActions && (
+                    <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
+                      <button className="mr-3 text-blue-600 hover:text-blue-900">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button className="text-red-600 hover:text-red-900">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

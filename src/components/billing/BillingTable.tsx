@@ -228,6 +228,17 @@ const BillingTable = ({
           columns={billingColumns}
           showDefaultActions={false}
           getRowId={(row) => row.id}
+          getRowClassName={(row) => {
+            const hasPending = paymentHistories.some(
+              (h) => h.bill === row.id && h.status === "pending",
+            );
+
+            if (hasPending) {
+              return "bg-yellow-100";
+            }
+
+            return "";
+          }}
         />
       </div>
 

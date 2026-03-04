@@ -1,6 +1,10 @@
+import ProcessPayment, {
+  type PaymentMethods,
+} from "@/components/billing/ProcessPayment";
 import type { UserBillingInfo } from "@/models/Billing";
 import type { PaymentHistory } from "@/models/PaymentHistory";
 import type { UserSubscription } from "@/models/subscription";
+import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { useCurrentUser } from "@saintrelion/auth-lib";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import { toast } from "@saintrelion/notifications";
@@ -54,18 +58,20 @@ const BillingAndPaymentsPage = () => {
     },
   }).data;
 
+  const processPayment = useBillingStore((s) => s.processPayment);
+
   /* ===================== UI STATE ===================== */
-  const [showGcashModal, setShowGcashModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState("");
 
   /* ===================== DOWNLOAD QR ===================== */
-  const downloadQRCode = () => {
+  const downloadQRCode = (qrCode: string) => {
     const link = document.createElement("a");
-    link.href = "/images/gcash.png";
-    link.download = "gcash-qr.png";
+    link.href = `/images/${qrCode}.jpg`;
+    link.download = `${qrCode}-qr.jpg`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("GCash QR Code downloaded");
+    toast.success(`${qrCode} QR Code downloaded`);
   };
 
   return (
@@ -79,7 +85,6 @@ const BillingAndPaymentsPage = () => {
           Manage your subscription and payments
         </p>
       </div>
-
       {/* ===================== SUBSCRIPTION CARD ===================== */}
       <div className="rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 p-5 text-white">
         {currentSubscription ? (
@@ -135,7 +140,7 @@ const BillingAndPaymentsPage = () => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Info label="Plan" value={currentSubscription.plan.name} />
               <Info label="Status" value={currentSubscription.status} />
-              {myActiveBilling?.[0] && (
+              {myActiveBilling.length > 0 && myActiveBilling[0] && (
                 <Info
                   label="Next Due Date"
                   value={formatReadableDate(myActiveBilling[0].due_date)}
@@ -148,50 +153,46 @@ const BillingAndPaymentsPage = () => {
             </div>
 
             {/* ===================== PAYMENT BUTTON ===================== */}
-            {currentSubscription.status === "active" && (
-              <div className="flex flex-col gap-3 sm:flex-row">
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              {["GCASH", "METROBANK", "RCBC"].map((method) => (
                 <button
-                  onClick={() => setShowGcashModal(true)}
+                  key={method}
+                  onClick={() => setSelectedPayment(method as PaymentMethods)}
                   className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100 sm:w-auto"
                 >
-                  Pay via GCash
+                  Pay via {method.charAt(0) + method.slice(1).toLowerCase()}
                 </button>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         ) : (
           <p className="text-center font-semibold">No Active Subscription</p>
         )}
       </div>
-
       {/* ===================== GCASH MODAL ===================== */}
-      {showGcashModal && (
+      {selectedPayment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-xl">
             <h2 className="text-center text-lg font-semibold text-indigo-700">
-              GCash Payment
+              {selectedPayment} Payment
             </h2>
+
             <p className="mb-4 text-center text-sm text-gray-500">
-              Scan this QR using your GCash app
+              Scan this QR using your {selectedPayment} app
             </p>
 
             <img
-              src="/images/gcash.png"
-              alt="GCash QR Code"
+              src={`/images/${selectedPayment}.jpg`}
+              alt={`${selectedPayment} QR Code`}
               className="mx-auto mb-4 w-48 rounded-lg shadow sm:w-56"
             />
 
-            {/* ===== HOW TO PAY (KEPT) ===== */}
             <div className="mb-4 rounded-lg bg-gray-50 p-4 text-sm text-gray-700">
               <p className="mb-2 font-semibold text-indigo-700">How to pay:</p>
               <ol className="ml-5 list-decimal space-y-1">
-                <li>Open the GCash app</li>
-                <li>
-                  Tap <strong>Pay QR</strong>
-                </li>
-                <li>
-                  Select <strong>Upload QR</strong> or scan directly
-                </li>
+                <li>Open the {selectedPayment} app</li>
+                <li>Scan or upload the QR code</li>
                 <li>
                   Enter the exact amount:
                   <strong className="ml-1">
@@ -203,14 +204,24 @@ const BillingAndPaymentsPage = () => {
             </div>
 
             <button
-              onClick={downloadQRCode}
+              onClick={() => downloadQRCode(selectedPayment)}
               className="mb-3 w-full rounded-lg border border-indigo-600 px-4 py-2 text-sm font-semibold text-indigo-600 hover:bg-indigo-50"
             >
               Download QR Code
             </button>
 
             <button
-              onClick={() => setShowGcashModal(false)}
+              disabled={myActiveBilling.length <= 0}
+              onClick={() => {
+                processPayment(myActiveBilling[0]); // activate store session
+              }}
+              className="mb-3 w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+            >
+              Confirm Payment
+            </button>
+
+            <button
+              onClick={() => setSelectedPayment("")}
               className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
             >
               Close
@@ -219,7 +230,10 @@ const BillingAndPaymentsPage = () => {
         </div>
       )}
 
-      {/* ===================== PAYMENT HISTORY ===================== */}
+      {selectedPayment != "" && (
+        <ProcessPayment paymentMethod={selectedPayment as PaymentMethods} />
+      )}
+
       <div className="rounded-xl bg-white p-4 shadow sm:p-6">
         <h3 className="mb-4 text-lg font-semibold">Payment History</h3>
 
@@ -228,35 +242,82 @@ const BillingAndPaymentsPage = () => {
             <thead className="border-b bg-gray-50">
               <tr>
                 <th className="px-3 py-2 text-left">Date</th>
-                {/* <th className="px-3 py-2 text-left">Description</th> */}
                 <th className="px-3 py-2 text-left">Amount</th>
+                <th className="px-3 py-2 text-left">Method</th>
                 <th className="px-3 py-2 text-left">Status</th>
-                {/* <th className="px-3 py-2 text-right">Invoice</th> */}
               </tr>
             </thead>
             <tbody>
               {paymentHistories.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-gray-500">
+                  <td colSpan={4} className="py-6 text-center text-gray-500">
                     No payment history
                   </td>
                 </tr>
               ) : (
-                paymentHistories.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="border-b last:border-0 hover:bg-gray-50"
-                  >
-                    <td className="px-3 py-2">
-                      {formatReadableDateTime(p.created_at)}
-                    </td>
-                    <td className="px-3 py-2 font-medium">₱{p.amount}</td>
-                    <td className="px-3 py-2 capitalize">{p.status}</td>
-                    <td className="px-3 py-2 text-right text-indigo-600">
-                      {p.transaction_screenshot}
-                    </td>
-                  </tr>
-                ))
+                paymentHistories.map((p) => {
+                  const statusStyles = {
+                    pending: "bg-yellow-100 text-yellow-700",
+                    completed: "bg-green-100 text-green-700",
+                    voided: "bg-red-100 text-red-700",
+                  };
+
+                  const statusLabels = {
+                    pending: "⏳ Pending",
+                    completed: "✓ Completed",
+                    voided: "✕ Voided",
+                  };
+
+                  const isCash = p.method === "CASH";
+
+                  return (
+                    <tr
+                      key={p.id}
+                      className="border-b last:border-0 hover:bg-gray-50"
+                    >
+                      <td className="px-3 py-2">
+                        {formatReadableDateTime(p.created_at)}
+                      </td>
+                      <td className="px-3 py-2 font-medium">₱{p.amount}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex flex-col gap-1">
+                          <span className="inline-flex w-fit items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                            {p.method}
+                          </span>
+
+                          {!isCash && (
+                            <span className="text-xs text-gray-600">
+                              Ref:{" "}
+                              <span className="font-mono font-semibold text-gray-800">
+                                {p.transaction_ref || "—"}
+                              </span>
+                            </span>
+                          )}
+
+                          {p.transaction_screenshot && !isCash && (
+                            <button
+                              onClick={() =>
+                                window.open(p.transaction_screenshot, "_blank")
+                              }
+                              className="text-xs text-blue-600 hover:underline"
+                            >
+                              View Screenshot
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-bold ${
+                            statusStyles[p.status as keyof typeof statusStyles]
+                          }`}
+                        >
+                          {statusLabels[p.status as keyof typeof statusLabels]}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

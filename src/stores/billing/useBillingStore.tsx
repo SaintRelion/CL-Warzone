@@ -9,11 +9,11 @@ export type BillingSortOrder = "desc" | "asc";
 interface BillingStore {
   selectedBillingInfo: UserBillingInfo | null;
   selectedPaymentHistory: PaymentHistory | null;
-  cashierBehavior: "" | "payment" | "paymenthistory" | "updatepayment";
+  billBehavior: "" | "payment" | "paymenthistory" | "updatepayment";
 
-  printReceipt: (bill: UserBillingInfo, paymentHistory: PaymentHistory) => void;
   processPayment: (bill: UserBillingInfo) => void;
   viewPaymentHistory: (bill: UserBillingInfo) => void;
+  printReceipt: (bill: UserBillingInfo, paymentHistory: PaymentHistory) => void;
   clearAll: () => void;
 
   // FILTERS
@@ -36,18 +36,18 @@ interface BillingStore {
 export const useBillingStore = create<BillingStore>((set) => ({
   selectedBillingInfo: null,
   selectedPaymentHistory: null,
-  cashierBehavior: "",
+  billBehavior: "",
 
+  processPayment: (bill) =>
+    set({ billBehavior: "payment", selectedBillingInfo: bill }),
+  viewPaymentHistory: (bill) =>
+    set({ billBehavior: "paymenthistory", selectedBillingInfo: bill }),
   printReceipt: (bill, paymentHistory) =>
     set({ selectedBillingInfo: bill, selectedPaymentHistory: paymentHistory }),
-  processPayment: (bill) =>
-    set({ cashierBehavior: "payment", selectedBillingInfo: bill }),
-  viewPaymentHistory: (bill) =>
-    set({ cashierBehavior: "paymenthistory", selectedBillingInfo: bill }),
 
   clearAll: () =>
     set({
-      cashierBehavior: "",
+      billBehavior: "",
       selectedBillingInfo: null,
       selectedPaymentHistory: null,
     }),

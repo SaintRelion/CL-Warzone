@@ -4,9 +4,9 @@ const KPICard = ({ subscriptions }: { subscriptions: UserSubscription[] }) => {
   // Calculate stats
   const totalSubscribers = subscriptions.length;
   const activeSubscribers = subscriptions.filter(
-    (s) => s.status === "Active",
+    (s) => s.status === "active",
   ).length;
-  const totalBalance = subscriptions.reduce(
+  const totalBillable = subscriptions.reduce(
     (sum, s) => sum + parseFloat(s.amount),
     0,
   );
@@ -45,11 +45,11 @@ const KPICard = ({ subscriptions }: { subscriptions: UserSubscription[] }) => {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold tracking-wide text-purple-600 uppercase">
-              Total Balance
+              Total Billable
             </p>
             <p className="mt-2 text-3xl font-black text-purple-900">
               ₱
-              {totalBalance.toLocaleString("en-PH", {
+              {totalBillable.toLocaleString("en-PH", {
                 minimumFractionDigits: 2,
               })}
             </p>

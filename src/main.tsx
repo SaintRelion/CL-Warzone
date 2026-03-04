@@ -21,14 +21,12 @@ import "@/repositories/PaymentHistoryRepo";
 import "@/repositories/SupportTicketRepo";
 import "@/repositories/ActivityLogRepo";
 import "@/repositories/OTPRepo";
-// import { LiveEventSubscriber } from "./components/LiveEventSubscriber";
 
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(
   <NotificationProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {/* <LiveEventSubscriber /> */}
         <RouterProvider router={router} />
       </AuthProvider>
     </QueryClientProvider>
