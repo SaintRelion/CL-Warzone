@@ -136,24 +136,26 @@ const ReportControls = () => {
             </PopoverTrigger>
 
             <PopoverContent
-              className="w-80 bg-white p-0 shadow-lg"
-              side="right"
+              side={window.innerWidth < 640 ? "bottom" : "right"}
               align="start"
+              sideOffset={8} // space between trigger and popover
+              collisionPadding={8} // keeps popover inside viewport
+              className="w-full max-w-xs bg-white p-0 shadow-lg sm:max-w-sm"
             >
-              <div className="bg-linear-to-br from-indigo-50 to-purple-50 p-4">
+              <div className="bg-linear-to-br from-indigo-50 to-purple-50 p-2">
                 <h4 className="font-semibold text-gray-900">Select Period</h4>
                 <p className="text-xs text-gray-600">
                   Choose month and year for report
                 </p>
               </div>
 
-              <div className="space-y-4 p-4">
+              <div className="space-y-2 p-2">
                 {/* Month Grid */}
                 <div>
                   <label className="mb-2 block text-xs font-semibold tracking-wide text-gray-600 uppercase">
                     Month
                   </label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 gap-1">
                     {MONTH_NAMES.map((name, idx) => (
                       <MonthButton
                         key={idx}
@@ -172,7 +174,7 @@ const ReportControls = () => {
                   <label className="mb-2 block text-xs font-semibold tracking-wide text-gray-600 uppercase">
                     Year
                   </label>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-5 gap-1">
                     {years.map((y) => (
                       <YearButton
                         key={y}
@@ -187,7 +189,7 @@ const ReportControls = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 border-t border-gray-200 pt-4">
+                <div className="flex gap-2 border-t border-gray-200 pt-2">
                   {" "}
                   <Button
                     variant="outline"
