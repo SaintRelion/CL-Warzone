@@ -1,6 +1,6 @@
 import { useAuth } from "@saintrelion/auth-lib";
 import { renderNavItems } from "@saintrelion/routers";
-import { LiveEventSubscriber } from "@/components/LiveEventSubscriber";
+// import { LiveEventSubscriber } from "@/components/LiveEventSubscriber";
 import { useState } from "react";
 
 const ClientSideBar = () => {
@@ -9,7 +9,7 @@ const ClientSideBar = () => {
 
   return (
     <>
-      <LiveEventSubscriber />
+      {/* <LiveEventSubscriber /> */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="fixed top-4 left-4 z-50 rounded-lg bg-indigo-600 p-2 text-white shadow-lg lg:hidden"
