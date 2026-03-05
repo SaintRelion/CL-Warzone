@@ -1,11 +1,11 @@
 import type { UserSubscription } from "@/models/subscription";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import KPICard from "@/components/subscribers/KPICard";
-import SubscribersTable from "@/components/subscribers/SubscribersTable";
-import ViewSubscription from "@/components/subscribers/ViewSubscription";
-import EditSubscription from "@/components/subscribers/EditSubscribption";
+import KPICard from "@/components/subscriptions/KPICard";
+import SubscriptionsTable from "@/components/subscriptions/SubscriptionsTable";
+import ViewSubscription from "@/components/subscriptions/ViewSubscription";
+import EditSubscription from "@/components/subscriptions/EditSubscribption";
 
-const SubscribersPage = () => {
+const SubscriptionsPage = () => {
   const { useList: getUserSubscriptions } =
     useResourceLocked<UserSubscription>("usersubscription");
   const userSubscriptions = getUserSubscriptions().data;
@@ -17,7 +17,7 @@ const SubscribersPage = () => {
         <KPICard subscriptions={userSubscriptions} />
 
         {/* Data Table */}
-        <SubscribersTable userSubscriptions={userSubscriptions} />
+        <SubscriptionsTable userSubscriptions={userSubscriptions} />
 
         {/* View Modal */}
         <ViewSubscription />
@@ -28,4 +28,4 @@ const SubscribersPage = () => {
     </div>
   );
 };
-export default SubscribersPage;
+export default SubscriptionsPage;

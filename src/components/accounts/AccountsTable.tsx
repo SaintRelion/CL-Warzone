@@ -1,90 +1,79 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../general/DataTable";
-import { Eye, Edit, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
-import type { UserSubscription } from "@/models/subscription";
-import { useSubscribersStore } from "@/stores/subscribers/useSubscribersStore";
 import { useMemo } from "react";
+import type { User } from "@/models/user";
 import MoreMenu from "./MoreMenu";
+import { useAccountsStore } from "@/stores/accounts/useAccountsStore";
 
-const SubscribersTable = ({
-  userSubscriptions,
-}: {
-  userSubscriptions: UserSubscription[];
-}) => {
-  const searchTerm = useSubscribersStore((s) => s.searchTerm);
-  const setSearchTerm = useSubscribersStore((s) => s.setSearchTerm);
+const AccountsTable = ({ users }: { users: User[] }) => {
+  const searchTerm = useAccountsStore((a) => a.searchTerm);
+  const setSearchTerm = useAccountsStore((a) => a.setSearchTerm);
 
-  const currentPage = useSubscribersStore((s) => s.currentPage);
-  const setCurrentPage = useSubscribersStore((s) => s.setCurrentPage);
-
-  const openView = useSubscribersStore((s) => s.openView);
-  const openEdit = useSubscribersStore((s) => s.openEdit);
+  const currentPage = useAccountsStore((a) => a.currentPage);
+  const setCurrentPage = useAccountsStore((a) => a.setCurrentPage);
 
   const itemsPerPage = 5;
 
-  const filteredSubscriptions = useMemo(() => {
+  const filteredUsers = useMemo(() => {
     const term = searchTerm?.toLowerCase();
 
-    return userSubscriptions.filter(
-      (sub) =>
+    return users.filter(
+      (user) =>
         !term ||
-        sub.name.toLowerCase().includes(term) ||
-        sub.address.toLowerCase().includes(term) ||
-        sub.plan.name.includes(term) ||
-        sub.id.toString().includes(term),
+        user.first_name.toLowerCase().includes(term) ||
+        user.last_name.toLowerCase().includes(term) ||
+        user.email.toString().includes(term) ||
+        user.phone_number.includes(term) ||
+        user.street_address.includes(term) ||
+        user.city_municipality.includes(term),
     );
-  }, [userSubscriptions, searchTerm]);
+  }, [users, searchTerm]);
 
-  const paginatedSubscriptions = filteredSubscriptions.slice(
+  const paginatedUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage,
   );
 
   // Pagination
-  const totalPages = Math.ceil(filteredSubscriptions.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
-  const subscriptionColumns: ColumnDef<UserSubscription>[] = [
+  const userColumns: ColumnDef<User>[] = [
     {
       id: "name",
-      header: "Subscriber Name",
+      header: "Full Name",
       cell: ({ row }) => {
-        const sub = row.original;
+        const user = row.original;
 
         return (
-          <span className="text-sm font-medium text-gray-900">{sub.name}</span>
-        );
-      },
-    },
-    {
-      accessorKey: "plan",
-      header: "Plan",
-      cell: ({ row }) => {
-        const sub = row.original;
-        return (
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-            {sub.plan.name}
+          <span className="text-sm font-medium text-gray-900">
+            {user.first_name} {user.last_name}
           </span>
         );
       },
     },
     {
-      accessorKey: "status",
-      header: "Status",
+      accessorKey: "email",
+      header: "Email",
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+            {user.email}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "phone_number",
+      header: "Phone Number",
       cell: ({ getValue }) => {
         const val = getValue<string>();
-        const statusConfig = {
-          active: { bg: "bg-green-100", text: "text-green-800" },
-          disabled: { bg: "bg-red-100", text: "text-red-800" },
-          Inactive: { bg: "bg-gray-100", text: "text-gray-800" },
-        };
-        const config =
-          statusConfig[val as keyof typeof statusConfig] ||
-          statusConfig.Inactive;
 
         return (
           <span
-            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${config.bg} ${config.text}`}
+            className={`inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800`}
           >
             {val}
           </span>
@@ -92,29 +81,35 @@ const SubscribersTable = ({
       },
     },
     {
-      accessorKey: "amount",
-      header: () => (
-        <div className="group relative inline-flex cursor-help items-center gap-1">
-          <span>Amount</span>
-          <span className="text-gray-400">ⓘ</span>
-          <div className="absolute bottom-full left-1/2 z-50 mb-2 hidden -translate-x-1/2 rounded bg-gray-900 px-3 py-2 text-xs whitespace-nowrap text-white group-hover:block">
-            Plan Price
-          </div>
-        </div>
-      ),
+      accessorKey: "street_address",
+      header: "Street Address",
       cell: ({ row }) => {
-        const sub = row.original;
-        const num = parseFloat(sub.amount) || 0;
+        const user = row.original;
         return (
           <span className="font-semibold text-gray-900">
-            ₱{num.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+            {user.street_address}
           </span>
         );
       },
     },
     {
-      accessorKey: "address",
-      header: "Address",
+      accessorKey: "city_municipality",
+      header: "City",
+      cell: ({ getValue }) => (
+        <span className="text-sm text-gray-600">📍 {getValue<string>()}</span>
+      ),
+    },
+
+    {
+      accessorKey: "barangay",
+      header: "Barangay",
+      cell: ({ getValue }) => (
+        <span className="text-sm text-gray-600">📍 {getValue<string>()}</span>
+      ),
+    },
+    {
+      accessorKey: "service_area",
+      header: "Service Area",
       cell: ({ getValue }) => (
         <span className="text-sm text-gray-600">📍 {getValue<string>()}</span>
       ),
@@ -125,28 +120,12 @@ const SubscribersTable = ({
       id: "actions",
       header: "",
       cell: ({ row }) => {
-        const sub = row.original as UserSubscription;
+        const user = row.original as User;
 
         return (
           <div className="flex items-center justify-end gap-2">
-            <button
-              aria-label={`View subscriber ${sub.id}`}
-              onClick={() => openView(sub)}
-              className="rounded p-2 hover:bg-gray-50"
-            >
-              <Eye className="h-4 w-4 text-gray-600" />
-            </button>
-
-            <button
-              aria-label={`Edit subscriber ${sub.id}`}
-              onClick={() => openEdit(sub)}
-              className="rounded p-2 hover:bg-gray-50"
-            >
-              <Edit className="h-4 w-4 text-gray-600" />
-            </button>
-
             {/* More Menu (Admin-only fields) */}
-            <MoreMenu subscription={sub} />
+            <MoreMenu user={user} />
           </div>
         );
       },
@@ -171,11 +150,23 @@ const SubscribersTable = ({
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
         <DataTable
-          type="Subcribers"
-          data={paginatedSubscriptions}
-          columns={subscriptionColumns}
+          type="Accounts"
+          data={paginatedUsers}
+          columns={userColumns}
           showDefaultActions={false}
           getRowId={(row) => row.id}
+          getRowClassName={(user) => {
+            switch (user.status) {
+              case "active":
+                return "bg-green-100";
+              case "disabled":
+                return "bg-yellow-100";
+              case "deactivated":
+                return "bg-red-100";
+              default:
+                return "";
+            }
+          }}
         />
       </div>
 
@@ -226,4 +217,4 @@ const SubscribersTable = ({
     </>
   );
 };
-export default SubscribersTable;
+export default AccountsTable;

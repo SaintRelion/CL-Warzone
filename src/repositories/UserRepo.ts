@@ -7,4 +7,14 @@ registerResource({
   operations: {
     list: true,
   },
+  dependentResources: ["usersubscribers"],
+});
+
+registerResource({
+  name: "usersubscribers",
+  endpoint: "usersubscribers/",
+  store: "User",
+  operations: {
+    list: true,
+  },
 });

@@ -270,7 +270,7 @@ const ReceiptView = () => {
           <div className="text-center font-bold">NEXT BILLING</div>
           <div className="flex justify-center">
             <span className="font-bold text-indigo-600">
-              {formatReadableDate(selectedReceipt.next_billing_date)}
+              {formatReadableDate(selectedBillingInfo.due_date)}
             </span>
           </div>
         </div>

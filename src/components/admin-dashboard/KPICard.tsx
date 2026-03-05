@@ -2,18 +2,18 @@ import { Activity, AlertCircle, DollarSign, Users } from "lucide-react";
 import { StatCard } from "../general/StatCard";
 import type { UserBillingInfo } from "@/models/Billing";
 import type { SupportTicket } from "@/models/SupportTicket";
-import type { UserSubscription } from "@/models/subscription";
+import type { User } from "@/models/user";
 
 const KPICard = ({
-  userSubscriptions,
+  users,
   userBillings,
   tickets,
 }: {
-  userSubscriptions: UserSubscription[];
+  users: User[];
   userBillings: UserBillingInfo[];
   tickets: SupportTicket[];
 }) => {
-  const totalUsers = userSubscriptions.length;
+  const totalUsers = users.length;
   const totalRevenue =
     userBillings
       ?.filter((b) => b.status === "paid")
@@ -33,7 +33,7 @@ const KPICard = ({
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
       <StatCard
         icon={Users}
-        title="Active Subscribers"
+        title="Users"
         value={totalUsers.toLocaleString()}
         color="blue"
       />

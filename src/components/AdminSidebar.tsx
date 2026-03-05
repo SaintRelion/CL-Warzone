@@ -1,15 +1,33 @@
 import { useAuth } from "@saintrelion/auth-lib";
 import { renderNavItems } from "@saintrelion/routers";
 import { ChevronLeft, ChevronRight, Wifi } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const AdminSidebar = () => {
   const auth = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  // Detect small screens
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 600px)");
+    setIsSmallScreen(media.matches); // initial check
+    setSidebarOpen(!media.matches); // close sidebar on small screens
+
+    const listener = () => {
+      setIsSmallScreen(media.matches);
+      setSidebarOpen(!media.matches); // auto-close if small
+    };
+
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, []);
 
   return (
     <aside
-      className={`${sidebarOpen ? "w-64" : "w-20"} flex flex-col bg-gray-900 text-white transition-all duration-300`}
+      className={`${
+        sidebarOpen ? "w-64" : "w-20"
+      } flex flex-col bg-gray-900 text-white transition-all duration-300`}
     >
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
         {sidebarOpen && (
@@ -19,8 +37,13 @@ const AdminSidebar = () => {
           </div>
         )}
         <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="rounded-lg p-2 hover:bg-gray-800"
+          onClick={() => {
+            if (!isSmallScreen) setSidebarOpen(!sidebarOpen);
+          }}
+          className={`rounded-lg p-2 hover:bg-gray-800 ${
+            isSmallScreen ? "cursor-not-allowed opacity-50" : ""
+          }`}
+          disabled={isSmallScreen} // block on small screens
         >
           {sidebarOpen ? (
             <ChevronLeft className="h-5 w-5" />
@@ -52,7 +75,6 @@ const AdminSidebar = () => {
           <span className={sidebarOpen ? "" : "hidden"}>Logout</span>
         </button>
       </div>
-
     </aside>
   );
 };

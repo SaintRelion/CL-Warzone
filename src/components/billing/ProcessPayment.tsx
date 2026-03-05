@@ -2,15 +2,16 @@ import { useActivityLogger } from "@/lib/activity-logger";
 import type { CreatePaymentHistory } from "@/models/PaymentHistory";
 import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import {
-  formatReadableDate,
-  formatReadableDateTime,
-  getCurrentDateTimeString,
-  toDate,
-} from "@saintrelion/time-functions";
+import { toDate } from "@saintrelion/time-functions";
 import { useState } from "react";
 
-const ProcessPayment = () => {
+export type PaymentMethods = "CASH" | "GCASH" | "METROBANK" | "RCBC";
+
+const ProcessPayment = ({
+  paymentMethod,
+}: {
+  paymentMethod: PaymentMethods;
+}) => {
   const { log } = useActivityLogger();
 
   const { useInsert: insertPaymentHistory } = useResourceLocked<
@@ -18,16 +19,17 @@ const ProcessPayment = () => {
     CreatePaymentHistory
   >("paymenthistory");
 
-  const cashierBehavior = useBillingStore((s) => s.cashierBehavior);
+  const billBehavior = useBillingStore((s) => s.billBehavior);
   const selectedBillingInfo = useBillingStore((s) => s.selectedBillingInfo);
-  const printReceipt = useBillingStore((s) => s.printReceipt);
   const clearAll = useBillingStore((s) => s.clearAll);
 
-  const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [transactionRef, setTransactionRef] = useState("");
   const [transactionScreenshot, setTransactionScreenshot] = useState("");
   const [amountReceived, setAmountReceived] = useState("");
   const [change, setChange] = useState(0);
+
+  const isCash = paymentMethod === "CASH";
+  const isOnline = !isCash;
 
   const handleScreenshotUpload = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -59,22 +61,18 @@ const ProcessPayment = () => {
         const nextBillingDate = new Date(dueDate);
         nextBillingDate.setDate(nextBillingDate.getDate() + 30);
 
-        const nextBillingReadable = formatReadableDate(
-          nextBillingDate.toISOString().split("T")[0],
-        );
-
         let changeAmount = 0;
         let creditAmount = 0;
 
         if (change > 0) {
-          if (paymentMethod === "Cash") {
+          if (isCash) {
             changeAmount = change;
           } else {
             creditAmount = change;
           }
         }
 
-        const completedPayment: CreatePaymentHistory = {
+        const recordPayment: CreatePaymentHistory = {
           bill: selectedBillingInfo.id,
           user: selectedBillingInfo.user,
           customer: selectedBillingInfo.customer,
@@ -83,17 +81,16 @@ const ProcessPayment = () => {
           change: changeAmount.toString(),
           credit: creditAmount.toString(),
           transaction_screenshot: transactionScreenshot,
-          transaction_ref: paymentMethod !== "Cash" ? transactionRef : "",
+          transaction_ref: isOnline ? transactionRef : "",
           next_billing_date: nextBillingDate.toISOString().split("T")[0],
-          status: "completed",
+          status: "pending",
         };
 
-        const id = await insertPaymentHistory.run(completedPayment);
-
+        await insertPaymentHistory.run(recordPayment);
         await log({
           action: "create",
           category: "billing",
-          description: `Processed GCash payment ₱${received} for ${selectedBillingInfo.customer} - Plan: ${selectedBillingInfo.plan.name}`,
+          description: `Processed ${paymentMethod} payment ₱${received} for ${selectedBillingInfo.customer}`,
           status: "success",
           additional_info: {
             amount: selectedBillingInfo.amount,
@@ -103,30 +100,13 @@ const ProcessPayment = () => {
         });
 
         clearAll();
-        printReceipt(selectedBillingInfo, {
-          id: id,
-          bill: selectedBillingInfo.id,
-          user: selectedBillingInfo.user,
-          customer: selectedBillingInfo.customer,
-          method: paymentMethod,
-          amount: received.toString(),
-          change: changeAmount.toString(),
-          credit: creditAmount.toString(),
-          transaction_screenshot: transactionScreenshot,
-          transaction_ref: paymentMethod !== "Cash" ? transactionRef : "",
-          created_at: formatReadableDateTime(getCurrentDateTimeString()),
-          next_billing_date: nextBillingReadable,
-          status: "completed",
-          voided_at: "",
-          voided_reason: "",
-        });
       }
     } else {
       alert("Insufficient amount received!");
     }
   };
 
-  if (!selectedBillingInfo || cashierBehavior != "payment") return <></>;
+  if (billBehavior != "payment" || !selectedBillingInfo) return <></>;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
@@ -138,7 +118,7 @@ const ProcessPayment = () => {
             </div>
             <div>
               <h3 className="text-2xl font-black text-gray-900">
-                Cash Payment
+                {isCash ? "Cash Payment" : `${paymentMethod} Payment`}
               </h3>
               <p className="text-xs font-semibold text-gray-700">
                 Process payment
@@ -167,26 +147,8 @@ const ProcessPayment = () => {
           </div>
         </div>
 
-        {/* Payment Method Selector */}
-        <div className="mb-6">
-          <label className="mb-2 block text-sm font-bold text-gray-800">
-            Payment Method
-          </label>
-          <select
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="w-full cursor-pointer rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:outline-none"
-          >
-            <option value="Cash">💵 Cash</option>
-            <option value="GCash">📱 GCash</option>
-            <option value="Maya">💳 Maya</option>
-            <option value="Bank Transfer">🏦 Bank Transfer</option>
-            <option value="Credit Card">💳 Credit Card</option>
-            <option value="Debit Card">💳 Debit Card</option>
-          </select>
-        </div>
-
         {/* Transaction Reference - Only for non-cash payments */}
-        {paymentMethod !== "Cash" && (
+        {isOnline && (
           <div className="mb-6">
             <label className="mb-2 block text-sm font-bold text-gray-800">
               Transaction Reference
@@ -194,7 +156,7 @@ const ProcessPayment = () => {
             <input
               type="text"
               onChange={(e) => setTransactionRef(e.target.value)}
-              placeholder="e.g., TRX123456789 or GCash Ref No."
+              placeholder="e.g., TRX123456789 - Ref No."
               className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm font-medium focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:outline-none"
             />
           </div>
@@ -255,7 +217,7 @@ const ProcessPayment = () => {
         {/* Amount Received Input */}
         <div className="mb-4">
           <label className="mb-2 block text-sm font-bold text-gray-800">
-            Amount Received
+            {isOnline ? "Amount Sent" : "Amount Received"}
           </label>
           <input
             type="number"
@@ -271,12 +233,12 @@ const ProcessPayment = () => {
 
         {/* Change Display */}
         {amountReceived &&
-          parseFloat(amountReceived) >=
+          parseFloat(amountReceived) >
             parseFloat(selectedBillingInfo.amount) && (
             <div className="mb-6 rounded-lg bg-green-50 p-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-bold text-green-800">
-                  Change:
+                  {isCash ? "Change:" : "Credit:"}
                 </span>
                 <span className="text-2xl font-black text-green-600">
                   ₱{change.toFixed(2)}
@@ -326,7 +288,6 @@ const ProcessPayment = () => {
               clearAll();
               setAmountReceived("");
               setChange(0);
-              setPaymentMethod("Cash");
               setTransactionRef("");
               setTransactionScreenshot("");
             }}
@@ -339,7 +300,9 @@ const ProcessPayment = () => {
             disabled={
               insertPaymentHistory.isLocked ||
               !amountReceived ||
-              parseFloat(amountReceived) < parseInt(selectedBillingInfo.amount)
+              parseFloat(amountReceived) <
+                parseInt(selectedBillingInfo.amount) ||
+              (isOnline && !transactionRef)
             }
             className="flex-1 rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-green-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-gray-300"
           >

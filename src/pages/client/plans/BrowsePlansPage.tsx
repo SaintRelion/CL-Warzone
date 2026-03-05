@@ -91,51 +91,38 @@ const BrowsePlansPage = () => {
       <p className="mb-8 text-gray-600">
         Choose the perfect plan for your needs
       </p>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
         {plans.map((plan) => {
-          // Dynamically generate features
-          const features = [
-            `Up to ${plan.speed_mbps} Mbps Speed`,
-            "Unlimited Data",
-            plan.name === "Basic Fiber" ? "Free Installation" : null,
-            plan.name === "Pro Gamer" ? "Low Latency Routing" : null,
-            plan.name === "Enterprise Fiber" ? "Dedicated IP Option" : null,
-            "24/7 Customer Support", // generic feature
-          ].filter(Boolean); // remove nulls
-
           const disableButton =
-            insertSubscription.isLocked || // generic lock
-            hasUnpaidBill || // cannot switch if unpaid bills
-            (openSubscription && openSubscription.status === "pending");
+            insertSubscription.isLocked ||
+            hasUnpaidBill ||
+            (openSubscription &&
+              (openSubscription.status === "pending" ||
+                openSubscription.status === "suspended"));
 
-          let buttonLabel = "Avail Plan";
-          if (openSubscription) {
-            if (openSubscription.status === "pending") {
-              buttonLabel = "Approval Pending";
-            } else if (currentPlan?.id === plan.id) {
-              buttonLabel = "Current Plan";
-            } else if (
-              openSubscription.status === "active" ||
-              openSubscription.status === "suspended"
-            ) {
-              buttonLabel = "Subscription Active";
-            }
-          }
+          // Determine badge & button status
+          const subscriptionStatus =
+            openSubscription?.plan === plan.id
+              ? openSubscription.status
+              : currentPlan?.id === plan.id
+                ? "current"
+                : "available";
 
-          // Determine button color classes
-          let buttonClass = "w-full rounded-lg py-3 font-medium transition ";
-          if (
-            openSubscription?.status === "pending" &&
-            currentPlan?.id === plan.id
-          ) {
-            buttonClass += "bg-yellow-500 text-white cursor-not-allowed";
-          } else if (!currentPlan) {
-            buttonClass += "bg-indigo-600 text-white hover:bg-indigo-700";
-          } else if (currentPlan?.id === plan.id) {
-            buttonClass += "bg-green-600 text-white hover:bg-green-700";
-          } else {
-            buttonClass += "bg-indigo-600 text-white hover:bg-indigo-700";
-          }
+          const statusStyles: Record<string, string> = {
+            pending: "bg-yellow-100 text-yellow-700",
+            current: "bg-green-100 text-green-700",
+            active: "bg-green-100 text-green-700",
+            suspended: "bg-gray-100 text-gray-700",
+            available: "bg-indigo-100 text-indigo-700",
+          };
+
+          const statusLabels: Record<string, string> = {
+            pending: "⏳ Approval Pending",
+            current: "✓ Current Plan",
+            active: "✓ Active",
+            suspended: "⚠ Suspended",
+            available: "Avail Plan",
+          };
 
           return (
             <div
@@ -147,6 +134,7 @@ const BrowsePlansPage = () => {
                   {plan.name}
                 </h3>
                 <p className="mb-4 text-sm text-gray-600">{plan.description}</p>
+
                 <div className="mb-4">
                   <span className="text-4xl font-bold text-indigo-600">
                     ₱{plan.price}
@@ -154,23 +142,21 @@ const BrowsePlansPage = () => {
                   <span className="text-gray-600">/month</span>
                 </div>
 
-                <ul className="mb-6 space-y-3">
-                  {features.map((feature, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2 text-sm text-gray-700"
-                    >
-                      <span className="fa-solid fa-check mt-0.5 shrink-0 text-lg text-green-500" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+                {/* Status Badge */}
+                <span
+                  className={`inline-flex w-fit items-center rounded-full px-2 py-1 text-xs font-bold ${
+                    statusStyles[subscriptionStatus]
+                  }`}
+                >
+                  {statusLabels[subscriptionStatus]}
+                </span>
 
+                {/* Subscription Dialog */}
                 <Dialog
                   onOpenChange={(open) => {
                     if (!open) setViewedPlan(null);
                   }}
-                  open={viewedPlan != null}
+                  open={viewedPlan?.id === plan.id}
                 >
                   <DialogTrigger asChild>
                     <button
@@ -184,9 +170,16 @@ const BrowsePlansPage = () => {
                         }
                         setViewedPlan(plan);
                       }}
-                      className={buttonClass}
+                      className={`mt-4 w-full rounded-lg py-3 font-medium transition ${
+                        subscriptionStatus === "pending"
+                          ? "cursor-not-allowed bg-yellow-500 text-white"
+                          : subscriptionStatus === "current" ||
+                              subscriptionStatus === "active"
+                            ? "bg-green-600 text-white hover:bg-green-700"
+                            : "bg-indigo-600 text-white hover:bg-indigo-700"
+                      }`}
                     >
-                      {buttonLabel}
+                      {statusLabels[subscriptionStatus]}
                     </button>
                   </DialogTrigger>
 
@@ -199,14 +192,13 @@ const BrowsePlansPage = () => {
                       </DialogDescription>
                     </DialogHeader>
 
-                    {/* ================ ORDER SUMMARY CARD ================ */}
+                    {/* Order Summary */}
                     <div className="mb-6 rounded-xl border bg-gray-50 p-4 shadow-sm">
                       <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
                         <span className="fa-solid fa-receipt text-indigo-600" />
                         Order Summary
                       </h3>
 
-                      {/* Plan info */}
                       <div className="mb-4 flex items-start gap-3">
                         <span className="fa-solid fa-wifi text-xl text-indigo-600" />
                         <div>
@@ -214,12 +206,11 @@ const BrowsePlansPage = () => {
                             {viewedPlan?.name}
                           </p>
                           <p className="text-sm text-gray-600">
-                            {viewedPlan?.speed_mbps} • Unlimited Data
+                            {viewedPlan?.description}
                           </p>
                         </div>
                       </div>
 
-                      {/* Items */}
                       <div className="space-y-2 text-sm text-gray-700">
                         <div className="flex justify-between">
                           <span>Monthly Plan</span>

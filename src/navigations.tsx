@@ -1,8 +1,7 @@
 import NotFound from "./pages/NotFound";
 
-import LoginPage from "./pages/authentication/LoginPage";
 import { AdminDashboardPage } from "./pages/admin/admin-dashboard/AdminDashboardPage";
-import SubscribersPage from "./pages/admin/subscribers/SubscribersPage";
+import SubscriptionsPage from "./pages/admin/subscriptions/SubscriptionsPage";
 import BillingPage from "./pages/admin/billing/BillingPage";
 import BrowsePlansPage from "./pages/client/plans/BrowsePlansPage";
 import BillingAndPaymentsPage from "./pages/client/billing-and-payments/BillingAndPaymentsPage";
@@ -23,6 +22,8 @@ import {
 import { roleLayoutMap } from "@saintrelion/auth-lib";
 import ActivityLogsPage from "./pages/admin/activity-logs/ActivityLogsPage";
 import AdminReportingPage from "./pages/admin/admin-reporting/AdminReportingPage";
+import UserAccountsPage from "./pages/admin/user-accounts/UserAccountsPage";
+import LandingPage from "./pages/authentication/LandingPage";
 
 roleLayoutMap[""] = {
   redirect: "/",
@@ -33,7 +34,7 @@ registerGroupAppRoutes({
   layout: createRoleLayout(""),
   errorElement: <NotFound />,
   children: [
-    { path: "login", auth: true, element: <LoginPage /> },
+    { path: "login", auth: true, element: <LandingPage /> },
     { path: "register", auth: true, element: <RegisterPage /> },
   ],
 });
@@ -55,10 +56,17 @@ registerGroupAppRoutes({
       allowedRoles: ["admin"],
     },
     {
-      path: "subscribers",
-      element: <SubscribersPage />,
-      label: "Subscribers",
+      path: "accounts",
+      element: <UserAccountsPage />,
+      label: "Accounts",
       iconClassName: "fa-solid fa-users text-lg",
+      allowedRoles: ["admin"],
+    },
+    {
+      path: "subscribers",
+      element: <SubscriptionsPage />,
+      label: "Subscribers",
+      iconClassName: "fa-solid fa-user-check text-lg",
       allowedRoles: ["admin"],
     },
     {

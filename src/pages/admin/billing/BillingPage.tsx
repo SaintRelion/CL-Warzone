@@ -58,7 +58,7 @@ const BillingPage = () => {
         <ReceiptView />
 
         {/* CASHIERING MODAL */}
-        <ProcessPayment />
+        <ProcessPayment paymentMethod="CASH" />
 
         {/* PAYMENT HISTORY MODAL */}
         <PaymentHistoryTable paymentHistories={paymentHistories} />
