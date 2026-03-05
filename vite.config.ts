@@ -47,11 +47,4 @@ export default defineConfig({
       },
     },
   },
-
-  // ✅ THIS MUST HAVE A COLON
-  test: {
-    globals: true,
-    environment: "jsdom",
-    setupFiles: "./src/setupTests.ts",
-  },
 });
