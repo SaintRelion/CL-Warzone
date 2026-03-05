@@ -92,25 +92,25 @@ const MoreMenu = ({ user }: { user: User }) => {
             <>
               <li>
                 <button
-                  onClick={() => updateStatus(user, "disabled")}
+                  onClick={() => updateStatus(user, "deactivated")}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-yellow-700 hover:bg-yellow-100"
                 >
-                  Suspend user (temporarily prevent login)
+                  Deactivate user (temporarily prevent login)
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => updateStatus(user, "deactivated")}
+                  onClick={() => updateStatus(user, "disabled")}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-100"
                 >
-                  Deactivate user (disable account permanently)
+                  Disable user (disable account permanently)
                 </button>
               </li>
             </>
           )}
 
           {/* Disabled user */}
-          {user.status === "disabled" && (
+          {user.status === "deactivated" && (
             <li>
               <button
                 onClick={() => updateStatus(user, "active")}
@@ -122,7 +122,7 @@ const MoreMenu = ({ user }: { user: User }) => {
           )}
 
           {/* Deactivated user */}
-          {user.status === "deactivated" && (
+          {user.status === "disabled" && (
             <li>
               <button
                 onClick={() => updateStatus(user, "active")}
