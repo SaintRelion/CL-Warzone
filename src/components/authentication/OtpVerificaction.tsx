@@ -35,17 +35,14 @@ export default function OtpVerification({
     try {
       setDeliveryMethod(method);
 
-      const endpoint =
-        method === "sms"
-          ? `${BASE_API}api/otp/send_sms/`
-          : `${BASE_API}api/otp/send/`;
-
       const payload =
         method === "sms"
-          ? { email: email, otp_type: "sms" } // backend can resolve phone from user
-          : { email: email, otp_type: "email" };
+          ? { email, password, otp_type: "sms" } // backend can resolve phone from user
+          : { email, password, otp_type: "email" };
 
-      const result = await apiRequest(endpoint, payload, { auth: false });
+      const result = await apiRequest(`${BASE_API}api/otp/send/`, payload, {
+        auth: false,
+      });
       if (result.otp_id) {
         toast.success(`OTP sent via ${method.toUpperCase()}`);
 
@@ -64,13 +61,8 @@ export default function OtpVerification({
     setStatus(null);
 
     try {
-      const endpoint =
-        deliveryMethod === "sms"
-          ? `${BASE_API}api/otp/verify_sms/`
-          : `${BASE_API}api/otp/verify/`;
-
       const result = await apiRequest(
-        endpoint,
+        `${BASE_API}api/otp/verify/`,
         { otp_id: otpId, code: otpInput },
         { auth: false },
       );

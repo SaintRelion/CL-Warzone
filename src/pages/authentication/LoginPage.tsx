@@ -9,6 +9,7 @@ import { apiRequest } from "../to-be-library/sr-api";
 import OtpVerification from "@/components/authentication/OtpVerificaction";
 
 import { BASE_API } from "@/sr-config";
+import { toast } from "@saintrelion/notifications";
 
 const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
   const auth = useAuth();
@@ -27,7 +28,7 @@ const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
       },
     );
 
-    return result.is_trusted;
+    return result;
   };
 
   const handleLogin = async (data: Record<string, string>) => {
@@ -36,16 +37,18 @@ const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
 
     setCheckingTrust(true);
 
-    const isTrusted = await checkDevice(data.email, data.password);
-    if (isTrusted) {
+    const result = await checkDevice(data.email, data.password);
+    if (result.is_trusted) {
       await auth.login({
         username: data.email,
         password: data.password,
       });
+    } else if (!result.valid_user) {
+      toast.warning("Invalid credentials");
     } else {
       setRequireOtp(true);
-      setCheckingTrust(false);
     }
+    setCheckingTrust(false);
   };
 
   return (
