@@ -86,10 +86,10 @@ const BillingAndPaymentsPage = () => {
         </p>
       </div> */}
       {/* ===================== SUBSCRIPTION CARD ===================== */}
-      <div className="rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 p-5 text-white shadow-lg">
+      <div className="rounded-xl bg-indigo-600 p-5   text-white font-semibold shadow-lg">
         {currentSubscription ? (
           <div className="space-y-5">
-            <h3 className="text-lg font-semibold">Current Subscription</h3>
+            <h3 className="text-lg font-bold">Current Subscription</h3>
 
             {/* ===================== APPROVAL PROCESS STEPS ===================== */}
             <div className="mb-4 flex items-center gap-3">
@@ -170,6 +170,7 @@ const BillingAndPaymentsPage = () => {
           <p className="text-center font-semibold">No Active Subscription</p>
         )}
       </div>
+
       {/* ===================== GCASH MODAL ===================== */}
       {selectedPayment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">

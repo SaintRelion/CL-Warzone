@@ -26,12 +26,15 @@ const ClientSideBar = () => {
         className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-lg transition-transform duration-300 lg:static ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} overflow-y-auto`}
       >
         <div className="border-b border-gray-200 p-6">
-          <div className="flex items-center gap-2">
-            <span className="fa-solid fa-wifi text-2xl text-indigo-600" />
-            <h1 className="text-xl font-bold text-gray-900">Warzone</h1>
-          </div>
-        </div>
-
+  <div className="flex items-center gap-2">
+    <img 
+      src="/my-logo.png" 
+      alt="Warzone Logo" 
+      className="h-10 w-auto object-contain"
+    />
+    <h1 className="text-xl font-bold text-gray-900">WarzoneNetCafe</h1>
+  </div>
+</div>
         <nav className="flex flex-col space-y-2 p-4">
           {renderNavItems({
             role: "client",
