@@ -1,6 +1,6 @@
 import { useAuth } from "@saintrelion/auth-lib";
 import { renderNavItems } from "@saintrelion/routers";
-import { ChevronLeft, ChevronRight, Wifi } from "lucide-react";
+import { ChevronLeft, ChevronRight} from "lucide-react";
 import { useEffect, useState } from "react";
 
 const AdminSidebar = () => {
@@ -30,12 +30,17 @@ const AdminSidebar = () => {
       } flex flex-col bg-gray-900 text-white transition-all duration-300`}
     >
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
-        {sidebarOpen && (
-          <div className="flex items-center gap-2">
-            <Wifi className="h-6 w-6 text-blue-400" />
-            <span className="text-lg font-bold">Warzone Net Cafe</span>
-          </div>
-        )}
+
+       {sidebarOpen && (
+        <div className="flex items-center gap-2">
+          <img
+            src="/my-logo.png"
+            alt="Warzone Logo"
+            className="h-8 w-auto object-contain"
+          />
+          <span className="text-lg font-bold">WarzoneNetCafe</span>
+        </div>
+            )}
         <button
           onClick={() => {
             if (!isSmallScreen) setSidebarOpen(!sidebarOpen);

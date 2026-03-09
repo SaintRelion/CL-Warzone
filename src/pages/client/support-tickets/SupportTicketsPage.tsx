@@ -87,14 +87,14 @@ const SupportTicketsPage = () => {
   return (
     <div className="space-y-10 p-4 sm:p-6">
       {/* ===================== HEADER ===================== */}
-      <div>
+      {/* <div>
         <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
           Internet Support Tickets
         </h2>
         <p className="text-sm text-gray-600">
           Report internet problems, service issues, and customer inquiries
         </p>
-      </div>
+      </div> */}
 
       {/* ===================== CREATE TICKET ===================== */}
       <div className="rounded-xl bg-white p-6 shadow">

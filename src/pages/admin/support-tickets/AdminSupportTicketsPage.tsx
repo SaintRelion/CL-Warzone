@@ -12,14 +12,14 @@ const AdminSupportTicketsPage = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-2">
+      {/* <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold text-gray-900">
           Support Tickets
         </h1>
         <p className="text-sm text-gray-500">
           Manage and respond to customer support requests
         </p>
-      </div>
+      </div> */}
 
       {/* Stats Cards */}
       <KPICards tickets={tickets} />

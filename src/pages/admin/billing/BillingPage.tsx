@@ -30,14 +30,14 @@ const BillingPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-8xl mx-auto space-y-6">
-        <div>
+        {/* <div>
           <h2 className="mb-1 text-4xl font-black text-gray-900">
             Cashiering & Billing
           </h2>
           <p className="text-sm font-semibold text-gray-700">
             Manage payments, receipts, and billing cycles
           </p>
-        </div>
+        </div> */}
 
         {/* SUMMARY CARDS and Filters */}
         <KPICards

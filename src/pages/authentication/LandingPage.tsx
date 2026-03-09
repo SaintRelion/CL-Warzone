@@ -5,8 +5,9 @@ import { useResourceLocked } from "@saintrelion/data-access-layer";
 import type { Plan } from "@/models/Plan";
 import LoginModal from "./LoginPage";
 
-const LandingPage = () => {
+const LandingPage = () => {  // const [darkMode, setDarkMode] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+
 
   const { useList: getPlans } = useResourceLocked<Plan>("plan", {
     showToast: false,
@@ -14,256 +15,288 @@ const LandingPage = () => {
 
   const { data: plans = [], isLoading, isError } = getPlans();
 
-  /* ==========================================
-     UI
-  ========================================== */
+  /* =========================
+     THEME SYSTEM
+  ========================= */
+
+  // useEffect(() => {
+  //   const savedTheme = localStorage.getItem("theme");
+
+  //   if (savedTheme === "dark") {
+  //     document.documentElement.classList.add("dark");
+  //     setDarkMode(true);
+  //   }
+  // }, []);
+
+  // const toggleTheme = () => {
+  //   if (darkMode) {
+  //     document.documentElement.classList.remove("dark");
+  //     localStorage.setItem("theme", "light");
+  //     setDarkMode(false);
+  //   } else {
+  //     document.documentElement.classList.add("dark");
+  //     localStorage.setItem("theme", "dark");
+  //     setDarkMode(true);
+  //   }
+  // };
 
   return (
     <>
-      <div className="min-h-screen bg-black px-4 py-20 text-white">
-        {/* =====================================
-            NAVIGATION
-        ===================================== */}
-        <nav className="fixed top-0 right-0 left-0 z-50 border-b border-white/10 bg-black/50 backdrop-blur-md">
-          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+      <div className="min-h-screen bg-white text-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 px-4 py-20">
+
+        {/* NAVBAR */}
+        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur border-b border-zinc-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-950/70">
+
+          <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4">
+
             <div className="flex items-center gap-2">
-              <span className="fa-solid fa-wifi text-xl text-[#78fbcf]" />
-              <span className="text-xl font-bold tracking-wide uppercase">
+               <img
+            src="/my-logo.png"
+            alt="Warzone Logo"
+            className="h-8 w-auto object-contain"
+          />
+              <span className="font-bold tracking-wide uppercase">
                 WARZONE NET CAFE
               </span>
             </div>
 
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="rounded-lg bg-[#78fbcf] px-4 py-2 text-sm font-bold text-black transition hover:opacity-90"
-            >
-              Login
-            </button>
+            <div className="flex items-center gap-3">
+{/* 
+              <button
+                onClick={toggleTheme}
+                className="rounded-md border border-zinc-300 dark:border-zinc-700 px-3 py-2 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              >
+                {darkMode ? "☀️" : "🌙"}
+              </button> */}
+
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="rounded-md bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 dark:bg-amber-400 dark:text-black"
+              >
+                Login
+              </button>
+
+            </div>
           </div>
         </nav>
 
-        {/* =====================================
-            HERO SECTION
-        ===================================== */}
+        {/* HERO */}
+        <section className="mx-auto mt-10 max-w-3xl text-center pb-16">
 
-        <section className="mx-auto mt-10 max-w-3xl text-center">
-          <h1 className="mb-6 text-4xl font-bold md:text-6xl">
-            Unstoppable Fiber Internet for Every Home
+          <h1 className="mb-6 text-4xl md:text-6xl font-bold bg-gradient-to-r from-red-500 to-amber-400 bg-clip-text text-transparent">
+            Reliable Fiber Internet
           </h1>
 
-          <p className="mx-auto max-w-2xl text-lg text-gray-400">
-            Warzone Fiber delivers high-speed, low-latency internet with a
-            powerful billing system that keeps you connected, informed, and in
-            control.
+          <p className="text-lg text-zinc-600 dark:text-zinc-400">
+            Warzone Fiber delivers fast, low-latency internet with a
+            modern billing system designed for seamless connectivity.
           </p>
+
         </section>
 
-        <div className="bg-black px-4 py-5 font-sans text-white">
-          <div className="mx-auto mt-20 max-w-4xl text-center">
-            <h2 className="mb-6 text-3xl font-bold text-[#78fbcf]">
-              Why Choose Warzone?
-            </h2>
+        {/* DIVIDER */}
+        <div className="h-px bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-zinc-700 my-16"></div>
 
-            <div className="grid gap-8 text-gray-300 md:grid-cols-3">
-              <div>
-                <h3 className="mb-2 font-bold text-white">
-                  ⚡ Blazing Fast Speed
+        {/* WHY CHOOSE */}
+        <section className="max-w-5xl mx-auto">
+
+          <h2 className="text-center text-3xl font-bold text-red-500 dark:text-amber-400 mb-12">
+            Why Choose Warzone?
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-8">
+
+            {[
+              {
+                title: "Blazing Fast Speed",
+                icon: "⚡",
+                desc: "Ultra-fast fiber connection designed for gaming and streaming.",
+              },
+              {
+                title: "Secure Billing",
+                icon: "🔒",
+                desc: "OTP-secured accounts with transparent billing history.",
+              },
+              {
+                title: "Reliable Coverage",
+                icon: "📡",
+                desc: "Serving multiple municipalities with stable infrastructure.",
+              },
+            ].map((item, i) => (
+
+              <div
+                key={i}
+                className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 transition hover:shadow-lg hover:shadow-red-400/10"
+              >
+
+                <h3 className="font-semibold text-lg mb-2">
+                  {item.icon} {item.title}
                 </h3>
-                <p>
-                  Experience ultra-fast fiber connection with stable bandwidth
-                  for gaming and streaming.
+
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  {item.desc}
                 </p>
+
               </div>
 
-              <div>
-                <h3 className="mb-2 font-bold text-white">
-                  🔒 Secure Billing System
-                </h3>
-                <p>
-                  OTP-secured login, real-time payment tracking, and transparent
-                  billing history.
-                </p>
-              </div>
+            ))}
 
-              <div>
-                <h3 className="mb-2 font-bold text-white">
-                  📡 Reliable Coverage
-                </h3>
-                <p>
-                  Serving Katipunan, Roxas, Piñan, Osmeña, and Polanco with
-                  dependable fiber infrastructure.
-                </p>
-              </div>
-            </div>
           </div>
-        </div>
 
-        {/* =====================================
-            PLANS SECTION
-        ===================================== */}
+        </section>
 
-        <section className="mx-auto mt-20 max-w-3xl">
+        {/* DIVIDER */}
+        <div className="h-px bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-zinc-700 my-16"></div>
+
+        {/* PLANS */}
+        <section className="max-w-4xl mx-auto">
+
           {isLoading && (
-            <div className="text-center text-gray-400">Loading plans...</div>
+            <p className="text-center text-zinc-500">Loading plans...</p>
           )}
 
           {isError && (
-            <div className="text-center text-red-500">
-              Failed to load plans.
-            </div>
+            <p className="text-center text-red-500">Failed to load plans</p>
           )}
 
           {!isLoading && !isError && (
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-              {plans.map((plan, index) => {
-                // Determine if this plan should be "featured"
-                const isFeatured = plan.name === "Pro Fiber";
+
+            <div className="grid md:grid-cols-2 gap-8">
+
+              {plans.map((plan) => {
+
+                const featured = plan.name === "Pro Fiber";
 
                 return (
+
                   <div
                     key={plan.id}
-                    className={`rounded-2xl p-8 transition-colors ${
-                      isFeatured
-                        ? "transform bg-[#78fbcf] text-black shadow-2xl shadow-[#78fbcf]/10 md:scale-105"
-                        : "border border-[#1f1f1f] bg-[#0f0f0f] text-gray-400 hover:border-gray-700"
+                    className={`rounded-2xl p-8 transition hover:scale-[1.02] ${
+                      featured
+                        ? "bg-red-500 text-white shadow-xl shadow-red-500/20 dark:bg-amber-400 dark:text-black"
+                        : "border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
                     }`}
                   >
-                    <h3
-                      className={`mb-4 ${isFeatured ? "font-bold" : "font-medium"}`}
-                    >
+
+                    <h3 className="text-lg font-semibold mb-4">
                       {plan.name}
                     </h3>
 
-                    <div className="mb-2 flex items-baseline">
-                      <span className="text-4xl font-bold">₱{plan.price}</span>
-                      <span
-                        className={`ml-2 ${isFeatured ? "text-black/70" : "text-gray-500"}`}
-                      >
+                    <div className="flex items-baseline mb-4">
+                      <span className="text-4xl font-bold">
+                        ₱{plan.price}
+                      </span>
+                      <span className="ml-2 text-sm opacity-70">
                         /month
                       </span>
                     </div>
 
-                    <p
-                      className={`mb-8 text-sm ${isFeatured ? "font-medium text-black/70" : "text-gray-400"}`}
-                    >
+                    <p className="text-sm mb-8 opacity-80">
                       {plan.description}
                     </p>
 
                     <button
                       onClick={() => setShowLoginModal(true)}
-                      className={`mb-8 w-full rounded-xl py-3 font-semibold transition-colors ${
-                        isFeatured
-                          ? "bg-black text-white hover:bg-black/80"
-                          : "bg-white text-black hover:bg-gray-200"
+                      className={`w-full rounded-lg py-3 font-semibold transition ${
+                        featured
+                          ? "bg-white text-red-500 hover:bg-zinc-100 dark:bg-black dark:text-white"
+                          : "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-black"
                       }`}
                     >
                       Apply Now
                     </button>
 
-                    <div
-                      className={`space-y-4 text-sm ${isFeatured ? "font-medium" : "text-gray-300"}`}
-                    >
-                      <p
-                        className={`font-semibold ${isFeatured ? "font-bold" : "text-white"}`}
-                      >
-                        {index === 0 ? "" : "Everything in Starter +"}
-                      </p>
-                    </div>
                   </div>
+
                 );
               })}
+
             </div>
+
           )}
+
         </section>
 
-        <div className="mx-auto mt-20 max-w-6xl px-4">
-          <div className="mb-14 text-center">
-            <h2 className="mb-4 text-3xl font-bold text-[#08b47b]">
+        {/* DIVIDER */}
+        <div className="h-px bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-zinc-700 my-16"></div>
+
+        {/* BUSINESS */}
+        <section className="max-w-6xl mx-auto">
+
+          <div className="text-center mb-14">
+
+            <h2 className="text-3xl font-bold text-red-500 dark:text-amber-400">
               Expanding Beyond Home Internet
             </h2>
-            <p className="mx-auto max-w-2xl text-gray-500">
-              Warzone Fiber is built to power growing businesses, institutions,
-              and enterprises with scalable and secure network infrastructure.
+
+            <p className="text-zinc-600 dark:text-zinc-400 mt-4">
+              Warzone Fiber also supports businesses and institutions with
+              enterprise-grade connectivity.
             </p>
+
           </div>
 
-          <div className="grid gap-8 text-gray-300 md:grid-cols-3">
-            <div className="rounded-2xl border border-[#1f1f1f] bg-[#111] p-8 transition hover:border-[#78fbcf]">
-              <h3 className="mb-3 font-bold text-white">🏢 Business Fiber</h3>
-              <p className="mb-4 text-sm">
-                Dedicated high-speed internet designed for offices, schools, and
-                commercial establishments.
-              </p>
-              <ul className="space-y-2 text-sm">
-                <li>✔ Symmetrical Upload & Download</li>
-                <li>✔ Static IP Available</li>
-                <li>✔ SLA Guaranteed Uptime</li>
-                <li>✔ Priority Technical Support</li>
-              </ul>
-            </div>
+          <div className="grid md:grid-cols-3 gap-8">
 
-            <div className="rounded-2xl border border-[#1f1f1f] bg-[#111] p-8 transition hover:border-[#78fbcf]">
-              <h3 className="mb-3 font-bold text-white">
-                ☁ Cloud & Server Hosting
-              </h3>
-              <p className="mb-4 text-sm">
-                Host your business applications, billing systems, and enterprise
-                platforms securely.
-              </p>
-              <ul className="space-y-2 text-sm">
-                <li>✔ VPS & Dedicated Servers</li>
-                <li>✔ Secure Data Center</li>
-                <li>✔ 24/7 Monitoring</li>
-                <li>✔ Local Deployment Support</li>
-              </ul>
-            </div>
+            {[
+              "Business Fiber",
+              "Cloud Hosting",
+              "Network Infrastructure",
+            ].map((title, i) => (
 
-            <div className="rounded-2xl border border-[#1f1f1f] bg-[#111] p-8 transition hover:border-[#78fbcf]">
-              <h3 className="mb-3 font-bold text-white">
-                📡 Network Infrastructure
-              </h3>
-              <p className="mb-4 text-sm">
-                End-to-end fiber deployment and structured cabling for growing
-                organizations.
-              </p>
-              <ul className="space-y-2 text-sm">
-                <li>✔ Fiber Installation</li>
-                <li>✔ Structured Cabling</li>
-                <li>✔ CCTV & Network Setup</li>
-                <li>✔ IT Consultation</li>
-              </ul>
-            </div>
+              <div
+                key={i}
+                className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 hover:border-red-500 transition"
+              >
+
+                <h3 className="font-semibold mb-3">
+                  {title}
+                </h3>
+
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Reliable infrastructure services built for modern businesses.
+                </p>
+
+              </div>
+
+            ))}
+
           </div>
-        </div>
 
-        <div className="mx-auto mt-25 mb-10 max-w-5xl px-4 text-center">
-          <h2 className="mb-6 text-3xl font-bold text-[#08b47b]">
-            Powering Communities & Businesses
+        </section>
+
+        {/* DIVIDER */}
+        <div className="h-px bg-gradient-to-r from-transparent via-zinc-300 to-transparent dark:via-zinc-700 my-16"></div>
+
+        {/* INDUSTRIES */}
+        <section className="text-center max-w-5xl mx-auto">
+
+          <h2 className="text-3xl font-bold text-red-500 dark:text-amber-400 mb-8">
+            Powering Communities
           </h2>
 
-          <p className="mb-10 text-gray-400">
-            From households to enterprises, Warzone Fiber delivers reliable
-            infrastructure built for long-term digital growth.
-          </p>
+          <div className="grid md:grid-cols-4 gap-6 text-sm">
 
-          <div className="grid gap-6 text-sm text-gray-300 md:grid-cols-4">
-            <div className="rounded-xl border border-[#1f1f1f] bg-[#0f0f0f] p-6">
-              🎮 Gaming Cafés
-            </div>
+            {[
+              "🎮 Gaming Cafés",
+              "🏫 Schools",
+              "🏢 Offices",
+              "🏬 Retail Stores",
+            ].map((item, i) => (
 
-            <div className="rounded-xl border border-[#1f1f1f] bg-[#0f0f0f] p-6">
-              🏫 Schools & Universities
-            </div>
+              <div
+                key={i}
+                className="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6"
+              >
+                {item}
+              </div>
 
-            <div className="rounded-xl border border-[#1f1f1f] bg-[#0f0f0f] p-6">
-              🏢 Corporate Offices
-            </div>
+            ))}
 
-            <div className="rounded-xl border border-[#1f1f1f] bg-[#0f0f0f] p-6">
-              🏬 Retail Establishments
-            </div>
           </div>
-        </div>
+
+        </section>
+
       </div>
 
       {showLoginModal && <LoginModal showLogin={setShowLoginModal} />}
