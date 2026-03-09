@@ -22,12 +22,24 @@ const AccountPage = () => {
     first_name: user.first_name,
     last_name: user.last_name,
     email: user.email,
+    password:user.password,
     phone_number: user.phone_number,
     street_address: user.street_address,
     city_municipality: user.city_municipality,
     zip_code: user.zip_code,
     service_area: user.service_area,
   };
+
+const toSentenceCase = (text?: string) => {
+  if (!text) return "—";
+
+  return text
+    .toLowerCase()
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
 
   async function handleSubmit(data: Record<string, string>) {
     const success = await updateUser.run({
@@ -91,11 +103,13 @@ const AccountPage = () => {
             { label: "First Name", name: "first_name" },
             { label: "Last Name", name: "last_name" },
             { label: "Email Address", name: "email" },
+            { label: "Password", name: "password" },
             { label: "Street Address", name: "street_address", full: true },
             { label: "Phone Number", name: "phone_number" },
             { label: "City / Municipality", name: "city_municipality" },
             { label: "ZIP Code", name: "zip_code" },
             { label: "Service Area", name: "service_area" },
+
           ].map((field) => (
             <div key={field.name} className={field.full ? "sm:col-span-2" : ""}>
               <p className="mb-1 text-xs font-medium tracking-wide text-gray-500 uppercase">
