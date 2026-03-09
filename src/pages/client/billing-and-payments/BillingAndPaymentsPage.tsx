@@ -77,16 +77,16 @@ const BillingAndPaymentsPage = () => {
   return (
     <div className="space-y-8 p-4 sm:p-6">
       {/* ===================== HEADER ===================== */}
-      <div>
+      {/* <div>
         <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
           Billing & Payments
         </h2>
         <p className="text-sm text-gray-500">
           Manage your subscription and payments
         </p>
-      </div>
+      </div> */}
       {/* ===================== SUBSCRIPTION CARD ===================== */}
-      <div className="rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 p-5 text-white">
+      <div className="rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 p-5 text-white shadow-lg">
         {currentSubscription ? (
           <div className="space-y-5">
             <h3 className="text-lg font-semibold">Current Subscription</h3>
