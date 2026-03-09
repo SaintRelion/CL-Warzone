@@ -1,6 +1,6 @@
 import { useAuth } from "@saintrelion/auth-lib";
 import { renderNavItems } from "@saintrelion/routers";
-import { ChevronLeft, ChevronRight, Wifi } from "lucide-react";
+
 import { useEffect, useState } from "react";
 
 const AdminSidebar = () => {
