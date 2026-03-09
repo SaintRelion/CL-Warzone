@@ -1,6 +1,6 @@
 // src/pages/LandingPage.tsx
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
 import type { Plan } from "@/models/Plan";
 import LoginModal from "./LoginPage";
