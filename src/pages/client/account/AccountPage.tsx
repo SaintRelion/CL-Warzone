@@ -42,14 +42,14 @@ const AccountPage = () => {
   return (
     <RenderForm wrapperClassName="space-y-10 max-w-5xl mx-auto">
       {/* PAGE HEADER */}
-      <div className="flex flex-col gap-2">
+      {/* <div className="flex flex-col gap-2">
         <h2 className="text-3xl font-bold tracking-tight text-gray-900">
           Account Information
         </h2>
         <p className="text-gray-600">
           View and update your personal and contact details
         </p>
-      </div>
+      </div> */}
 
       {/* ACCOUNT CARD */}
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
