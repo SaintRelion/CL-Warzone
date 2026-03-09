@@ -13,14 +13,14 @@ const ActivityLogsPage = () => {
   return (
     <div className="space-y-4 p-4 md:space-y-6 md:p-6">
       {/* Page Header */}
-      <div className="flex flex-col gap-2">
+      {/* <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900 md:text-3xl">
           Activity Logs
         </h1>
         <p className="text-xs text-gray-500 md:text-sm">
           Track all user actions, system events, and administrative changes
         </p>
-      </div>
+      </div> */}
 
       {/* Stats Cards */}
       <KPICard activityLogs={activityLogs} />

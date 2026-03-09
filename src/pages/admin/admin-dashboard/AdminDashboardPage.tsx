@@ -20,14 +20,14 @@ export const AdminDashboardPage = () => {
 
   return (
     <div className="space-y-10">
-      <div className="flex flex-col gap-2">
+      {/* <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
           Operations Dashboard
         </h1>
         <p className="text-sm text-gray-500">
           Enterprise overview of subscribers, revenue, and tickets
         </p>
-      </div>
+      </div> */}
 
       {/* ===================== KPI ROW ===================== */}
       <KPICard users={users} userBillings={userBillings} tickets={tickets} />
