@@ -5,9 +5,9 @@ import { useResourceLocked } from "@saintrelion/data-access-layer";
 import type { Plan } from "@/models/Plan";
 import LoginModal from "./LoginPage";
 
-const LandingPage = () => {
+const LandingPage = () => {  // const [darkMode, setDarkMode] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+
 
   const { useList: getPlans } = useResourceLocked<Plan>("plan", {
     showToast: false,
@@ -19,14 +19,14 @@ const LandingPage = () => {
      THEME SYSTEM
   ========================= */
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
+  // useEffect(() => {
+  //   const savedTheme = localStorage.getItem("theme");
 
-    if (savedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-      setDarkMode(true);
-    }
-  }, []);
+  //   if (savedTheme === "dark") {
+  //     document.documentElement.classList.add("dark");
+  //     setDarkMode(true);
+  //   }
+  // }, []);
 
   // const toggleTheme = () => {
   //   if (darkMode) {
