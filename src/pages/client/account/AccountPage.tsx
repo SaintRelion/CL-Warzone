@@ -41,9 +41,7 @@ const AccountPage = () => {
       .trim()
       .toLowerCase()
       .split(" ")
-      .map((word) =>
-        word ? word.charAt(0).toUpperCase() + word.slice(1) : ""
-      )
+      .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : ""))
       .join(" ");
   };
 
@@ -59,12 +57,9 @@ const AccountPage = () => {
 
   return (
     <RenderForm wrapperClassName="space-y-10 max-w-5xl mx-auto">
-
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-
         {/* HEADER */}
         <div className="flex items-center justify-between bg-linear-to-r from-indigo-50 to-purple-50 px-6 py-4">
-
           <h3 className="text-lg font-semibold text-gray-900">
             Personal Details
           </h3>
@@ -78,7 +73,6 @@ const AccountPage = () => {
             </button>
           ) : (
             <div className="flex gap-2">
-
               <RenderFormButton
                 onSubmit={handleSubmit}
                 isDisabled={updateUser.isLocked}
@@ -93,14 +87,12 @@ const AccountPage = () => {
               >
                 Cancel
               </button>
-
             </div>
           )}
         </div>
 
         {/* CONTENT */}
         <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2">
-
           {[
             { label: "First Name", name: "first_name" },
             { label: "Last Name", name: "last_name" },
@@ -112,65 +104,36 @@ const AccountPage = () => {
             { label: "ZIP Code", name: "zip_code" },
             { label: "Service Area", name: "service_area" },
           ].map((field) => (
-
             <div key={field.name} className={field.full ? "sm:col-span-2" : ""}>
-
               <p className="mb-1 text-xs font-medium tracking-wide text-gray-500 uppercase">
                 {field.label}
               </p>
 
               {!editMode ? (
-
                 <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-base text-gray-900">
-
                   {field.name === "password"
                     ? "••••••••"
                     : toSentenceCase(
-                        information[field.name as keyof typeof information] as string
+                        information[
+                          field.name as keyof typeof information
+                        ] as string,
                       )}
-
                 </div>
-
               ) : (
-
                 <RenderFormField
                   field={{ name: field.name, type: "text" }}
                   defaultValue={
-                    information[field.name as keyof typeof information] as string
+                    information[
+                      field.name as keyof typeof information
+                    ] as string
                   }
                   inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
                 />
-
               )}
-
             </div>
-
           ))}
-
         </div>
-
       </div>
-<<<<<<< HEAD
-=======
-
-      {/* DANGER ZONE */}
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6">
-
-        <h4 className="text-sm font-semibold text-red-700">
-          Danger Zone
-        </h4>
-
-        <p className="mt-1 text-sm text-red-600">
-          Deleting your account is permanent and cannot be undone.
-        </p>
-
-        <button className="mt-4 rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-red-700">
-          Delete Account
-        </button>
-
-      </div>
-
->>>>>>> bc713408130d400b7d26494c07f2e007db016755
     </RenderForm>
   );
 };
