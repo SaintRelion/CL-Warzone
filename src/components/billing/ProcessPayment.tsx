@@ -1,4 +1,3 @@
-import { useActivityLogger } from "@/lib/activity-logger";
 import type { CreatePaymentHistory } from "@/models/PaymentHistory";
 import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
@@ -12,8 +11,6 @@ const ProcessPayment = ({
 }: {
   paymentMethod: PaymentMethods;
 }) => {
-  const { log } = useActivityLogger();
-
   const { useInsert: insertPaymentHistory } = useResourceLocked<
     never,
     CreatePaymentHistory
@@ -74,7 +71,7 @@ const ProcessPayment = ({
 
         const recordPayment: CreatePaymentHistory = {
           bill: selectedBillingInfo.id,
-          user: selectedBillingInfo.user,
+          user: selectedBillingInfo.user.id,
           customer: selectedBillingInfo.customer,
           method: paymentMethod,
           amount: received.toString(),
@@ -87,17 +84,6 @@ const ProcessPayment = ({
         };
 
         await insertPaymentHistory.run(recordPayment);
-        await log({
-          action: "create",
-          category: "billing",
-          description: `Processed ${paymentMethod} payment ₱${received} for ${selectedBillingInfo.customer}`,
-          status: "success",
-          additional_info: {
-            amount: selectedBillingInfo.amount,
-            payment_method: paymentMethod,
-            plan_name: selectedBillingInfo.plan.name,
-          },
-        });
 
         clearAll();
       }

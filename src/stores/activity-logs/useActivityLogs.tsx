@@ -1,9 +1,9 @@
-import type { ActivityLog } from "@/models/ActivityLog";
+import type { AuditLog } from "@/models/AuditLog";
 import { create } from "zustand";
 
-interface ActivityLogsStore {
-  selectedActivityLog: ActivityLog | null;
-  viewActivityLog: (activityLog: ActivityLog | null) => void;
+interface AuditLogsStore {
+  selectedAuditLog: AuditLog | null;
+  viewAuditLog: (activityLog: AuditLog | null) => void;
 
   // FILTERS
   currentPage: number;
@@ -12,16 +12,13 @@ interface ActivityLogsStore {
   searchTerm: string;
   setSearchTerm: (search: string) => void;
 
-  categoryFilter: string;
-  setCategoryFilter: (category: string) => void;
-
-  statusFilter: string;
-  setStatusFilter: (status: string) => void;
+  actionFilter: string;
+  setActionFilter: (category: string) => void;
 }
 
-export const useActivityLogsStore = create<ActivityLogsStore>((set) => ({
-  selectedActivityLog: null,
-  viewActivityLog: (activityLog) => set({ selectedActivityLog: activityLog }),
+export const useAuditLogsStore = create<AuditLogsStore>((set) => ({
+  selectedAuditLog: null,
+  viewAuditLog: (activityLog) => set({ selectedAuditLog: activityLog }),
 
   currentPage: 1,
   setCurrentPage: (page) => set({ currentPage: page }),
@@ -29,9 +26,6 @@ export const useActivityLogsStore = create<ActivityLogsStore>((set) => ({
   searchTerm: "",
   setSearchTerm: (search) => set({ searchTerm: search }),
 
-  categoryFilter: "all",
-  setCategoryFilter: (category) => set({ categoryFilter: category }),
-
-  statusFilter: "all",
-  setStatusFilter: (status) => set({ statusFilter: status }),
+  actionFilter: "all",
+  setActionFilter: (category) => set({ actionFilter: category }),
 }));

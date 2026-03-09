@@ -20,7 +20,7 @@ import {
   createRoleLayout,
 } from "@saintrelion/routers";
 import { roleLayoutMap } from "@saintrelion/auth-lib";
-import ActivityLogsPage from "./pages/admin/activity-logs/ActivityLogsPage";
+import AuditLogsPage from "./pages/admin/audit-logs/AuditLogsPage";
 import AdminReportingPage from "./pages/admin/admin-reporting/AdminReportingPage";
 import UserAccountsPage from "./pages/admin/user-accounts/UserAccountsPage";
 import LandingPage from "./pages/authentication/LandingPage";
@@ -84,9 +84,9 @@ registerGroupAppRoutes({
       allowedRoles: ["admin"],
     },
     {
-      path: "activity-logs",
-      element: <ActivityLogsPage />,
-      label: "Activity Logs",
+      path: "audit-logs",
+      element: <AuditLogsPage />,
+      label: "Audit Logs",
       iconClassName: "fa-solid fa-clock-rotate-left text-lg",
       allowedRoles: ["admin"],
     },

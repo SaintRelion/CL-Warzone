@@ -56,6 +56,7 @@ const MoreMenu = ({ subscription }: { subscription: UserSubscription }) => {
           {subscription.status === "pending" && (
             <li>
               <button
+                disabled={updating}
                 onClick={() => updateStatus(subscription, "active")}
                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-green-700 hover:bg-green-50"
               >
@@ -68,6 +69,7 @@ const MoreMenu = ({ subscription }: { subscription: UserSubscription }) => {
             <>
               <li>
                 <button
+                  disabled={updating}
                   onClick={() => updateStatus(subscription, "suspended")}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-yellow-50"
                 >
@@ -77,6 +79,7 @@ const MoreMenu = ({ subscription }: { subscription: UserSubscription }) => {
 
               <li>
                 <button
+                  disabled={updating}
                   onClick={() => updateStatus(subscription, "cancelled")}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
                 >
@@ -90,6 +93,7 @@ const MoreMenu = ({ subscription }: { subscription: UserSubscription }) => {
             <>
               <li>
                 <button
+                  disabled={updating}
                   onClick={() => updateStatus(subscription, "active")}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-green-50"
                 >
@@ -99,6 +103,7 @@ const MoreMenu = ({ subscription }: { subscription: UserSubscription }) => {
 
               <li>
                 <button
+                  disabled={updating}
                   onClick={() => updateStatus(subscription, "cancelled")}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
                 >

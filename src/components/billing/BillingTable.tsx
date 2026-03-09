@@ -44,10 +44,7 @@ const BillingTable = ({
     const term = searchTerm?.toLowerCase();
 
     return userBillings.filter((b) => {
-      const matchesSearch =
-        !term ||
-        b.customer.toLowerCase().includes(term) ||
-        b.user.toString().includes(term);
+      const matchesSearch = !term || b.customer.toLowerCase().includes(term);
 
       const toDateBill = toDate(b.created_at);
 
@@ -151,13 +148,15 @@ const BillingTable = ({
       id: "actions",
       header: "",
       cell: ({ row }) => {
-        const bill = row.original;
+        const userBill = row.original;
 
         const paymentHistory = paymentHistories.find(
-          (h) => h.bill === bill.id && h.status === "completed",
+          (h) => h.bill === userBill.id && h.status === "completed",
         );
 
-        return <BillingActions bill={bill} paymentHistory={paymentHistory} />;
+        return (
+          <BillingActions userBill={userBill} paymentHistory={paymentHistory} />
+        );
       },
     },
   ];

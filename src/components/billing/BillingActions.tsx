@@ -5,10 +5,10 @@ import { formatReadableDate } from "@saintrelion/time-functions";
 import { HandCoins, History, Receipt } from "lucide-react";
 
 const BillingActions = ({
-  bill,
+  userBill,
   paymentHistory,
 }: {
-  bill: UserBillingInfo;
+  userBill: UserBillingInfo;
   paymentHistory: PaymentHistory | undefined;
 }) => {
   const printReceipt = useBillingStore((s) => s.printReceipt);
@@ -18,15 +18,17 @@ const BillingActions = ({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {/* Print Receipt Button - Only for Paid Payments */}
-      {bill.status === "paid" && (
+      {userBill.status === "paid" && (
         <button
           onClick={() => {
             if (!paymentHistory) {
-              alert("No paid payment found for this bill. Bill ID: " + bill.id);
+              alert(
+                "No paid payment found for this bill. Bill ID: " + userBill.id,
+              );
               return;
             }
 
-            printReceipt(bill, {
+            printReceipt(userBill, {
               ...paymentHistory,
               created_at: formatReadableDate(paymentHistory.created_at),
             });
@@ -39,9 +41,9 @@ const BillingActions = ({
       )}
 
       {/* Cashiering Button - Only for Pending Payments */}
-      {bill.status === "unpaid" && (
+      {userBill.status === "unpaid" && (
         <button
-          onClick={() => processPayment(bill)}
+          onClick={() => processPayment(userBill)}
           title="Process Payment - Collect payment from customer"
           className="rounded-lg bg-green-600 p-2 text-white shadow transition-all duration-150 hover:bg-green-700 focus:ring-2 focus:ring-green-400 focus:ring-offset-2 focus:outline-none active:scale-95"
         >
@@ -52,7 +54,7 @@ const BillingActions = ({
       {/* View Payment History Button */}
       <button
         onClick={() => {
-          viewPaymentHistory(bill);
+          viewPaymentHistory(userBill);
         }}
         title="View Payment History - See all payments from this customer"
         className="rounded-lg bg-blue-600 p-2 text-white shadow transition-all duration-150 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:outline-none active:scale-95"

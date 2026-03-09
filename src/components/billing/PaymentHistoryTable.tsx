@@ -11,7 +11,6 @@ import { DataTable } from "../general/DataTable";
 import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { toast } from "@saintrelion/notifications";
 import { useResourceLocked } from "@saintrelion/data-access-layer";
-import { useActivityLogger } from "@/lib/activity-logger";
 
 const PaymentHistoryTable = ({
   paymentHistories,
@@ -22,7 +21,6 @@ const PaymentHistoryTable = ({
   const selectedBillingInfo = useBillingStore((s) => s.selectedBillingInfo);
   const clearAll = useBillingStore((s) => s.clearAll);
 
-  const { log } = useActivityLogger();
   const { useUpdate: updatePaymentHistory } = useResourceLocked<
     never,
     never,
@@ -34,7 +32,8 @@ const PaymentHistoryTable = ({
   const userPaymentHistories = sortByTime(
     paymentHistories.filter(
       (p) =>
-        p.user == selectedBillingInfo.user && p.bill == selectedBillingInfo.id,
+        p.user == selectedBillingInfo.user.id &&
+        p.bill == selectedBillingInfo.id,
     ),
     "created_at",
   );
@@ -47,13 +46,6 @@ const PaymentHistoryTable = ({
       payload: {
         status: "completed",
       },
-    });
-
-    await log({
-      action: "update",
-      category: "billing",
-      description: `Completed Payment Id: ${payment.id} for ${selectedBillingInfo.customer}`,
-      status: "success",
     });
 
     toast.success("Payment marked as completed");
@@ -71,17 +63,6 @@ const PaymentHistoryTable = ({
         status: "voided",
         voided_at: new Date().toISOString(),
         voided_reason: reason,
-      },
-    });
-
-    await log({
-      action: "update",
-      category: "billing",
-      description: `Voided Payment Id: ${payment.id} for ${selectedBillingInfo.customer}`,
-      status: "success",
-      additional_info: {
-        amount: payment.amount,
-        planName: selectedBillingInfo.plan.name,
       },
     });
 
@@ -284,7 +265,7 @@ const PaymentHistoryTable = ({
               {paymentHistories
                 .filter(
                   (p) =>
-                    p.user === selectedBillingInfo.user &&
+                    p.user === selectedBillingInfo.user.id &&
                     p.bill == selectedBillingInfo.id &&
                     p.status === "completed",
                 )

@@ -131,15 +131,6 @@ const ReportTable = () => {
         );
       },
     },
-    {
-      accessorKey: "payment_method",
-      header: "Payment Method",
-      cell: ({ getValue }) => (
-        <span className="text-sm text-gray-600">
-          {getValue<string>() || "-"}
-        </span>
-      ),
-    },
   ];
 
   if (isGeneratingReport) {

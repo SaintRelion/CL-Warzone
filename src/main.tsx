@@ -19,8 +19,8 @@ import "@/repositories/SubscriptionRepo";
 import "@/repositories/BillingRepo";
 import "@/repositories/PaymentHistoryRepo";
 import "@/repositories/SupportTicketRepo";
-import "@/repositories/ActivityLogRepo";
 import "@/repositories/OTPRepo";
+import "@/repositories/ReportRepo";
 
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(

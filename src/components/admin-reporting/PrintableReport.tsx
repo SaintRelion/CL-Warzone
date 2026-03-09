@@ -1,10 +1,7 @@
-import { useActivityLogger } from "@/lib/activity-logger";
 import { useAdminReportingStore } from "@/stores/admin-reporting/useAdminReportingStore";
 
 const PrintableReport = () => {
-  const { log } = useActivityLogger();
   const report = useAdminReportingStore((s) => s.report);
-
   if (!report) return <p className="text-gray-500">No report available.</p>;
 
   return (
@@ -57,18 +54,6 @@ const PrintableReport = () => {
       <div className="mt-4 flex justify-end print:hidden">
         <button
           onClick={() => {
-            // Log view/print action
-            log({
-              action: "other",
-              category: "reports",
-              description: `Viewed printable payment report for ${report.month + 1}/${report.year}`,
-              additional_info: {
-                reportType: "monthly-payment-report",
-                month: String(report.month),
-                year: String(report.year),
-              },
-            });
-
             window.print();
           }}
           className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"

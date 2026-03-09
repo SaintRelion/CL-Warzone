@@ -1,5 +1,6 @@
 import type { Plan } from "./Plan";
 import type { UserSubscription } from "./subscription";
+import type { User } from "./user";
 
 export interface BillingInfo {
   id: string;
@@ -23,7 +24,7 @@ export interface CreateBilling {
 
 export interface UserBillingInfo {
   id: string;
-  user: string;
+  user: User;
   customer: string;
   plan: Plan;
   subscription: UserSubscription;

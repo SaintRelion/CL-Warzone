@@ -9,9 +9,6 @@ export interface MonthlyPaymentReportItem {
   total_credits: number;
   status: string;
   plan: string;
-  payment_date: string;
-  payment_method: string;
-  transaction_ref: string;
 }
 
 export interface MonthlyPaymentReport {

@@ -117,18 +117,6 @@ const AccountPage = () => {
           ))}
         </div>
       </div>
-
-      {/* DANGER ZONE */}
-      <div className="rounded-xl border border-red-200 bg-red-50 p-6">
-        <h4 className="text-sm font-semibold text-red-700">Danger Zone</h4>
-        <p className="mt-1 text-sm text-red-600">
-          Deleting your account is permanent and cannot be undone.
-        </p>
-
-        <button className="mt-4 rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-red-700">
-          Delete Account
-        </button>
-      </div>
     </RenderForm>
   );
 };
