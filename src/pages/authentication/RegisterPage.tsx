@@ -6,13 +6,12 @@ import {
   RenderFormButton,
   RenderFormField,
 } from "@saintrelion/forms";
+import { serviceAreas } from "@/constants";
 
 const RegisterPage = () => {
   const auth = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const serviceAreas = ["katipunan", "roxas", "piñan", "osmeña", "polanco"];
 
   const handleRegister = async (data: Record<string, string>) => {
     setError(null);

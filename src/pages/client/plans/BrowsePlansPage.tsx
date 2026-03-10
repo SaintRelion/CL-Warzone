@@ -217,29 +217,10 @@ const BrowsePlansPage = () => {
                           <span>₱{viewedPlan?.price}</span>
                         </div>
 
-                        <div className="flex justify-between">
-                          <span>Installation Fee</span>
-                          <span>₱1,500</span>
-                        </div>
-
                         <hr className="my-3" />
-
-                        <div className="flex justify-between font-semibold">
-                          <span>Monthly Total</span>
-                          <span>₱{Number(viewedPlan?.price) - 150}</span>
-                        </div>
-
-                        <div className="flex justify-between text-lg font-bold text-indigo-700">
-                          <span>First Month Total</span>
-                          <span>₱{Number(viewedPlan?.price) + 1500 - 150}</span>
-                        </div>
                       </div>
 
                       <div className="mt-3 space-y-1 text-xs text-gray-600">
-                        <p>
-                          <span className="fa-solid fa-circle-dot mr-1" />{" "}
-                          Installation: To be scheduled
-                        </p>
                         <p>
                           <span className="fa-solid fa-circle-dot mr-1" />{" "}
                           Service Area: {user.service_area.toUpperCase()}

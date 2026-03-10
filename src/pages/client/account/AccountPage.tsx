@@ -15,8 +15,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import { serviceAreas } from "@/constants";
 
 const AccountPage = () => {
   const { refreshUser } = useAuth();
@@ -145,12 +145,16 @@ const AccountPage = () => {
             {[
               { label: "First Name", name: "first_name" },
               { label: "Last Name", name: "last_name" },
-              { label: "Email Address", name: "email" },
+              { label: "Email Address", name: "email", full: true },
               { label: "Street Address", name: "street_address", full: true },
               { label: "Phone Number", name: "phone_number" },
               { label: "City / Municipality", name: "city_municipality" },
               { label: "ZIP Code", name: "zip_code" },
-              { label: "Service Area", name: "service_area" },
+              {
+                label: "Service Area",
+                name: "service_area",
+                options: serviceAreas,
+              },
             ].map((field) => (
               <div
                 key={field.name}
@@ -170,7 +174,15 @@ const AccountPage = () => {
                   </div>
                 ) : (
                   <RenderFormField
-                    field={{ name: field.name, type: "text" }}
+                    field={
+                      field.options
+                        ? {
+                            name: field.name,
+                            type: "select",
+                            options: field.options,
+                          }
+                        : { name: field.name, type: "text" }
+                    }
                     defaultValue={
                       information[
                         field.name as keyof typeof information
@@ -189,15 +201,6 @@ const AccountPage = () => {
           Change Password Modal
       ============================== */}
       <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
-        <DialogTrigger asChild>
-          <button
-            className="rounded-lg border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50"
-            onClick={() => setShowPasswordModal(true)}
-          >
-            Change Password
-          </button>
-        </DialogTrigger>
-
         <DialogContent className="bg-white sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
