@@ -43,43 +43,45 @@ export async function apiRequest<T>(
           headers,
         }));
 
-    let body = null;
+    let body;
+
     try {
       body = await res.json();
     } catch {
-      body = null;
+      body = await res.text(); // fallback to text if not JSON
     }
 
     if (!res.ok) {
-      // Priority 1: Your standard { error: "..." }
-      if (body?.error) {
-        throw new Error(body.error);
+      // Show error toast using body.detail if present
+      let toastMessage = "Request Failed";
+      if (
+        body &&
+        typeof body === "object" &&
+        "detail" in body &&
+        typeof body.detail === "string"
+      ) {
+        toastMessage = body.detail;
       }
+      toast.error(toastMessage);
 
-      // Priority 2: If backend returns random format
-      if (typeof body === "object" && body !== null) {
-        throw new Error(JSON.stringify(body));
-      }
-
-      // Priority 3: If plain text
-      if (typeof body === "string") {
-        throw new Error(body);
-      }
-
-      // Priority 4: Fallback generic
-      throw new Error(
-        "body was null for some reason, failed to read response.json",
-      );
+      // Throw for upstream handling
+      throw new Error(`${"Request Failed"}: ${JSON.stringify(body)}`);
     }
 
-    // 204 No Content
-    if (res.status === 204) return {};
+    // Show success toast if body.detail exists
+    if (
+      body &&
+      typeof body === "object" &&
+      "detail" in body &&
+      typeof body.detail === "string"
+    ) {
+      toast.success(body.detail);
+    }
 
     return body;
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
-
-    toast.error(message || "Unknown error");
+    console.error(message);
     throw err;
   }
 }

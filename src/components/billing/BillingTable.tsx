@@ -166,7 +166,7 @@ const BillingTable = ({
       {/* FILTERS AND SEARCH - MINIMALIST */}
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
         {/* Search */}
-        <div className="relative min-w-62.5 flex-1">
+        <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <input
             type="text"

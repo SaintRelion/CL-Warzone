@@ -168,12 +168,12 @@ const TicketsTable = ({ tickets }: { tickets: SupportTicket[] }) => {
           />
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 max-md:flex-col">
           <Filter className="h-4 w-4 text-gray-400" />
           <select
             value={ticketFilter}
             onChange={(e) => setTicketFilter(e.target.value as TicketFilter)}
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           >
             <option value="all">All Status</option>
             <option value="open">Open</option>
@@ -186,7 +186,7 @@ const TicketsTable = ({ tickets }: { tickets: SupportTicket[] }) => {
             onChange={(e) =>
               setTicketPriorityFilter(e.target.value as TicketPriorityFilter)
             }
-            className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
           >
             <option value="all">All Priority</option>
             <option value="urgent">Urgent</option>

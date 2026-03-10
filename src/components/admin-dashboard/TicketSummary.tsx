@@ -4,7 +4,7 @@ import { AlertCircle, Activity } from "lucide-react";
 const TicketSummary = ({ tickets }: { tickets: SupportTicket[] }) => {
   const totalTickets = tickets?.length || 0;
   const openTickets =
-    tickets?.filter((t) => t.status !== "Resolved" && t.status !== "Closed")
+    tickets?.filter((t) => t.status !== "resolved" && t.status !== "closed")
       .length || 0;
 
   return (

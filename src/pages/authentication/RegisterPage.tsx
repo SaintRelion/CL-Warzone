@@ -19,18 +19,14 @@ const RegisterPage = () => {
     setIsSubmitting(true);
 
     try {
-      await auth.register(
-        { ...data, roles: ["client"] },
-        data.password
-      );
-    } catch (err: any) {
-      setError(err?.message || "Registration failed.");
+      await auth.register({ ...data, roles: ["client"] }, data.password);
+    } catch (err) {
+      const error = err as Record<string, string>;
+      setError(error.message || "Registration failed.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
