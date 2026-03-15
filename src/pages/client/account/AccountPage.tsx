@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { serviceAreas } from "@/constants";
+import { municipalityOptions, serviceAreas, zipcodeMap } from "@/constants";
 
 const AccountPage = () => {
   const { refreshUser } = useAuth();
@@ -29,27 +29,9 @@ const AccountPage = () => {
   const [editMode, setEditMode] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
-  const information: Record<string, string | undefined> = {
-    first_name: user.first_name,
-    last_name: user.last_name,
-    email: user.email,
-    phone_number: user.phone_number,
-    street_address: user.street_address,
-    city_municipality: user.city_municipality,
-    zip_code: user.zip_code,
-    service_area: user.service_area,
-  };
-
-  const toSentenceCase = (text?: string) => {
-    if (!text) return "—";
-
-    return text
-      .trim()
-      .toLowerCase()
-      .split(" ")
-      .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : ""))
-      .join(" ");
-  };
+  const [zipCode, setZipCode] = useState(
+    user.city_municipality ? zipcodeMap[user.city_municipality] : "",
+  );
 
   /** Handle personal info update (password excluded) */
   async function handleSubmit(data: Record<string, string>) {
@@ -142,57 +124,105 @@ const AccountPage = () => {
 
           {/* CONTENT */}
           <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2">
-            {[
-              { label: "First Name", name: "first_name" },
-              { label: "Last Name", name: "last_name" },
-              { label: "Email Address", name: "email", full: true },
-              { label: "Street Address", name: "street_address", full: true },
-              { label: "Phone Number", name: "phone_number" },
-              { label: "City / Municipality", name: "city_municipality" },
-              { label: "ZIP Code", name: "zip_code" },
-              {
-                label: "Service Area",
+            {/* First Name */}
+            <RenderFormField
+              field={{
+                label: "First Name *",
+                type: "text",
+                name: "first_name",
+                disabled: !editMode,
+              }}
+              defaultValue={user.first_name}
+              inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+            />
+
+            {/* Last Name */}
+            <RenderFormField
+              field={{
+                label: "Last Name *",
+                type: "text",
+                name: "last_name",
+                disabled: !editMode,
+              }}
+              defaultValue={user.last_name}
+              inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+            />
+
+            {/* Email */}
+            <RenderFormField
+              field={{
+                label: "Email Address *",
+                type: "email",
+                name: "email",
+                disabled: !editMode,
+              }}
+              defaultValue={user.email}
+              inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+            />
+
+            {/* Street Address */}
+            <RenderFormField
+              field={{
+                label: "Street Address *",
+                type: "text",
+                name: "street_address",
+                disabled: !editMode,
+              }}
+              defaultValue={user.street_address}
+              inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+            />
+
+            {/* Phone Number */}
+            <RenderFormField
+              field={{
+                label: "Phone Number *",
+                type: "text",
+                name: "phone_number",
+                disabled: !editMode,
+              }}
+              defaultValue={user.phone_number}
+              inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+            />
+
+            {/* City / Municipality */}
+            <RenderFormField
+              field={{
+                label: "City / Municipality *",
+                type: "select",
+                name: "city_municipality",
+                options: municipalityOptions,
+                disabled: !editMode,
+                onValueChange: (value) =>
+                  setZipCode(zipcodeMap[value as string]),
+              }}
+              defaultValue={user.city_municipality}
+              inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+            />
+
+            {/* ZIP Code */}
+            <RenderFormField
+              field={{
+                label: "ZIP Code *",
+                type: "text",
+                name: "zip_code",
+                disabled: true, // Always disabled since it’s auto-filled
+              }}
+              defaultValue={zipCode}
+              inputClassName="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+            />
+
+            {/* Service Area */}
+            <RenderFormField
+              field={{
+                label: "Service Area *",
+                type: "select",
                 name: "service_area",
                 options: serviceAreas,
-              },
-            ].map((field) => (
-              <div
-                key={field.name}
-                className={field.full ? "sm:col-span-2" : ""}
-              >
-                <p className="mb-1 text-xs font-medium tracking-wide text-gray-500 uppercase">
-                  {field.label}
-                </p>
-
-                {!editMode ? (
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-base text-gray-900">
-                    {toSentenceCase(
-                      information[
-                        field.name as keyof typeof information
-                      ] as string,
-                    )}
-                  </div>
-                ) : (
-                  <RenderFormField
-                    field={
-                      field.options
-                        ? {
-                            name: field.name,
-                            type: "select",
-                            options: field.options,
-                          }
-                        : { name: field.name, type: "text" }
-                    }
-                    defaultValue={
-                      information[
-                        field.name as keyof typeof information
-                      ] as string
-                    }
-                    inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
-                  />
-                )}
-              </div>
-            ))}
+                disabled: !editMode,
+              }}
+              defaultValue={user.service_area}
+              inputClassName="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-300"
+            />
           </div>
         </div>
       </RenderForm>

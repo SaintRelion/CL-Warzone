@@ -1,13 +1,18 @@
 import type { SupportTicket } from "@/models/SupportTicket";
-import { useResourceLocked } from "@saintrelion/data-access-layer";
+import {
+  type Paginated,
+  useResourceLocked,
+} from "@saintrelion/data-access-layer";
 import KPICards from "@/components/support-tickets/KPICards";
 import TicketsTable from "@/components/support-tickets/TicketsTable";
 import ViewTicket from "@/components/support-tickets/ViewTicket";
 
 const AdminSupportTicketsPage = () => {
   const { useList: getTickets } =
-    useResourceLocked<SupportTicket>("supportticket");
-  const tickets = getTickets().data;
+    useResourceLocked<Paginated<SupportTicket>>("supportticket");
+  const tickets = getTickets({ filters: { nopage: true } }).data;
+
+  if (!tickets) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6">
@@ -22,10 +27,10 @@ const AdminSupportTicketsPage = () => {
       </div> */}
 
       {/* Stats Cards */}
-      <KPICards tickets={tickets} />
+      <KPICards tickets={tickets.results} />
 
       {/* Tickets Table */}
-      <TicketsTable tickets={tickets} />
+      <TicketsTable tickets={tickets.results} />
 
       {/* View Ticket Modal */}
       <ViewTicket />

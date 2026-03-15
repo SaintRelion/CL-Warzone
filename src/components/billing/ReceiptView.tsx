@@ -85,7 +85,7 @@ const ReceiptView = () => {
             Internet Services Provider
           </div>
           <div className="text-xs text-gray-600">
-            San Antonio, Looy, Katipunan, Dipolog, Zamboanga del Norte
+            San Antonio, Looy, Katipunan, Zamboanga del Norte
           </div>
         </div>
 
@@ -127,7 +127,10 @@ const ReceiptView = () => {
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span style={{ textAlign: "left" }}>Name:</span>
             <span className="font-bold" style={{ textAlign: "right" }}>
-              {selectedReceipt.customer}
+              {selectedReceipt.customer
+                ? selectedReceipt.customer.charAt(0).toUpperCase() +
+                  selectedReceipt.customer.slice(1)
+                : ""}
             </span>
           </div>
         </div>
@@ -211,7 +214,7 @@ const ReceiptView = () => {
             </div>
 
             {/* CASH → CHANGE */}
-            {selectedReceipt.method === "Cash" &&
+            {selectedReceipt.method === "CASH" &&
               Number(selectedReceipt.change) > 0 && (
                 <div className="flex justify-between">
                   <span>Change Given:</span>
@@ -222,7 +225,7 @@ const ReceiptView = () => {
               )}
 
             {/* NON-CASH → CREDIT */}
-            {selectedReceipt.method !== "Cash" &&
+            {selectedReceipt.method !== "CASH" &&
               Number(selectedReceipt.credit) > 0 && (
                 <div className="flex justify-between">
                   <span>Credit Added:</span>
@@ -285,13 +288,6 @@ const ReceiptView = () => {
           <div className="mb-1">Thank you for your payment!</div>
           <div className="mb-1 font-semibold">Please keep this receipt</div>
           <div className="text-xs text-gray-600">for your records</div>
-        </div>
-
-        {/* FOOTER INFO */}
-        <div className="text-center text-xs text-gray-600">
-          <div className="mb-1">For inquiries, please contact:</div>
-          <div>📞 (02) XXXX-XXXX</div>
-          <div>📧 support@warzone.ph</div>
         </div>
       </div>
 

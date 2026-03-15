@@ -1,19 +1,18 @@
 import { Activity, AlertCircle, DollarSign, Users } from "lucide-react";
 import { StatCard } from "../general/StatCard";
 import type { UserBillingInfo } from "@/models/Billing";
-import type { SupportTicket } from "@/models/SupportTicket";
-import type { User } from "@/models/user";
 
 const KPICard = ({
-  users,
+  totalUsers,
   userBillings,
-  tickets,
+  totalTickets,
+  openTickets,
 }: {
-  users: User[];
+  totalUsers: number;
   userBillings: UserBillingInfo[];
-  tickets: SupportTicket[];
+  totalTickets: number;
+  openTickets: number;
 }) => {
-  const totalUsers = users.length;
   const totalRevenue =
     userBillings
       ?.filter((b) => b.status === "paid")
@@ -23,11 +22,6 @@ const KPICard = ({
         );
         return sum + (isNaN(amount) ? 0 : amount);
       }, 0) || 0;
-
-  const totalTickets = tickets.length;
-  const openTickets = tickets.filter(
-    (t) => t.status !== "resolved" && t.status !== "closed",
-  ).length;
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">

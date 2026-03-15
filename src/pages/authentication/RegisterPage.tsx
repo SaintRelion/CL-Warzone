@@ -6,12 +6,14 @@ import {
   RenderFormButton,
   RenderFormField,
 } from "@saintrelion/forms";
-import { serviceAreas } from "@/constants";
+import { municipalityOptions, serviceAreas, zipcodeMap } from "@/constants";
 
 const RegisterPage = () => {
   const auth = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [zipCode, setZipCode] = useState("");
 
   const handleRegister = async (data: Record<string, string>) => {
     setError(null);
@@ -121,9 +123,11 @@ const RegisterPage = () => {
               <RenderFormField
                 field={{
                   label: "City/Municipality *",
-                  type: "text",
+                  type: "select",
                   name: "city_municipality",
-                  placeholder: "City/Municipality",
+                  options: municipalityOptions,
+                  onValueChange: (value) =>
+                    setZipCode(zipcodeMap[value as string]),
                 }}
               />
 
@@ -141,8 +145,9 @@ const RegisterPage = () => {
                   label: "ZIP Code *",
                   type: "text",
                   name: "zip_code",
-                  placeholder: "10001",
+                  disabled: true,
                 }}
+                defaultValue={zipCode}
               />
 
               <RenderFormField

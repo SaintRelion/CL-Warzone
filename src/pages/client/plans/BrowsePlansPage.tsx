@@ -16,7 +16,10 @@ import type {
   Subscription,
 } from "@/models/subscription";
 import type { Plan } from "@/models/Plan";
-import { useResourceLocked } from "@saintrelion/data-access-layer";
+import {
+  useResourceLocked,
+  type Paginated,
+} from "@saintrelion/data-access-layer";
 import type { UserBillingInfo } from "@/models/Billing";
 import type { User } from "@/models/user";
 
@@ -24,7 +27,7 @@ const BrowsePlansPage = () => {
   const user = useCurrentUser<User>();
   const [viewedPlan, setViewedPlan] = useState<Plan | null>(null);
 
-  const { useList: getPlans } = useResourceLocked<Plan>("plan", {
+  const { useList: getPlans } = useResourceLocked<Paginated<Plan>>("plan", {
     showToast: false,
   });
 
@@ -35,36 +38,17 @@ const BrowsePlansPage = () => {
     useInsert: insertSubscription,
     useUpdate: updateSubscription,
   } = useResourceLocked<
-    Subscription,
+    Paginated<Subscription>,
     CreateSubscription,
     UpdateSubscriptionStatus
   >("subscription");
 
   const { useList: getUserBilling } =
-    useResourceLocked<UserBillingInfo>("userbilling");
+    useResourceLocked<Paginated<UserBillingInfo>>("userbilling");
 
   const currentSubscriptions = getSubscription({
     filters: { user: user.id },
   }).data;
-
-  const openSubscription =
-    currentSubscriptions.find((sub) =>
-      ["pending", "active", "suspended"].includes(sub.status),
-    ) ?? null;
-
-  const currentPlan = openSubscription
-    ? plans.find((p) => p.id == openSubscription.plan)
-    : null;
-
-  const myActiveBilling = getUserBilling({
-    filters: {
-      user: user.id,
-      subscription: openSubscription ? openSubscription.id : -1,
-    },
-  }).data;
-
-  const hasUnpaidBill =
-    myActiveBilling.length > 0 && myActiveBilling[0].status === "unpaid";
 
   async function handleConfirmPlan(confirmedPlan: Plan) {
     if (confirmedPlan != null) {
@@ -83,6 +67,29 @@ const BrowsePlansPage = () => {
     }
   }
 
+  const openSubscription =
+    currentSubscriptions?.results.find((sub) =>
+      ["pending", "active", "suspended"].includes(sub.status),
+    ) ?? null;
+
+  const myActiveBilling = getUserBilling({
+    filters: {
+      user: user.id,
+      subscription: openSubscription ? openSubscription.id : -1,
+    },
+  }).data;
+
+  if (!plans || !currentSubscriptions || !myActiveBilling)
+    return <div>Loading...</div>;
+
+  const currentPlan = openSubscription
+    ? plans.results.find((p) => p.id == openSubscription.plan)
+    : null;
+
+  const hasUnpaidBill =
+    myActiveBilling.results.length > 0 &&
+    myActiveBilling.results[0].status === "unpaid";
+
   return (
     <div>
       <h2 className="mb-2 text-3xl font-bold text-gray-900 md:text-4xl">
@@ -92,7 +99,7 @@ const BrowsePlansPage = () => {
         Choose the perfect plan for your needs
       </p>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-2">
-        {plans.map((plan) => {
+        {plans.results.map((plan) => {
           const disableButton =
             insertSubscription.isLocked ||
             hasUnpaidBill ||

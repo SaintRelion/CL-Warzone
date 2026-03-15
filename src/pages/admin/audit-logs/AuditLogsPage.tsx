@@ -5,6 +5,7 @@ import { BASE_API } from "@/sr-config";
 import { useEffect, useState } from "react";
 import AuditLogsTable from "@/components/activity-logs/AuditLogsTable";
 import ViewAuditLogs from "@/components/activity-logs/ViewAuditLogs";
+import type { Paginated } from "@saintrelion/data-access-layer";
 
 const getAuditLogs = async (params?: {
   action?: string;
@@ -14,6 +15,7 @@ const getAuditLogs = async (params?: {
   search?: string;
   ordering?: string;
   page?: number;
+  nopage?: boolean;
 }) => {
   const query = params
     ? `?${new URLSearchParams(
@@ -35,12 +37,13 @@ const getAuditLogs = async (params?: {
 };
 
 const AuditLogsPage = () => {
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [auditLogs, setAuditLogs] = useState<Paginated<AuditLog>>();
 
   useEffect(() => {
     const fetchLogs = async () => {
       const result = await getAuditLogs({
         ordering: "-created_at",
+        nopage: true,
       });
 
       setAuditLogs(result);
@@ -48,6 +51,8 @@ const AuditLogsPage = () => {
 
     fetchLogs();
   }, []);
+
+  if (!auditLogs) return <div>Loading...</div>;
 
   return (
     <div className="space-y-4 p-4 md:space-y-6 md:p-6">
@@ -63,10 +68,10 @@ const AuditLogsPage = () => {
       </div>
 
       {/* KPI Cards */}
-      <KPICard auditLogs={auditLogs} />
+      <KPICard auditLogs={auditLogs.results} />
 
       {/* Table */}
-      <AuditLogsTable auditLogs={auditLogs} />
+      <AuditLogsTable auditLogs={auditLogs.results} />
 
       {/* Details Modal */}
       <ViewAuditLogs />

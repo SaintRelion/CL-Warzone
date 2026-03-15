@@ -8,6 +8,7 @@ export interface MonthlyPaymentReportItem {
   total_change_given_back: number;
   total_credits: number;
   status: string;
+  overdue: string;
   plan: string;
 }
 

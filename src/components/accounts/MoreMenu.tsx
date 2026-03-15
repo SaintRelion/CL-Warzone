@@ -116,7 +116,7 @@ const MoreMenu = ({ user }: { user: User }) => {
                 onClick={() => updateStatus(user, "active")}
                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-green-700 hover:bg-green-50"
               >
-                Reactivate user (restore access)
+                Activate user (restore access)
               </button>
             </li>
           )}

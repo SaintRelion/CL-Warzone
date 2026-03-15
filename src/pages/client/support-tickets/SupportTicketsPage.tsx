@@ -1,38 +1,54 @@
 import type { SupportTicket, CreateTicket } from "@/models/SupportTicket";
 import type { User } from "@/models/user";
 import { useCurrentUser } from "@saintrelion/auth-lib";
-import { useResourceLocked } from "@saintrelion/data-access-layer";
+import {
+  useResourceLocked,
+  type Paginated,
+} from "@saintrelion/data-access-layer";
 import { sortByTime } from "@saintrelion/time-functions";
 import { useState } from "react";
+
+const ISSUE_PRIORITY_MAP: Record<string, string> = {
+  "Slow Internet Speed": "low",
+
+  "Router/Modem Issue": "medium",
+  Others: "medium",
+  Activation: "medium",
+
+  "Intermittent Connection": "high",
+  "Billing Inquiry": "high",
+  "High Latency/Ping": "high",
+
+  "No Internet Connection": "urgent",
+  "Frequent Disconnections": "urgent",
+};
 
 const SupportTicketsPage = () => {
   const user = useCurrentUser<User>();
 
   const { useList: getMyTickets, useInsert: insertTicket } = useResourceLocked<
-    SupportTicket,
+    Paginated<SupportTicket>,
     CreateTicket,
     never
   >("supportticket");
 
-  const myTickets = sortByTime(
-    getMyTickets({
-      filters: {
-        user: user.id,
-      },
-    }).data,
-    "created_at",
-  );
+  const tickets = getMyTickets({
+    filters: {
+      user: user.id,
+    },
+  }).data;
 
   /* ===================== FORM STATE ===================== */
   const [issueType, setIssueType] = useState("");
   const [service, setService] = useState("Home Fiber");
-  const [priority, setPriority] = useState("medium");
   const [description, setDescription] = useState("");
 
   /* ===================== CREATE TICKET ===================== */
   const createTicket = async () => {
     if (!issueType || !description)
       return alert("Please complete all required fields.");
+
+    const priority = ISSUE_PRIORITY_MAP[issueType] || "medium";
 
     const myTicket = {
       user: user.id,
@@ -48,7 +64,6 @@ const SupportTicketsPage = () => {
 
     setIssueType("");
     setService("Home Fiber");
-    setPriority("medium");
     setDescription("");
   };
 
@@ -84,17 +99,21 @@ const SupportTicketsPage = () => {
     }
   };
 
+  if (!tickets) return <div>Loading...</div>;
+
+  const sortedTickets = sortByTime(tickets.results, "created_at");
+
   return (
     <div className="space-y-10 p-4 sm:p-6">
       {/* ===================== HEADER ===================== */}
-      {/* <div>
+      <div>
         <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
           Internet Support Tickets
         </h2>
         <p className="text-sm text-gray-600">
           Report internet problems, service issues, and customer inquiries
         </p>
-      </div> */}
+      </div>
 
       {/* ===================== CREATE TICKET ===================== */}
       <div className="rounded-xl bg-white p-6 shadow">
@@ -128,17 +147,6 @@ const SupportTicketsPage = () => {
             <option>Wireless Broadband</option>
             <option>Mobile Data</option>
           </select>
-
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className="rounded border p-2"
-          >
-            <option value="low">Low Priority</option>
-            <option value="medium">Medium Priority</option>
-            <option value="high">High Priority</option>
-            <option value="urgent">Urgent</option>
-          </select>
         </div>
 
         <textarea
@@ -160,8 +168,8 @@ const SupportTicketsPage = () => {
 
       {/* ===================== TICKET LIST ===================== */}
       <div className="space-y-4">
-        {myTickets.length > 0 ? (
-          myTickets.map((t) => (
+        {sortedTickets.length > 0 ? (
+          sortedTickets.map((t) => (
             <div
               key={t.id}
               className="rounded-xl bg-white p-6 shadow hover:shadow-md"

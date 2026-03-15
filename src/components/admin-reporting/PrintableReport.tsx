@@ -28,6 +28,7 @@ const PrintableReport = () => {
               <th className="border px-2 py-1">Billing Amount</th>
               <th className="border px-2 py-1">Paid Amount</th>
               <th className="border px-2 py-1">Status</th>
+              <th className="border px-2 py-1">Overdue</th>
             </tr>
           </thead>
           <tbody>
@@ -39,15 +40,20 @@ const PrintableReport = () => {
                 <td className="border px-2 py-1">{item.billing_amount}</td>
                 <td className="border px-2 py-1">{item.total_paid}</td>
                 <td className="border px-2 py-1">{item.status}</td>
+                <td className="border px-2 py-1">{item.overdue}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
+      <div className="mt-1 text-right text-xs italic print:text-black">
+        <p>Cut off for Overdue bills is on the 5th day</p>
+      </div>
+
       {/* Footer for totals / notes */}
       <div className="mt-6 text-right text-sm print:text-black">
-        <p>Total Records: {report.items.length}</p>
+        <p>Total Collection: {report.items.length}</p>
       </div>
 
       {/* Print Button */}

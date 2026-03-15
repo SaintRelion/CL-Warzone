@@ -4,7 +4,10 @@ import type {
   CreatePaymentHistory,
   PaymentHistory,
 } from "@/models/PaymentHistory";
-import { useResourceLocked } from "@saintrelion/data-access-layer";
+import {
+  useResourceLocked,
+  type Paginated,
+} from "@saintrelion/data-access-layer";
 import ReceiptView from "../../../components/billing/ReceiptView";
 import ProcessPayment from "@/components/billing/ProcessPayment";
 import PaymentHistoryTable from "@/components/billing/PaymentHistoryTable";
@@ -12,17 +15,24 @@ import KPICards from "@/components/billing/KPICards";
 import { sortByTime } from "@saintrelion/time-functions";
 
 const BillingPage = () => {
-  const { useList: getUserBilling } = useResourceLocked<UserBillingInfo>(
-    "userbilling",
-    { showToast: false },
-  );
+  const { useList: getUserBilling } = useResourceLocked<
+    Paginated<UserBillingInfo>
+  >("userbilling", { showToast: false });
   const { useList: getPaymentHistory } = useResourceLocked<
-    PaymentHistory,
+    Paginated<PaymentHistory>,
     CreatePaymentHistory
   >("paymenthistory", { showToast: false });
 
-  const userBilling = sortByTime(getUserBilling().data, "due_date");
-  const paymentHistories = getPaymentHistory().data || [];
+  const userBilling = getUserBilling().data;
+  const paymentHistories = getPaymentHistory().data;
+
+  if (!userBilling || !paymentHistories) return <div>Loading...</div>;
+
+  const sortedBilling = sortByTime(userBilling.results, "due_date");
+  const sortedPaymentHistories = sortByTime(
+    paymentHistories.results,
+    "created_at",
+  );
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -41,15 +51,15 @@ const BillingPage = () => {
 
         {/* SUMMARY CARDS and Filters */}
         <KPICards
-          userBillings={userBilling}
+          userBillings={sortedBilling}
           currentMonth={currentMonth}
           currentYear={currentYear}
         />
 
         {/* DATA TABLE - Improved UI */}
         <BillingTable
-          userBillings={userBilling}
-          paymentHistories={paymentHistories}
+          userBillings={sortedBilling}
+          paymentHistories={sortedPaymentHistories}
           currentMonth={currentMonth}
           currentYear={currentYear}
         />
@@ -61,7 +71,7 @@ const BillingPage = () => {
         <ProcessPayment paymentMethod="CASH" />
 
         {/* PAYMENT HISTORY MODAL */}
-        <PaymentHistoryTable paymentHistories={paymentHistories} />
+        <PaymentHistoryTable paymentHistories={sortedPaymentHistories} />
       </div>
     </div>
   );

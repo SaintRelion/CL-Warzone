@@ -6,7 +6,10 @@ import type { PaymentHistory } from "@/models/PaymentHistory";
 import type { UserSubscription } from "@/models/subscription";
 import { useBillingStore } from "@/stores/billing/useBillingStore";
 import { useCurrentUser } from "@saintrelion/auth-lib";
-import { useResourceLocked } from "@saintrelion/data-access-layer";
+import {
+  useResourceLocked,
+  type Paginated,
+} from "@saintrelion/data-access-layer";
 import { toast } from "@saintrelion/notifications";
 import {
   formatReadableDate,
@@ -19,37 +22,39 @@ const BillingAndPaymentsPage = () => {
   const user = useCurrentUser();
 
   /* ===================== PAYMENT HISTORY ===================== */
-  const { useList: getPaymentHistories } = useResourceLocked<PaymentHistory>(
-    "paymenthistory",
-    {
-      showToast: false,
-    },
-  );
+  const { useList: getPaymentHistories } = useResourceLocked<
+    Paginated<PaymentHistory>
+  >("paymenthistory", {
+    showToast: false,
+  });
 
-  const paymentHistories = sortByTime(
-    getPaymentHistories({
-      filters: {
-        user: user.id,
-      },
-    }).data,
-    "created_at",
-  );
+  const paymentHistories = getPaymentHistories({
+    filters: {
+      user: user.id,
+    },
+  }).data;
 
   /* ===================== SUBSCRIPTION ===================== */
-  const { useList: getUserSubscriptions } = useResourceLocked<UserSubscription>(
-    "usersubscription",
-    { showToast: false },
-  );
+  const { useList: getUserSubscriptions } = useResourceLocked<
+    Paginated<UserSubscription>
+  >("usersubscription", { showToast: false });
 
   const currentSubscriptions = getUserSubscriptions({
     filters: { user: user.id },
   }).data;
 
-  const currentSubscription =
-    currentSubscriptions.length > 0 ? currentSubscriptions[0] : null;
-
   const { useList: getUserBilling } =
-    useResourceLocked<UserBillingInfo>("userbilling");
+    useResourceLocked<Paginated<UserBillingInfo>>("userbilling");
+
+  const processPayment = useBillingStore((s) => s.processPayment);
+
+  /* ===================== UI STATE ===================== */
+  const [selectedPayment, setSelectedPayment] = useState("");
+
+  const currentSubscription =
+    currentSubscriptions && currentSubscriptions.results.length > 0
+      ? currentSubscriptions.results[0]
+      : null;
 
   const myActiveBilling = getUserBilling({
     filters: {
@@ -58,10 +63,16 @@ const BillingAndPaymentsPage = () => {
     },
   }).data;
 
-  const processPayment = useBillingStore((s) => s.processPayment);
+  if (!paymentHistories) return <div>Loading...</div>;
 
-  /* ===================== UI STATE ===================== */
-  const [selectedPayment, setSelectedPayment] = useState("");
+  const sortedActiveBilling = myActiveBilling
+    ? sortByTime(myActiveBilling.results, "due_date")
+    : [];
+
+  const sortedPaymentHistories = sortByTime(
+    paymentHistories.results,
+    "created_at",
+  );
 
   /* ===================== DOWNLOAD QR ===================== */
   const downloadQRCode = (qrCode: string) => {
@@ -77,16 +88,16 @@ const BillingAndPaymentsPage = () => {
   return (
     <div className="space-y-8 p-4 sm:p-6">
       {/* ===================== HEADER ===================== */}
-      {/* <div>
+      <div>
         <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
           Billing & Payments
         </h2>
         <p className="text-sm text-gray-500">
           Manage your subscription and payments
         </p>
-      </div> */}
+      </div>
       {/* ===================== SUBSCRIPTION CARD ===================== */}
-      <div className="rounded-xl bg-indigo-600 p-5   text-white font-semibold shadow-lg">
+      <div className="rounded-xl bg-indigo-600 p-5 font-semibold text-white shadow-lg">
         {currentSubscription ? (
           <div className="space-y-5">
             <h3 className="text-lg font-bold">Current Subscription</h3>
@@ -140,10 +151,10 @@ const BillingAndPaymentsPage = () => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Info label="Plan" value={currentSubscription.plan.name} />
               <Info label="Status" value={currentSubscription.status} />
-              {myActiveBilling.length > 0 && myActiveBilling[0] && (
+              {sortedActiveBilling.length > 0 && (
                 <Info
                   label="Next Due Date"
-                  value={formatReadableDate(myActiveBilling[0].due_date)}
+                  value={formatReadableDate(sortedActiveBilling[0].due_date)}
                 />
               )}
               <Info
@@ -212,9 +223,9 @@ const BillingAndPaymentsPage = () => {
             </button>
 
             <button
-              disabled={myActiveBilling.length <= 0}
+              disabled={sortedActiveBilling.length <= 0}
               onClick={() => {
-                processPayment(myActiveBilling[0]); // activate store session
+                processPayment(sortedActiveBilling[0]); // activate store session
               }}
               className="mb-3 w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
             >
@@ -249,14 +260,14 @@ const BillingAndPaymentsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {paymentHistories.length === 0 ? (
+              {sortedPaymentHistories.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-6 text-center text-gray-500">
                     No payment history
                   </td>
                 </tr>
               ) : (
-                paymentHistories.map((p) => {
+                sortedPaymentHistories.map((p) => {
                   const statusStyles = {
                     pending: "bg-yellow-100 text-yellow-700",
                     completed: "bg-green-100 text-green-700",

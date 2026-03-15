@@ -8,8 +8,6 @@ import { router } from "./navigations";
 
 import "./main.css";
 
-import "@/lib/firebase-client";
-
 import "@/sr-config";
 
 import "@/repositories/UserRepo";

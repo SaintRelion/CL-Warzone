@@ -21,7 +21,7 @@ const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
 
   const checkDevice = async (email: string, password: string) => {
     const result = await apiRequest(
-      `${BASE_API}api/auth/check/device/`,
+      `${BASE_API}api/auth/trust/device/`,
       { identifier: auth.deviceId, username: email, password: password },
       {
         auth: false,

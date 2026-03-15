@@ -7,14 +7,19 @@ import type { User } from "@/models/user";
 import MoreMenu from "./MoreMenu";
 import { useAccountsStore } from "@/stores/accounts/useAccountsStore";
 
-const AccountsTable = ({ users }: { users: User[] }) => {
+const AccountsTable = ({
+  users,
+  currentPage,
+  totalPages,
+}: {
+  users: User[];
+  currentPage: number;
+  totalPages: number;
+}) => {
   const searchTerm = useAccountsStore((a) => a.searchTerm);
   const setSearchTerm = useAccountsStore((a) => a.setSearchTerm);
 
-  const currentPage = useAccountsStore((a) => a.currentPage);
   const setCurrentPage = useAccountsStore((a) => a.setCurrentPage);
-
-  const itemsPerPage = 5;
 
   const filteredUsers = useMemo(() => {
     const term = searchTerm?.toLowerCase();
@@ -30,14 +35,6 @@ const AccountsTable = ({ users }: { users: User[] }) => {
         user.city_municipality.includes(term),
     );
   }, [users, searchTerm]);
-
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
-
-  // Pagination
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   const userColumns: ColumnDef<User>[] = [
     {
@@ -151,7 +148,7 @@ const AccountsTable = ({ users }: { users: User[] }) => {
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
         <DataTable
           type="Accounts"
-          data={paginatedUsers}
+          data={filteredUsers}
           columns={userColumns}
           showDefaultActions={false}
           getRowId={(row) => row.id}
@@ -171,11 +168,11 @@ const AccountsTable = ({ users }: { users: User[] }) => {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between rounded-lg border bg-white px-4 py-3 shadow-sm">
+        <div className="flex flex-col gap-3 border border-t bg-white px-4 py-3 md:flex-row md:items-center md:justify-between md:px-6 md:py-4">
           <div className="text-sm text-gray-600">
             Page {currentPage} of {totalPages}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}

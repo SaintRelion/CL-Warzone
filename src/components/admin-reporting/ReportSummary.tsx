@@ -1,6 +1,9 @@
 import type { User } from "@/models/user";
 import type { UserBillingInfo } from "@/models/Billing";
-import { useResourceLocked } from "@saintrelion/data-access-layer";
+import {
+  useResourceLocked,
+  type Paginated,
+} from "@saintrelion/data-access-layer";
 import { useMemo } from "react";
 import { useAdminReportingStore } from "@/stores/admin-reporting/useAdminReportingStore";
 import { MONTH_NAMES } from "./constants";
@@ -37,22 +40,28 @@ const StatCard = ({
 const ReportSummary = () => {
   const report = useAdminReportingStore((s) => s.report);
 
-  const { useList: getUsers } = useResourceLocked<User>("user");
+  const { useList: getUsers } = useResourceLocked<Paginated<User>>("user");
   const { useList: getUserBilling } =
-    useResourceLocked<UserBillingInfo>("userbilling");
+    useResourceLocked<Paginated<UserBillingInfo>>("userbilling");
 
   const users = getUsers().data;
   const userBillings = getUserBilling().data;
 
   const liveStats = useMemo(() => {
-    const activeUsers = users.filter(
+    if (!users || !userBillings) return null;
+
+    const activeUsers = users.results.filter(
       (u) => u.email && u.roles?.find((r) => r == "client"),
     ).length;
 
-    const paidBillings = userBillings.filter((b) => b.status === "paid");
-    const unpaidBillings = userBillings.filter((b) => b.status != "paid");
+    const paidBillings = userBillings.results.filter(
+      (b) => b.status === "paid",
+    );
+    const unpaidBillings = userBillings.results.filter(
+      (b) => b.status != "paid",
+    );
 
-    const totalBillable = userBillings.reduce(
+    const totalBillable = userBillings.results.reduce(
       (sum, b) => sum + parseFloat(b.amount || "0"),
       0,
     );
@@ -77,6 +86,8 @@ const ReportSummary = () => {
           : 0,
     };
   }, [users, userBillings]);
+
+  if (!liveStats) return <div>Loading...</div>;
 
   if (!report) {
     return (

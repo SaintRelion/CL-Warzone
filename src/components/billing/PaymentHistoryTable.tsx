@@ -2,10 +2,7 @@ import type {
   PaymentHistory,
   VoidPaymentHistory,
 } from "@/models/PaymentHistory";
-import {
-  formatReadableDateTime,
-  sortByTime,
-} from "@saintrelion/time-functions";
+import { formatReadableDateTime } from "@saintrelion/time-functions";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../general/DataTable";
 import { useBillingStore } from "@/stores/billing/useBillingStore";
@@ -29,13 +26,9 @@ const PaymentHistoryTable = ({
 
   if (!selectedBillingInfo || cashierBehavior != "paymenthistory") return <></>;
 
-  const userPaymentHistories = sortByTime(
-    paymentHistories.filter(
-      (p) =>
-        p.user == selectedBillingInfo.user.id &&
-        p.bill == selectedBillingInfo.id,
-    ),
-    "created_at",
+  const userPaymentHistories = paymentHistories.filter(
+    (p) =>
+      p.user == selectedBillingInfo.user.id && p.bill == selectedBillingInfo.id,
   );
 
   const handleComplete = async (payment: PaymentHistory) => {
@@ -209,14 +202,15 @@ const PaymentHistoryTable = ({
               </>
             )}
 
-            {payment.status === "completed" && (
+            {/* Remove Void for completed, this will break the billing cycle if not careful */}
+            {/* {payment.status === "completed" && (
               <button
                 onClick={() => handleVoid(payment)}
                 className="text-red-600 hover:underline"
               >
                 Void
               </button>
-            )}
+            )} */}
           </div>
         );
       },
