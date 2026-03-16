@@ -258,7 +258,7 @@ const ReceiptView = () => {
               className="text-2xl font-black text-indigo-600"
               style={{ textAlign: "right" }}
             >
-              ₱{selectedReceipt.amount.toLocaleString()}
+              ₱{selectedBillingInfo.amount.toLocaleString()}
             </span>
           </div>
         </div>

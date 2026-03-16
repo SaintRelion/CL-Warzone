@@ -15,7 +15,9 @@ const UserAccountsPage = () => {
     filters: { page: currentPage },
   }).data;
 
-  const totalPages = userSubscribers ? Math.ceil(userSubscribers.count / 2) : 0;
+  const totalPages = userSubscribers
+    ? Math.ceil(userSubscribers.count / 200)
+    : 0;
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto max-w-7xl space-y-6">

@@ -27,7 +27,7 @@ const actionsList = [
   "SEND",
 ];
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 200;
 
 const ActivityLogsTable = ({ auditLogs }: { auditLogs: AuditLog[] }) => {
   const currentPage = useAuditLogsStore((s) => s.currentPage);

@@ -4,6 +4,10 @@ const PrintableReport = () => {
   const report = useAdminReportingStore((s) => s.report);
   if (!report) return <p className="text-gray-500">No report available.</p>;
 
+  const totalCollection = report.items
+    .filter((item) => item.status === "paid")
+    .reduce((sum, item) => sum + Number(item.billing_amount || 0), 0);
+
   return (
     <div
       className="print:bg-white print:p-6 print:text-black"
@@ -53,7 +57,7 @@ const PrintableReport = () => {
 
       {/* Footer for totals / notes */}
       <div className="mt-6 text-right text-sm print:text-black">
-        <p>Total Collection: {report.items.length}</p>
+        <p>Total Collection: {totalCollection}</p>
       </div>
 
       {/* Print Button */}
