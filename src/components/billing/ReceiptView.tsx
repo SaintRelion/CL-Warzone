@@ -128,9 +128,15 @@ const ReceiptView = () => {
             <span style={{ textAlign: "left" }}>Name:</span>
             <span className="font-bold" style={{ textAlign: "right" }}>
               {selectedReceipt.customer
-                ? selectedReceipt.customer.charAt(0).toUpperCase() +
-                  selectedReceipt.customer.slice(1)
-                : ""}
+                ? selectedReceipt.customer
+                    .split(" ")
+                    .map(
+                      (word) =>
+                        word.charAt(0).toUpperCase() +
+                        word.slice(1).toLowerCase(),
+                    )
+                    .join(" ")
+                : "N/A"}
             </span>
           </div>
         </div>
@@ -273,7 +279,11 @@ const ReceiptView = () => {
           <div className="text-center font-bold">NEXT BILLING</div>
           <div className="flex justify-center">
             <span className="font-bold text-indigo-600">
-              {formatReadableDate(selectedBillingInfo.due_date)}
+              {(() => {
+                const dueDate = new Date(selectedBillingInfo.due_date);
+                dueDate.setDate(dueDate.getDate() + 30);
+                return formatReadableDate(dueDate.toISOString());
+              })()}
             </span>
           </div>
         </div>
