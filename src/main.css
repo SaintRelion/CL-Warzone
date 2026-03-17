@@ -10,19 +10,41 @@ i {
 }
 
 @media print {
-  body * {
-    visibility: hidden; /* hide everything */
+  @page {
+    margin: 10mm;
+    size: auto;
   }
 
+  /* 1. Hide EVERYTHING by default using visibility */
+  body * {
+    visibility: hidden;
+  }
+
+  /* 2. Show the report and its contents */
   #printable-report,
   #printable-report * {
-    visibility: visible; /* show only report container */
+    visibility: visible;
   }
 
+  /* 3. This is the fix for ghost icons: 
+     Target elements OUTSIDE the report and force display none */
+  header,
+  nav,
+  aside,
+  .sidebar,
+  .no-print,
+  .StatCard-Icons {
+    display: none !important;
+  }
+
+  /* 4. Position the report for printing */
   #printable-report {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
+    /* This ensures flex works on the printed page */
+    display: flex !important;
+    flex-direction: column !important;
   }
 }

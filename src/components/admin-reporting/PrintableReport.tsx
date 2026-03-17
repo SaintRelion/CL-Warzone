@@ -1,7 +1,13 @@
+import { useState } from "react";
 import { useAdminReportingStore } from "@/stores/admin-reporting/useAdminReportingStore";
 
 const PrintableReport = () => {
   const report = useAdminReportingStore((s) => s.report);
+
+  // State for replaceable names
+  const [preparedBy, setPreparedBy] = useState("Staff Name");
+  const [approvedBy, setApprovedBy] = useState("Manager Name");
+
   if (!report) return <p className="text-gray-500">No report available.</p>;
 
   const totalCollection = report.items
@@ -10,65 +16,142 @@ const PrintableReport = () => {
 
   return (
     <div
-      className="print:bg-white print:p-6 print:text-black"
+      className="mx-auto mb-10 flex min-h-[1056px] max-w-4xl flex-col bg-white p-8 shadow-md print:m-0 print:min-h-screen print:w-full print:bg-white print:p-12 print:shadow-none"
       id="printable-report"
     >
-      {/* Header */}
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold">Monthly Payment Report</h1>
-        <p className="text-sm">
-          {report.month + 1}/{report.year}
-        </p>
-      </div>
+      {/* 1. Main Content Wrapper (Grows to push footer down) */}
+      <div className="print:grow">
+        {/* Header Section */}
+        <div className="mb-8 flex flex-col items-center border-b-2 border-indigo-900 pb-4">
+          <img
+            src="/my-logo.png"
+            alt="Warzone Logo"
+            className="mb-2 h-16 w-auto object-contain"
+          />
+          <div className="text-center">
+            <div className="text-2xl font-black tracking-tighter text-indigo-900">
+              WARZONE
+            </div>
+            <div className="text-xs font-bold tracking-widest text-gray-700 uppercase">
+              Internet Services Provider
+            </div>
+            <div className="mt-1 text-xs text-gray-500">
+              San Antonio, Looy, Katipunan, Zamboanga del Norte
+            </div>
+          </div>
+        </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full table-auto border-collapse text-sm print:text-black">
-          <thead>
-            <tr className="bg-gray-200 text-gray-800 print:bg-gray-300">
-              <th className="border px-2 py-1">Name</th>
-              <th className="border px-2 py-1">Email</th>
-              <th className="border px-2 py-1">Phone</th>
-              <th className="border px-2 py-1">Billing Amount</th>
-              <th className="border px-2 py-1">Paid Amount</th>
-              <th className="border px-2 py-1">Status</th>
-              <th className="border px-2 py-1">Overdue</th>
-            </tr>
-          </thead>
-          <tbody>
-            {report.items.map((item, i) => (
-              <tr key={i} className="even:bg-gray-100 print:even:bg-white">
-                <td className="border px-2 py-1">{item.full_name}</td>
-                <td className="border px-2 py-1">{item.email}</td>
-                <td className="border px-2 py-1">{item.phone_number || "-"}</td>
-                <td className="border px-2 py-1">{item.billing_amount}</td>
-                <td className="border px-2 py-1">{item.total_paid}</td>
-                <td className="border px-2 py-1">{item.status}</td>
-                <td className="border px-2 py-1">{item.overdue}</td>
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <h2 className="text-xl font-bold uppercase underline">
+              Monthly Payment Report
+            </h2>
+            <p className="text-sm font-medium text-gray-600">
+              Period: {report.month + 1}/{report.year}
+            </p>
+          </div>
+          <div className="text-right text-xs text-gray-400">
+            Generated on: {new Date().toLocaleDateString()}
+          </div>
+        </div>
+
+        {/* Table Section */}
+        <div className="overflow-x-auto">
+          <table className="w-full table-auto border-collapse text-sm print:text-black">
+            <thead>
+              <tr className="bg-gray-100 text-gray-800 print:bg-gray-200">
+                <th className="border border-gray-300 px-2 py-2 text-left">
+                  Name
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-left">
+                  Email
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-left">
+                  Phone
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-right">
+                  Billing
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-right">
+                  Paid
+                </th>
+                <th className="border border-gray-300 px-2 py-2 text-center">
+                  Status
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {report.items.map((item, i) => (
+                <tr key={i} className="even:bg-gray-50 print:even:bg-white">
+                  <td className="border border-gray-300 px-2 py-1 font-medium">
+                    {item.full_name}
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 text-xs">
+                    {item.email}
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1">
+                    {item.phone_number || "-"}
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 text-right">
+                    {item.billing_amount}
+                  </td>
+                  <td className="border border-gray-300 px-2 py-1 text-right">
+                    {item.total_paid}
+                  </td>
+                  <td
+                    className={`border border-gray-300 px-2 py-1 text-center text-[10px] font-bold uppercase ${item.status === "paid" ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {item.status}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Summary Info */}
+        <div className="mt-4 flex items-start justify-between text-xs italic">
+          <p>* Cut off for Overdue bills is on the 5th day of the month.</p>
+          <div className="text-right">
+            <p className="text-lg font-bold not-italic">
+              Total Collection: PHP {totalCollection.toLocaleString()}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-1 text-right text-xs italic print:text-black">
-        <p>Cut off for Overdue bills is on the 5th day</p>
+      {/* Signatories - Pushed to bottom ONLY on print because of flex-grow above */}
+      <div className="mt-12 mb-8 grid grid-cols-2 gap-24">
+        <div className="text-center">
+          <input
+            type="text"
+            value={preparedBy}
+            onChange={(e) => setPreparedBy(e.target.value)}
+            className="w-full border-b border-black text-center font-bold focus:outline-none print:border-b"
+          />
+          <p className="mt-1 text-sm font-semibold uppercase">Prepared by</p>
+        </div>
+        <div className="text-center">
+          <input
+            type="text"
+            value={approvedBy}
+            onChange={(e) => setApprovedBy(e.target.value)}
+            className="w-full border-b border-black text-center font-bold focus:outline-none print:border-b"
+          />
+          <p className="mt-1 text-sm font-semibold uppercase">Approved by</p>
+        </div>
       </div>
 
-      {/* Footer for totals / notes */}
-      <div className="mt-6 text-right text-sm print:text-black">
-        <p>Total Collection: {totalCollection}</p>
-      </div>
-
-      {/* Print Button */}
-      <div className="mt-4 flex justify-end print:hidden">
+      {/* Print Tool Section (Hidden during print) */}
+      <div className="mt-10 flex items-center justify-end gap-4 border-t pt-4 print:hidden">
+        <div className="text-xs text-gray-400 italic">
+          Tip: You can edit the names above before printing.
+        </div>
         <button
-          onClick={() => {
-            window.print();
-          }}
-          className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+          onClick={() => window.print()}
+          className="rounded bg-indigo-600 px-6 py-2 font-bold text-white transition-colors hover:bg-indigo-700"
         >
-          Print Report
+          Print Official Report
         </button>
       </div>
     </div>
