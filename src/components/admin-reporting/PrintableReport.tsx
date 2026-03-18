@@ -126,7 +126,7 @@ const PrintableReport = () => {
       <div className="mt-12 mb-8 grid grid-cols-2 gap-24">
         {/* Prepared By Column */}
         <div className="flex flex-col text-left">
-          <p className="mb-4 text-sm font-semibold uppercase">Prepared by:</p>
+          <p className="mb-4 text-sm font-semibold">Prepared by:</p>
           <input
             type="text"
             value={preparedBy}
@@ -143,7 +143,7 @@ const PrintableReport = () => {
 
         {/* Approved By Column */}
         <div className="flex flex-col text-left">
-          <p className="mb-4 text-sm font-semibold uppercase">Approved by:</p>
+          <p className="mb-4 text-sm font-semibold">Approved by:</p>
           <input
             type="text"
             value={approvedBy}
