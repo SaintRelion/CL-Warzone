@@ -6,7 +6,9 @@ const PrintableReport = () => {
 
   // State for replaceable names
   const [preparedBy, setPreparedBy] = useState("Staff Name");
+  const [preparedRole, setPreparedRole] = useState("Cashier");
   const [approvedBy, setApprovedBy] = useState("Manager Name");
+  const [approvedRole, setApprovedRole] = useState("Owner");
 
   if (!report) return <p className="text-gray-500">No report available.</p>;
 
@@ -120,25 +122,40 @@ const PrintableReport = () => {
         </div>
       </div>
 
-      {/* Signatories - Pushed to bottom ONLY on print because of flex-grow above */}
+      {/* Signatories Section */}
       <div className="mt-12 mb-8 grid grid-cols-2 gap-24">
-        <div className="text-center">
+        {/* Prepared By Column */}
+        <div className="flex flex-col text-left">
+          <p className="mb-4 text-sm font-semibold uppercase">Prepared by:</p>
           <input
             type="text"
             value={preparedBy}
             onChange={(e) => setPreparedBy(e.target.value)}
             className="w-full border-b border-black text-center font-bold focus:outline-none print:border-b"
           />
-          <p className="mt-1 text-sm font-semibold uppercase">Prepared by</p>
+          <input
+            type="text"
+            value={preparedRole}
+            onChange={(e) => setPreparedRole(e.target.value)}
+            className="w-full text-center text-sm text-gray-600 italic focus:outline-none"
+          />
         </div>
-        <div className="text-center">
+
+        {/* Approved By Column */}
+        <div className="flex flex-col text-left">
+          <p className="mb-4 text-sm font-semibold uppercase">Approved by:</p>
           <input
             type="text"
             value={approvedBy}
             onChange={(e) => setApprovedBy(e.target.value)}
             className="w-full border-b border-black text-center font-bold focus:outline-none print:border-b"
           />
-          <p className="mt-1 text-sm font-semibold uppercase">Approved by</p>
+          <input
+            type="text"
+            value={approvedRole}
+            onChange={(e) => setApprovedRole(e.target.value)}
+            className="w-full text-center text-sm text-gray-600 italic focus:outline-none"
+          />
         </div>
       </div>
 
