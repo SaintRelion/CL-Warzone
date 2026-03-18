@@ -127,16 +127,7 @@ const ReceiptView = () => {
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span style={{ textAlign: "left" }}>Name:</span>
             <span className="font-bold" style={{ textAlign: "right" }}>
-              {selectedReceipt.customer
-                ? selectedReceipt.customer
-                    .split(" ")
-                    .map(
-                      (word) =>
-                        word.charAt(0).toUpperCase() +
-                        word.slice(1).toLowerCase(),
-                    )
-                    .join(" ")
-                : "N/A"}
+              {selectedReceipt.customer}
             </span>
           </div>
         </div>

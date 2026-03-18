@@ -19,8 +19,23 @@ const RegisterPage = () => {
     setError(null);
     setIsSubmitting(true);
 
+    const properFirstName =
+      data.first_name.charAt(0).toUpperCase() +
+      data.first_name.slice(1).toLowerCase();
+    const properLastName =
+      data.last_name.charAt(0).toUpperCase() +
+      data.last_name.slice(1).toLowerCase();
+
+    const payload = {
+      ...data,
+      roles: ["client"],
+      first_name: properFirstName,
+      last_name: properLastName,
+    };
+
+    console.log(payload);
     try {
-      await auth.register({ ...data, roles: ["client"] }, data.password);
+      await auth.register(payload, data.password);
     } catch (err) {
       const error = err as Record<string, string>;
       setError(error.message || "Registration failed.");
