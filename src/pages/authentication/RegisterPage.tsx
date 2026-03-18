@@ -33,7 +33,6 @@ const RegisterPage = () => {
       last_name: properLastName,
     };
 
-    console.log(payload);
     try {
       await auth.register(payload, data.password);
     } catch (err) {
