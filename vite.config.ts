@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "robots.txt", "apple-touch-icon.png"],
       manifest: {
-        name: "Class Management and Instructor Attendance",
+        name: Warzone Net Cafe",
         short_name: "CMIA",
-        description: "Class Management and Instructor Attendance",
+        description: "Internet Provider",
         theme_color: "#ffffff",
         icons: [
           {
