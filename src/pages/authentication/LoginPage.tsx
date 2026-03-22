@@ -14,10 +14,10 @@ import { toast } from "@saintrelion/notifications";
 const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
   const auth = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [requireOtp, setRequireOtp] = useState(false);
-  const [checkingTrust, setCheckingTrust] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [requireOtp, setRequireOtp] = useState<boolean>(false);
+  const [checkingTrust, setCheckingTrust] = useState<boolean>(false);
 
   const checkDevice = async (email: string, password: string) => {
     const result = await apiRequest(
@@ -31,7 +31,7 @@ const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
     return result;
   };
 
-  const handleLogin = async (data: Record<string, string>) => {
+  const handleLogin = async (data: Record<string, string>): Promise<void> => {
     setEmail(data.email);
     setPassword(data.password);
 
@@ -53,23 +53,30 @@ const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
         {/* Modal Container */}
-        <div className="animate-fadeIn relative w-full max-w-md rounded-xl bg-[#090909] p-8 shadow-2xl">
+        <div className="animate-fadeIn relative w-full max-w-md rounded-xl border border-white/5 bg-[#090909] p-8 shadow-2xl">
           {/* Close Button */}
           <button
             onClick={() => showLogin(false)}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            className="absolute top-4 right-4 text-gray-500 transition-colors hover:text-amber-500"
           >
             ✕
           </button>
 
           <div className="mb-8 flex items-center justify-center">
-            <span className="fa-solid fa-wifi text-2xl text-indigo-600" />
-            <h1 className="ml-2 text-2xl font-bold text-white">Warzone</h1>
+            {/* Actual Logo Implementation */}
+            <img
+              src="/my-logo.png"
+              alt="Warzone Logo"
+              className="h-10 w-auto object-contain"
+            />
+            <h1 className="ml-3 text-2xl font-bold tracking-tight text-white">
+              Warzone
+            </h1>
           </div>
 
-          {requireOtp == false ? (
+          {requireOtp === false ? (
             <>
               <RenderForm wrapperClassName="space-y-4">
                 <RenderFormField
@@ -79,8 +86,9 @@ const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
                     name: "email",
                     placeholder: "your@gmail.com",
                   }}
-                  labelClassName="mb-2 block text-sm font-medium text-gray-200"
-                  inputClassName="text-white w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
+                  labelClassName="mb-2 block text-sm font-medium text-gray-300"
+                  // Updated focus ring to Amber (Dirty Yellow)
+                  inputClassName="text-white w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/50"
                 />
                 <RenderFormField
                   field={{
@@ -89,29 +97,29 @@ const LoginPage = ({ showLogin }: { showLogin: (status: boolean) => void }) => {
                     name: "password",
                     placeholder: "••••••••",
                   }}
-                  labelClassName="mb-2 block text-sm font-medium text-gray-200"
-                  inputClassName="text-white w-full rounded-lg border border-gray-300 px-4 py-3 transition outline-none focus:border-transparent focus:ring-2 focus:ring-indigo-600"
+                  labelClassName="mb-2 block text-sm font-medium text-gray-300"
+                  inputClassName="text-white w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/50"
                 />
                 <RenderFormButton
                   buttonLabel="Sign In"
                   isDisabled={auth.isLocked || checkingTrust}
                   onSubmit={handleLogin}
-                  buttonClassName="w-full rounded-lg bg-indigo-600 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-gray-400 disabled:opacity-70"
+                  // Updated Button Colors
+                  buttonClassName="w-full rounded-lg bg-amber-500 py-3 font-semibold text-black transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:bg-gray-600 disabled:opacity-50"
                 />
               </RenderForm>
 
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-200">Don't have an account?</p>
+                <p className="text-sm text-gray-400">Don't have an account?</p>
                 <a
                   href="/register"
-                  className="mt-1 font-medium text-indigo-600 hover:text-indigo-700"
+                  className="mt-1 inline-block font-medium text-amber-500 transition-colors hover:text-amber-400"
                 >
                   Create an account
                 </a>
               </div>
             </>
           ) : (
-            // OTP VERIFICATION FORM
             <OtpVerification email={email} password={password} />
           )}
         </div>

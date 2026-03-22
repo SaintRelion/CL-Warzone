@@ -11,11 +11,13 @@ import { municipalityOptions, serviceAreas, zipcodeMap } from "@/constants";
 const RegisterPage = () => {
   const auth = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const [zipCode, setZipCode] = useState("");
+  const [zipCode, setZipCode] = useState<string>("");
 
-  const handleRegister = async (data: Record<string, string>) => {
+  const handleRegister = async (
+    data: Record<string, string>,
+  ): Promise<void> => {
     setError(null);
     setIsSubmitting(true);
 
@@ -44,42 +46,42 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-[#050505] font-sans text-white">
       {/* NAVBAR */}
-      <nav className="fixed top-0 right-0 left-0 z-50 border-b bg-black text-white backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <span className="fa-solid fa-wifi text-xl text-[#78fbcf]" />
-            <span className="text-xl font-bold tracking-tight uppercase">
+      <nav className="fixed top-0 right-0 left-0 z-50 border-b border-white/5 bg-[#090909]/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <img src="/my-logo.png" alt="Warzone Logo" className="h-8 w-auto" />
+            <span className="text-xl font-bold tracking-tight text-white uppercase">
               Warzone
             </span>
           </div>
 
-          <Button asChild className="bg-[#78fbcf] text-black hover:opacity-90">
+          <Button
+            asChild
+            className="bg-amber-500 font-semibold text-black hover:bg-amber-600"
+          >
             <a href="/login">Login</a>
           </Button>
         </div>
       </nav>
 
       {/* FORM SECTION */}
-      <div className="flex items-center justify-center px-4 pt-24 pb-12">
-        <div className="w-full max-w-4xl rounded-2xl bg-white p-8 shadow-xl">
-          <h2 className="mb-2 text-3xl font-bold text-gray-900">
-            Create Account
-          </h2>
-          <p className="mb-8 text-gray-600">
+      <div className="flex items-center justify-center px-4 pt-28 pb-12">
+        <div className="w-full max-w-4xl rounded-2xl border border-white/5 bg-[#090909] p-8 shadow-2xl">
+          <h2 className="mb-2 text-3xl font-bold text-white">Create Account</h2>
+          <p className="mb-8 text-gray-400">
             Fill in your details to get started with high-speed internet.
           </p>
 
           {error && (
-            <div className="mb-4 rounded bg-red-100 p-3 text-red-700">
+            <div className="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 p-4 text-sm text-red-500">
               {error}
             </div>
           )}
 
           <RenderForm wrapperClassName="space-y-6">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {/* Fields unchanged */}
               <RenderFormField
                 field={{
                   label: "First Name *",
@@ -87,6 +89,8 @@ const RegisterPage = () => {
                   name: "first_name",
                   placeholder: "Juan",
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
 
               <RenderFormField
@@ -96,6 +100,8 @@ const RegisterPage = () => {
                   name: "last_name",
                   placeholder: "Dela Cruz",
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
 
               <RenderFormField
@@ -105,6 +111,8 @@ const RegisterPage = () => {
                   name: "password",
                   placeholder: "••••••••",
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
 
               <RenderFormField
@@ -114,6 +122,8 @@ const RegisterPage = () => {
                   name: "email",
                   placeholder: "youremail@gmail.com",
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
 
               <RenderFormField
@@ -123,6 +133,8 @@ const RegisterPage = () => {
                   name: "phone_number",
                   placeholder: "+63 9XX XXX XXXX",
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
 
               <RenderFormField
@@ -132,6 +144,8 @@ const RegisterPage = () => {
                   name: "street_address",
                   placeholder: "123 Main St",
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
 
               <RenderFormField
@@ -143,6 +157,8 @@ const RegisterPage = () => {
                   onValueChange: (value) =>
                     setZipCode(zipcodeMap[value as string]),
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
 
               <RenderFormField
@@ -152,6 +168,8 @@ const RegisterPage = () => {
                   name: "barangay",
                   placeholder: "Barangay",
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
 
               <RenderFormField
@@ -162,6 +180,8 @@ const RegisterPage = () => {
                   disabled: true,
                 }}
                 defaultValue={zipCode}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/10 border border-white/10 rounded-lg px-4 py-2.5 text-gray-400 cursor-not-allowed outline-none"
               />
 
               <RenderFormField
@@ -171,17 +191,24 @@ const RegisterPage = () => {
                   name: "service_area",
                   options: serviceAreas,
                 }}
+                labelClassName="text-gray-300 text-sm mb-1.5 block"
+                inputClassName="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-white outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20 transition"
               />
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col gap-4 pt-6 sm:flex-row">
               <RenderFormButton
                 onSubmit={handleRegister}
                 isDisabled={auth.isLocked || isSubmitting}
                 buttonLabel={isSubmitting ? "Creating..." : "Create Account"}
+                buttonClassName="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-black font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
               />
 
-              <Button asChild>
+              <Button
+                asChild
+                variant="outline"
+                className="border-white/10 py-6 text-gray-300 hover:bg-white/5 hover:text-white"
+              >
                 <a href="/login">Back to Login</a>
               </Button>
             </div>
