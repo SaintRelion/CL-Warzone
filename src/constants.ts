@@ -1,10 +1,10 @@
 export const serviceAreas = [
-  "katipunan",
-  "roxas",
-  "piñan",
-  "osmeña",
-  "polanco",
-  "manukan",
+  "Katipunan",
+  "Roxas",
+  "Piñan",
+  "Osmeña",
+  "Polanco",
+  "Manukan",
 ];
 
 export const municipalityZipcodes = [
