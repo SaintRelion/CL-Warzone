@@ -7,6 +7,7 @@ import {
   RenderFormField,
 } from "@saintrelion/forms";
 import { municipalityOptions, serviceAreas, zipcodeMap } from "@/constants";
+import { toast } from "@saintrelion/notifications";
 
 const RegisterPage = () => {
   const auth = useAuth();
@@ -38,8 +39,49 @@ const RegisterPage = () => {
     try {
       await auth.register(payload, data.password);
     } catch (err) {
-      const error = err as Record<string, string>;
-      setError(error.message || "Registration failed.");
+      // Convert the error to a string to be safe
+      const rawError: string = String(err);
+      console.log("Raw Error caught:", rawError);
+
+      try {
+        // 1. Find the index where the JSON object actually starts
+        const jsonStartIndex: number = rawError.indexOf("{");
+        const jsonEndIndex: number = rawError.lastIndexOf("}");
+
+        if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+          // 2. Extract and parse only the JSON portion
+          const jsonString: string = rawError.substring(
+            jsonStartIndex,
+            jsonEndIndex + 1,
+          );
+          const errorObj: Record<string, string[]> = JSON.parse(jsonString);
+
+          // 3. Map the keys (email, username, etc.) to a readable string
+          const formatted: string = Object.entries(errorObj)
+            .map(([key, messages]) => {
+              const fieldName: string =
+                key.charAt(0).toUpperCase() + key.slice(1);
+              return `${fieldName}: ${messages.join(", ")}`;
+            })
+            .join(" ");
+
+          toast.error(formatted);
+          setError(formatted);
+        } else {
+          // 4. If no JSON found, clean up the "Register failed:" prefix
+          const cleanMessage: string = rawError
+            .replace(/^Error:\s*/i, "")
+            .replace(/^Register\s*failed:\s*/i, "");
+
+          setError(cleanMessage || "Registration failed.");
+        }
+      } catch (parseErr: unknown) {
+        // 5. Ultimate fallback if parsing explodes
+        setError(
+          "An unexpected error occurred during registration. Raw Error: " +
+            parseErr,
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
