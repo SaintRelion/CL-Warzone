@@ -20,20 +20,31 @@ const RegisterPage = () => {
     data: Record<string, string>,
   ): Promise<void> => {
     setError(null);
+
+    const safeRegex: RegExp = /^[a-zA-Z0-9\s\-'.@)(,_\u00f1\u00d1]+$/;
+    const invalidFields: string[] = Object.keys(data).filter((key: string) => {
+      const value: string = data[key];
+      // We only validate if there's actually text to check
+      return value && !safeRegex.test(value);
+    });
+
+    // 3. Block if any "fancy" characters are found
+    if (invalidFields.length > 0) {
+      // Optionally format field names for the toast (e.g., first_name -> First Name)
+      const fieldLabel: string = invalidFields[0].replace("_", " ");
+      toast.warning(`Invalid characters detected in: ${fieldLabel}`);
+      return;
+    }
     setIsSubmitting(true);
 
-    const properFirstName =
-      data.first_name.charAt(0).toUpperCase() +
-      data.first_name.slice(1).toLowerCase();
-    const properLastName =
-      data.last_name.charAt(0).toUpperCase() +
-      data.last_name.slice(1).toLowerCase();
+    const formatValue = (val: string): string =>
+      val.trim().charAt(0).toUpperCase() + val.trim().slice(1).toLowerCase();
 
     const payload = {
       ...data,
       roles: ["client"],
-      first_name: properFirstName,
-      last_name: properLastName,
+      first_name: formatValue(data.first_name),
+      last_name: formatValue(data.last_name),
     };
 
     try {
