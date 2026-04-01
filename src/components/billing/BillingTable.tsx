@@ -38,7 +38,7 @@ const BillingTable = ({
   const currentPage = useBillingStore((s) => s.currentPage);
   const setCurrentPage = useBillingStore((s) => s.setCurrentPage);
 
-  const itemsPerPage = 5;
+  const itemsPerPage = 200;
 
   const filteredBillings = useMemo(() => {
     const term = searchTerm?.toLowerCase();

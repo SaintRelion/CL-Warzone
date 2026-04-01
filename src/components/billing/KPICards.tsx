@@ -105,7 +105,7 @@ const KPICards = ({
             </div>
             {/* Optional: Small percentage badge if you want it visible textually */}
             <span className={`text-[14px] font-bold text-${card.color}-500`}>
-              {card.percent}%
+              {Number(card.percent || 0).toFixed(2)}%
             </span>
           </div>
 
