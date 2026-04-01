@@ -83,41 +83,51 @@ const KPICards = ({
   ];
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statCards.map((card) => (
-          <button
-            key={card.key}
-            type="button"
-            onClick={card.onClick}
-            className={`transform rounded-xl border border-${card.color}-200 bg-linear-to-br from-${card.color}-50 to-${card.color}-100 p-5 shadow-md transition-all duration-300 hover:scale-[1.02] hover:shadow-lg focus:ring-2 focus:ring-${card.color}-400`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-bold text-${card.color}-600`}>
-                  {card.label}
-                </p>
-                <p
-                  className={`mt-1 text-3xl font-black text-${card.color}-700`}
-                >
-                  {card.value}
-                </p>
-              </div>
-              <div className="text-4xl opacity-20">{card.icon}</div>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {statCards.map((card) => (
+        <button
+          key={card.key}
+          type="button"
+          onClick={card.onClick}
+          className={`group relative flex flex-col justify-center overflow-hidden rounded-xl border border-${card.color}-200 bg-linear-to-br from-${card.color}-50 to-${card.color}-100 p-4 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-md focus:ring-2 focus:outline-hidden focus:ring-${card.color}-400`}
+        >
+          {/* Header Row: Icon and Label together */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 overflow-hidden">
+              <span className="shrink-0 text-base opacity-70 transition-opacity group-hover:opacity-100">
+                {card.icon}
+              </span>
+              <p
+                className={`truncate text-[14px] font-black tracking-tight uppercase text-${card.color}-600`}
+              >
+                {card.label}
+              </p>
             </div>
+            {/* Optional: Small percentage badge if you want it visible textually */}
+            <span className={`text-[14px] font-bold text-${card.color}-500`}>
+              {card.percent}%
+            </span>
+          </div>
 
+          {/* Value Row */}
+          <p
+            className={`mt-1 truncate text-2xl font-black text-${card.color}-800`}
+          >
+            {card.value}
+          </p>
+
+          {/* Progress Bar - Slimmed down */}
+          <div
+            className={`mt-2 h-1 w-full rounded-full bg-${card.color}-200/50`}
+          >
             <div
-              className={`mt-3 h-1.5 w-full rounded-full bg-${card.color}-200`}
-            >
-              <div
-                className={`h-1.5 rounded-full bg-${card.color}-600`}
-                style={{ width: `${card.percent || 0}%` }}
-              />
-            </div>
-          </button>
-        ))}
-      </div>
-    </>
+              className={`h-1 rounded-full bg-${card.color}-600 transition-all duration-500`}
+              style={{ width: `${card.percent || 0}%` }}
+            />
+          </div>
+        </button>
+      ))}
+    </div>
   );
 };
 export default KPICards;

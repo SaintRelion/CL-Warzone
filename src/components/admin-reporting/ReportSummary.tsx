@@ -22,18 +22,32 @@ const StatCard = ({
   icon?: string;
 }) => (
   <div
-    className={`rounded-xl border border-gray-200 p-5 shadow-sm transition-all hover:shadow-md ${bgColor}`}
+    className={`group flex min-h-[100px] items-center justify-between rounded-xl border border-gray-100 p-4 shadow-sm transition-all hover:shadow-md ${bgColor}`}
   >
-    <div className="flex items-start justify-between">
-      <div className="flex-1">
-        <p className="text-xs font-semibold tracking-wide text-gray-600 uppercase">
-          {title}
+    {/* 1. Text Container: min-w-0 is the secret to preventing layout push */}
+    <div className="min-w-0 flex-1">
+      <p className="truncate text-[14px] font-black tracking-widest text-gray-500 uppercase md:text-xs">
+        {title}
+      </p>
+
+      <div className="mt-1 flex items-baseline gap-1">
+        <p className="truncate text-xl font-black text-gray-900 md:text-2xl">
+          {value}
         </p>
-        <p className="mt-3 text-3xl font-extrabold text-gray-900">{value}</p>
-        {subtext && <p className="mt-2 text-sm text-gray-600">{subtext}</p>}
+        {subtext && (
+          <span className="truncate text-[14px] font-medium text-gray-400 italic">
+            {subtext}
+          </span>
+        )}
       </div>
-      {icon && <div className="ml-3 text-3xl opacity-50">{icon}</div>}
     </div>
+
+    {/* 2. Icon Container: shrink-0 keeps it from jumping out */}
+    {icon && (
+      <div className="ml-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/40 text-2xl opacity-40 shadow-inner transition-opacity group-hover:opacity-100 md:h-12 md:w-12 md:text-3xl">
+        {icon}
+      </div>
+    )}
   </div>
 );
 
@@ -109,7 +123,7 @@ const ReportSummary = () => {
           <h4 className="mb-4 text-base font-semibold text-gray-900">
             Live System Overview
           </h4>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <StatCard
               title="Active Users"
               value={liveStats.activeUsers}

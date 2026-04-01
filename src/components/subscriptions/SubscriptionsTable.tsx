@@ -21,7 +21,7 @@ const SubscriptionsTable = ({
   const openView = useSubscribersStore((s) => s.openView);
   const openEdit = useSubscribersStore((s) => s.openEdit);
 
-  const itemsPerPage = 5;
+  const itemsPerPage = 200;
 
   const filteredSubscriptions = useMemo(() => {
     const term = searchTerm?.toLowerCase();
@@ -180,11 +180,11 @@ const SubscriptionsTable = ({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between rounded-lg border bg-white px-4 py-3 shadow-sm">
+        <div className="flex flex-col gap-3 border border-t bg-white px-4 py-3 md:flex-row md:items-center md:justify-between md:px-6 md:py-4">
           <div className="text-sm text-gray-600">
             Page {currentPage} of {totalPages}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
