@@ -288,7 +288,14 @@ const ReceiptView = () => {
         <div className="mb-2 text-center text-xs">
           <div className="mb-1">Thank you for your payment!</div>
           <div className="mb-1 font-semibold">Please keep this receipt</div>
-          <div className="text-xs text-gray-600">for your records</div>
+          <div className="mb-2 text-gray-600">for your records</div>
+
+          {/* ADDED OFFICE CLAIM MESSAGE */}
+          <div className="mt-2 border-t pt-2 text-gray-600 italic">
+            Subscribers are encouraged to claim their
+            <br />
+            official receipt at the Warzone office.
+          </div>
         </div>
       </div>
 

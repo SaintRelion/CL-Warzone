@@ -5,9 +5,9 @@ const PrintableReport = () => {
   const report = useAdminReportingStore((s) => s.report);
 
   // State for replaceable names
-  const [preparedBy, setPreparedBy] = useState("Staff Name");
+  const [preparedBy, setPreparedBy] = useState("Jasmarie Taclap");
   const [preparedRole, setPreparedRole] = useState("Cashier");
-  const [approvedBy, setApprovedBy] = useState("Manager Name");
+  const [approvedBy, setApprovedBy] = useState("Bryan Joseph Real");
   const [approvedRole, setApprovedRole] = useState("Owner");
 
   if (!report) return <p className="text-gray-500">No report available.</p>;
