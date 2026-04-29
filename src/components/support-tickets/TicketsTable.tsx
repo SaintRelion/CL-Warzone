@@ -31,18 +31,31 @@ const TicketsTable = ({ tickets }: { tickets: SupportTicket[] }) => {
   >("supportticket");
 
   // Filter tickets
-  const filteredTickets = tickets.filter((ticket) => {
-    const matchesSearch =
-      ticket.customer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.issue?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ticket.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      ticketFilter === "all" || ticket.status === ticketFilter;
-    const matchesPriority =
-      ticketPriorityFilter === "all" ||
-      ticket.priority === ticketPriorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+  const priorityOrder: Record<string, number> = {
+    urgent: 0,
+    high: 1,
+    medium: 2,
+    low: 3, // Assuming "slow" maps to "low" or "slow"
+  };
+
+  const filteredTickets = tickets
+    .filter((ticket) => {
+      const matchesSearch =
+        ticket.customer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket.issue?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        ticket.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        ticketFilter === "all" || ticket.status === ticketFilter;
+      const matchesPriority =
+        ticketPriorityFilter === "all" ||
+        ticket.priority === ticketPriorityFilter;
+      return matchesSearch && matchesStatus && matchesPriority;
+    })
+    .sort((a, b) => {
+      const weightA = priorityOrder[a.priority.toLowerCase()] ?? 99;
+      const weightB = priorityOrder[b.priority.toLowerCase()] ?? 99;
+      return weightA - weightB;
+    });
 
   const handleUpdateStatus = async (ticketId: string, newStatus: string) => {
     try {

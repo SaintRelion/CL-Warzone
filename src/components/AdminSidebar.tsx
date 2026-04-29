@@ -1,6 +1,6 @@
 import { useAuth } from "@saintrelion/auth-lib";
 import { renderNavItems } from "@saintrelion/routers";
-import { ChevronLeft, ChevronRight} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const AdminSidebar = () => {
@@ -30,17 +30,16 @@ const AdminSidebar = () => {
       } flex flex-col bg-gray-900 text-white transition-all duration-300`}
     >
       <div className="flex items-center justify-between border-b border-gray-700 p-4">
-
-       {sidebarOpen && (
-        <div className="flex items-center gap-2">
-          <img
-            src="/my-logo.png"
-            alt="Warzone Logo"
-            className="h-8 w-auto object-contain"
-          />
-          <span className="text-lg font-bold">WarzoneNetCafe</span>
-        </div>
-            )}
+        {sidebarOpen && (
+          <div className="flex items-center gap-2">
+            <img
+              src="/my-logo.png"
+              alt="Warzone Logo"
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-lg font-bold">WarzoneNetCafe</span>
+          </div>
+        )}
         <button
           onClick={() => {
             if (!isSmallScreen) setSidebarOpen(!sidebarOpen);
@@ -62,9 +61,9 @@ const AdminSidebar = () => {
         {renderNavItems({
           role: "admin",
           baseClassName:
-            "flex w-full items-center gap-3 rounded-lg px-3 py-3 transition-colors text-gray-300 text-opacity-0 hover:bg-gray-800",
+            "flex w-full items-center text-lg gap-3 rounded-lg px-3 py-3 transition-colors text-gray-300 text-opacity-0 hover:bg-gray-800",
           activeClassName:
-            "flex w-full items-center gap-3 rounded-lg px-3 py-3 transition-colors bg-blue-600 text-white",
+            "flex w-full items-center text-lg gap-3 rounded-lg px-3 py-3 transition-colors bg-blue-600 text-white",
           labelClassname: sidebarOpen ? "" : "hidden",
         })}
       </nav>
