@@ -292,9 +292,9 @@ const ReceiptView = () => {
 
           {/* ADDED OFFICE CLAIM MESSAGE */}
           <div className="mt-2 border-t pt-2 text-gray-600 italic">
-            Subscribers are encouraged to claim their
+            You are encouraged to claim your
             <br />
-            official receipt at the Warzone office.
+            official receipt at the Warzone Office.
           </div>
         </div>
       </div>

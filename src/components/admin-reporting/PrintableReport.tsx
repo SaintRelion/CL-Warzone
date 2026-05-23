@@ -129,7 +129,7 @@ const PrintableReport = () => {
           <p className="mb-4 text-sm font-semibold">Prepared by:</p>
           <input
             type="text"
-            value={preparedBy}
+            value={preparedBy.toUpperCase()}
             onChange={(e) => setPreparedBy(e.target.value)}
             className="w-full border-b border-black text-center font-bold focus:outline-none print:border-b"
           />
@@ -146,7 +146,7 @@ const PrintableReport = () => {
           <p className="mb-4 text-sm font-semibold">Approved by:</p>
           <input
             type="text"
-            value={approvedBy}
+            value={approvedBy.toUpperCase()}
             onChange={(e) => setApprovedBy(e.target.value)}
             className="w-full border-b border-black text-center font-bold focus:outline-none print:border-b"
           />
@@ -165,7 +165,31 @@ const PrintableReport = () => {
           Tip: You can edit the names above before printing.
         </div>
         <button
-          onClick={() => window.print()}
+          onClick={() => {
+            const isValidName = (name: string) => {
+              const parts = name.trim().split(/\s+/);
+              if (parts.length < 3) return false;
+              const initials = parts.filter((p) => /^[A-Za-z]\.$/.test(p));
+              const fullParts = parts.filter((p) => /^[A-Za-z]{2,}$/.test(p));
+              const lastPart = parts[parts.length - 1];
+              return (
+                initials.length >= 1 &&
+                fullParts.length >= 2 &&
+                /^[A-Za-z]{2,}$/.test(lastPart) // last part must be a full word
+              );
+            };
+
+            if (!isValidName(preparedBy)) {
+              alert("Please enter a proper full name for 'Prepared by'.");
+              return;
+            }
+            if (!isValidName(approvedBy)) {
+              alert("Please enter a proper full name for 'Approved by'.");
+              return;
+            }
+
+            window.print();
+          }}
           className="rounded bg-indigo-600 px-6 py-2 font-bold text-white transition-colors hover:bg-indigo-700"
         >
           Print Official Report
